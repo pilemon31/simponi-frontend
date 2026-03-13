@@ -20,28 +20,26 @@ const AuthPage = () => {
             </h1>
           </div>
         </div>
-        <div className='mx-auto flex w-full max-w-sm flex-col justify-center space-y-5'>
-          <div className='flex flex-col space-y-2 text-start'>
-            <h2 className='text-2xl font-bold tracking-tight'>Masuk</h2>
-            <p className='text-sm '>
+        <div className="mx-auto flex w-full max-w-sm flex-col justify-center space-y-5">
+          <div className="flex flex-col space-y-2 text-start">
+            <h2 className="text-2xl font-bold tracking-tight">Masuk</h2>
+            <p className="text-sm ">
               Selamat datang kembali! Masukkan alamat email dan password anda
               untuk masuk ke sistem
             </p>
           </div>
-          <SignInForm redirectTo='/'></SignInForm>
-          <p className='px-8 text-center text-sm text-muted-foreground'>
-            Dengan menekan masuk, anda setuju terhadap{' '}
+          <SignInForm redirectTo="/"></SignInForm>
+          <p className="px-8 text-center text-sm text-muted-foreground">
+            Dengan menekan masuk, anda setuju terhadap{" "}
             <a
-              href='#'
-              className='underline underline-offset-4 hover:text-primary'
-            >
+              href="#"
+              className="underline underline-offset-4 hover:text-primary">
               Syarat dan Ketentuan
-            </a>{' '}
-            and{' '}
+            </a>{" "}
+            and{" "}
             <a
-              href='#'
-              className='underline underline-offset-4 hover:text-primary'
-            >
+              href="#"
+              className="underline underline-offset-4 hover:text-primary">
               Kebijakan Privasi
             </a>
             .
@@ -51,23 +49,22 @@ const AuthPage = () => {
 
       <div
         className={cn(
-          'relative h-full overflow-hidden bg-muted max-lg:hidden',
-          '[&>img]:absolute [&>img]:top-[15%] [&>img]:left-20 [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>img]:object-top-left [&>img]:select-none',
-        )}
-      >
+          "relative h-full overflow-hidden bg-muted max-lg:hidden",
+          "[&>img]:absolute [&>img]:top-[15%] [&>img]:left-20 [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>img]:object-top-left [&>img]:select-none",
+        )}>
         <img
           src={dashboardLight}
-          className='dark:hidden'
+          className="dark:hidden"
           width={1024}
           height={1151}
-          alt='Shadcn-Admin'
+          alt="Shadcn-Admin"
         />
         <img
           src={dashboardDark}
-          className='hidden dark:block'
+          className="hidden dark:block"
           width={1024}
           height={1138}
-          alt='Shadcn-Admin'
+          alt="Shadcn-Admin"
         />
       </div>
     </div>

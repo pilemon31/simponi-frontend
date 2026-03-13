@@ -21,8 +21,8 @@ export const sidebarData = {
           icon: LayoutDashboard,
         },
         {
-          title: 'Logging',
-          url: '/log',
+          title: 'Activity',
+          url: '/activity',
           icon: LayoutDashboard,
         },
       ],
