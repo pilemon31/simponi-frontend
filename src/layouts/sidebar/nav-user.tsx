@@ -18,9 +18,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-import { useAuthStore } from '@/stores/auth-store';
-import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router';
+import useDialogState from '@/hooks/use-dialog-state';
+import { SignOutDialog } from '@/components/shared/sign-out-dialog';
 
 export function NavUser({
   user,
@@ -32,14 +31,14 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const queryClient = useQueryClient();
-  const reset = useAuthStore((s) => s.auth.reset);
-  const navigate = useNavigate();
-  const handleLogout = async () => {
-    queryClient.clear();
-    reset();
-    navigate('/signin', { replace: true });
-  };
+
+  const fallback = user.name
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase())
+    .slice(0, 2)
+    .join('');
+
+  const [open, setOpen] = useDialogState();
 
   return (
     <SidebarMenu>
@@ -52,7 +51,9 @@ export function NavUser({
             >
               <Avatar className='h-8 w-8 rounded-lg'>
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className='rounded-lg'>AT</AvatarFallback>
+                <AvatarFallback className='rounded-lg'>
+                  {fallback}
+                </AvatarFallback>
               </Avatar>
               <div className='grid flex-1 text-left text-sm leading-tight'>
                 <span className='truncate font-medium'>{user.name}</span>
@@ -71,7 +72,9 @@ export function NavUser({
               <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
                 <Avatar className='h-8 w-8 rounded-lg'>
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className='rounded-lg'>AD</AvatarFallback>
+                  <AvatarFallback className='rounded-lg'>
+                    {fallback}
+                  </AvatarFallback>
                 </Avatar>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
                   <span className='truncate font-medium'>{user.name}</span>
@@ -83,7 +86,7 @@ export function NavUser({
 
             <DropdownMenuItem
               className='cursor-pointer text-destructive focus:text-destructive'
-              onClick={handleLogout}
+              onClick={() => setOpen(true)}
             >
               <LogOut />
               Log out
@@ -91,6 +94,7 @@ export function NavUser({
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+      <SignOutDialog open={!!open} onOpenChange={setOpen}></SignOutDialog>
     </SidebarMenu>
   );
 }

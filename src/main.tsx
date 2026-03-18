@@ -11,9 +11,12 @@ import { Toaster } from 'sonner';
 import AuthPage from './pages/auth';
 import ProtectedRoute from './layouts/middlewares/protected-route';
 import PublicRoute from './layouts/middlewares/public-route';
-import DashboardLayout from './layouts/sidebar/dashboard-layout';
+import { AuthenticatedLayout } from './layouts/sidebar/authenticated-layout';
 import InventoryPage from './pages/inventory';
 import ActivityPage from './pages/activity';
+import { DirectionProvider } from './context/direction-provider';
+import { FontProvider } from './context/font-provider';
+import { Dashboard } from './pages/dashboard';
 
 const router = createBrowserRouter([
   {
@@ -29,11 +32,11 @@ const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        element: <DashboardLayout />,
+        element: <AuthenticatedLayout />,
         children: [
           {
             path: '/',
-            element: <div>Hai</div>,
+            element: <Dashboard />,
           },
           {
             path: '/inventory',
@@ -56,9 +59,13 @@ ReactDOM.createRoot(root!).render(
     <Toaster></Toaster>
     <UseQueryContext>
       <SearchProvider>
-        <ThemeProvider defaultTheme="light">
+        <ThemeProvider defaultTheme='light'>
           <TooltipProvider>
-            <RouterProvider router={router} />
+            <DirectionProvider>
+              <FontProvider>
+                <RouterProvider router={router} />
+              </FontProvider>
+            </DirectionProvider>
           </TooltipProvider>
         </ThemeProvider>
       </SearchProvider>

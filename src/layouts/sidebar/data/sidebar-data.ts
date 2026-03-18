@@ -3,7 +3,7 @@ import { LayoutDashboard } from 'lucide-react';
 export const sidebarData = {
   navGroups: [
     {
-      title: 'Fitur Utama',
+      title: 'General',
       items: [
         {
           title: 'Dashboard',

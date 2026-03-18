@@ -17,9 +17,9 @@
  *   }
  */
 export const fonts = [
+  'plus-jakarta-sans',
   'inter',
   'manrope',
-  'plus-jakarta-sans',
   'poppins',
   'system',
 ] as const;
