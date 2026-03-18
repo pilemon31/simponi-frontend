@@ -1,4 +1,5 @@
 import { useLayout } from '@/context/layout-provider';
+import { useDirection } from '@/context/direction-provider';
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +15,7 @@ import { LogoDisplay } from './logo-display';
 
 export function AppSidebar() {
   const user = useAuthStore((state) => state.auth.user);
+  const { dir } = useDirection();
 
   const userData = {
     name: user?.accountNo ?? '001',
@@ -22,8 +24,11 @@ export function AppSidebar() {
   };
 
   const { collapsible, variant } = useLayout();
+
+  const side = dir === 'rtl' ? 'right' : 'left';
+
   return (
-    <Sidebar collapsible={collapsible} variant={variant}>
+    <Sidebar collapsible={collapsible} variant={variant} side={side}>
       <SidebarHeader>
         <LogoDisplay></LogoDisplay>
       </SidebarHeader>
