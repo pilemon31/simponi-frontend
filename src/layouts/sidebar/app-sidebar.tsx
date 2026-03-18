@@ -10,6 +10,7 @@ import { sidebarData } from './data/sidebar-data';
 import { NavGroup } from './nav-group';
 import { NavUser } from './nav-user';
 import { useAuthStore } from '@/stores/auth-store';
+import { LogoDisplay } from './logo-display';
 
 export function AppSidebar() {
   const user = useAuthStore((state) => state.auth.user);
@@ -24,7 +25,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
       <SidebarHeader>
-        <div className='w-full h-auto flex flex-row justify-center items-center py-4 px-2'></div>
+        <LogoDisplay></LogoDisplay>
       </SidebarHeader>
       <SidebarContent>
         {sidebarData.navGroups.map((props) => (
