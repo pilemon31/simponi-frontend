@@ -17,34 +17,40 @@ import ActivityPage from './pages/activity';
 import { DirectionProvider } from './context/direction-provider';
 import { FontProvider } from './context/font-provider';
 import { Dashboard } from './pages/dashboard';
+import { RootLayout } from './layouts/root-layout';
 
 const router = createBrowserRouter([
   {
-    element: <PublicRoute />,
+    element: <RootLayout />,
     children: [
       {
-        path: '/signin',
-        element: <AuthPage />,
-      },
-    ],
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <AuthenticatedLayout />,
+        element: <PublicRoute />,
         children: [
           {
-            path: '/',
-            element: <Dashboard />,
+            path: '/signin',
+            element: <AuthPage />,
           },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
           {
-            path: '/inventory',
-            element: <InventoryPage />,
-          },
-          {
-            path: '/activity',
-            element: <ActivityPage />,
+            element: <AuthenticatedLayout />,
+            children: [
+              {
+                path: '/',
+                element: <Dashboard />,
+              },
+              {
+                path: '/inventory',
+                element: <InventoryPage />,
+              },
+              {
+                path: '/activity',
+                element: <ActivityPage />,
+              },
+            ],
           },
         ],
       },
