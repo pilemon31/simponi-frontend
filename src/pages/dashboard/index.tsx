@@ -15,6 +15,9 @@ import { ProfileDropdown } from '@/components/shared/profile-dropdown';
 import { Search } from '@/components/shared/search';
 import { ThemeSwitch } from '@/components/shared/theme-switcher';
 import { useAuthStore } from '@/stores/auth-store';
+import { Overview } from '@/components/dashboard/overview';
+import { RecentSales } from '@/components/inventory/RecentInventory';
+import { Analytics } from '@/components/dashboard/analytics';
 
 export function Dashboard() {
   const user = useAuthStore((state) => state.auth.user);
@@ -37,7 +40,6 @@ export function Dashboard() {
         </div>
       </Header>
 
-      {/* ===== Main ===== */}
       <Main>
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
@@ -171,7 +173,9 @@ export function Dashboard() {
                 <CardHeader>
                   <CardTitle>Overview</CardTitle>
                 </CardHeader>
-                <CardContent className='ps-2'></CardContent>
+                <CardContent className='ps-2'>
+                  <Overview></Overview>
+                </CardContent>
               </Card>
               <Card className='col-span-1 lg:col-span-3'>
                 <CardHeader>
@@ -180,11 +184,15 @@ export function Dashboard() {
                     You made 265 sales this month.
                   </CardDescription>
                 </CardHeader>
-                <CardContent></CardContent>
+                <CardContent>
+                  <RecentSales></RecentSales>
+                </CardContent>
               </Card>
             </div>
           </TabsContent>
-          <TabsContent value='analytics' className='space-y-4'></TabsContent>
+          <TabsContent value='analytics' className='space-y-4'>
+            <Analytics></Analytics>
+          </TabsContent>
         </Tabs>
       </Main>
     </>
