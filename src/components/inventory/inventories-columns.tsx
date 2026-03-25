@@ -1,9 +1,14 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
-import { ProductIcons } from "./data/data";
 import { type Inventory } from "./data/schema";
-import { MoreVertical, Music, ShoppingCart, AlertTriangle } from "lucide-react";
+import {
+  MoreVertical,
+  Music,
+  ShoppingCart,
+  AlertTriangle,
+  Image as ImageIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const inventoryColumns: ColumnDef<Inventory>[] = [
@@ -32,25 +37,30 @@ export const inventoryColumns: ColumnDef<Inventory>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "product",
+    accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="PRODUCT" />
+      <DataTableColumnHeader column={column} title="Product" />
     ),
     cell: ({ row }) => {
-      const product = row.original.product;
-      const Icon =
-        ProductIcons[product.icon as keyof typeof ProductIcons] ||
-        ProductIcons.Box;
+      const data = row.original;
 
       return (
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-md bg-muted text-muted-foreground">
-            <Icon className="size-5" />
+          <div className="flex size-10 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground">
+            {data.imageUrl ? (
+              <img
+                src={data.imageUrl}
+                alt={data.name}
+                className="size-full object-cover"
+              />
+            ) : (
+              <ImageIcon className="size-5" />
+            )}
           </div>
           <div className="flex flex-col">
-            <span className="font-medium text-foreground">{product.name}</span>
+            <span className="font-medium text-foreground">{data.name}</span>
             <span className="text-xs text-muted-foreground">
-              {product.category}
+              {data.category?.name || "Uncategorized"}
             </span>
           </div>
         </div>
@@ -58,40 +68,47 @@ export const inventoryColumns: ColumnDef<Inventory>[] = [
     },
   },
   {
-    accessorKey: "internalSku",
+    accessorKey: "sku",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="INTERNAL SKU" />
+      <DataTableColumnHeader column={column} title="Internal SKU" />
     ),
     cell: ({ row }) => (
       <span className="font-mono text-sm text-muted-foreground">
-        {row.getValue("internalSku")}
+        {row.getValue("sku")}
       </span>
     ),
   },
   {
-    accessorKey: "platformSkus",
+    id: "platformMappings",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="PLATFORM SKUS" />
+      <DataTableColumnHeader column={column} title="Platform Mappings" />
     ),
     cell: ({ row }) => {
-      const skus = row.original.platformSkus;
+      const externals = row.original.externalProducts;
+      const tiktok = externals.find((e) => e.platform === "tiktok");
+      const shopee = externals.find((e) => e.platform === "shopee");
+
+      if (externals.length === 0) {
+        return (
+          <div className="flex items-center gap-1.5 text-yellow-600">
+            <AlertTriangle className="size-3.5" />
+            <span className="text-xs">Unmapped</span>
+          </div>
+        );
+      }
 
       return (
         <div className="flex flex-col gap-1 text-xs">
-          <div className="flex items-center gap-1.5 text-blue-500">
-            <Music className="size-3.5" />
-            <span className="font-mono">{skus.tiktok}</span>
-          </div>
-
-          {skus.shopee ? (
+          {tiktok && (
+            <div className="flex items-center gap-1.5 text-blue-500">
+              <Music className="size-3.5" />
+              <span className="font-mono">{tiktok.externalProductId}</span>
+            </div>
+          )}
+          {shopee && (
             <div className="flex items-center gap-1.5 text-orange-500">
               <ShoppingCart className="size-3.5" />
-              <span className="font-mono">{skus.shopee}</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 text-yellow-600">
-              <AlertTriangle className="size-3.5" />
-              <span>Not mapped</span>
+              <span className="font-mono">{shopee.externalProductId}</span>
             </div>
           )}
         </div>
@@ -99,55 +116,37 @@ export const inventoryColumns: ColumnDef<Inventory>[] = [
     },
   },
   {
-    accessorKey: "unifiedStock",
+    accessorKey: "stock",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="UNIFIED STOCK" />
+      <DataTableColumnHeader column={column} title="Central Stock" />
     ),
     cell: ({ row }) => {
-      const stock = row.original.unifiedStock;
+      const stock = row.getValue("stock") as number;
+      const isCritical = stock < 10;
 
       return (
         <div className="flex flex-col">
-          <span className="font-medium">{stock.total}</span>
-          {stock.isCriticalLow ? (
+          <span className="font-medium">{stock}</span>
+          {isCritical ? (
             <span className="text-xs text-red-500">Critical low</span>
           ) : (
-            <span className="text-xs text-muted-foreground">
-              Available: {stock.available}
-            </span>
+            <span className="text-xs text-muted-foreground">In Stock</span>
           )}
         </div>
       );
-    },
-  },
-  {
-    accessorKey: "tiktokStock",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="TIKTOK STOCK" />
-    ),
-    cell: ({ row }) => <span>{row.getValue("tiktokStock")}</span>,
-  },
-  {
-    accessorKey: "shopeeStock",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="SHOPEE STOCK" />
-    ),
-    cell: ({ row }) => {
-      const stock = row.getValue("shopeeStock") as number | null;
-      return <span>{stock !== null ? stock : "-"}</span>;
     },
   },
   {
     accessorKey: "status",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="STATUS" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
       const status = row.original.status;
 
       const getBadgeStyles = (state: string) => {
         switch (state) {
-          case "Synced":
+          case "Mapped":
             return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
           case "Low Stock":
             return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
@@ -170,14 +169,18 @@ export const inventoryColumns: ColumnDef<Inventory>[] = [
         </div>
       );
     },
-    filterFn: (row, value) => {
-      return value.includes(row.original.status.state);
+    filterFn: (row, _columnId, filterValue: string[]) => {
+      if (!Array.isArray(filterValue) || filterValue.length === 0) {
+        return true;
+      }
+
+      return filterValue.includes(row.original.status.state);
     },
   },
   {
     id: "actions",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="ACTIONS" />
+      <DataTableColumnHeader column={column} title="Actions" />
     ),
     cell: () => {
       return (

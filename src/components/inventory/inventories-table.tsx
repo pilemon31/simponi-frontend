@@ -24,8 +24,8 @@ import {
   DataTablePagination,
   DataTableToolbar,
 } from "@/components/shared/data-table";
-import { SyncStatuses } from "./data/data";
 import { type Inventory } from "./data/schema";
+import { SyncStatuses } from "./data/data";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
 import { inventoryColumns as columns } from "./inventories-columns";
 import { cn } from "@/lib/utils";
@@ -59,8 +59,8 @@ export function InventoriesTable({ data }: DataTableProps) {
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
     globalFilterFn: (row, _columnId, filterValue) => {
-      const productName = String(row.original.product.name).toLowerCase();
-      const internalSku = String(row.original.internalSku).toLowerCase();
+      const productName = String(row.original.name).toLowerCase();
+      const internalSku = String(row.original.sku).toLowerCase();
       const searchValue = String(filterValue).toLowerCase();
 
       return (
