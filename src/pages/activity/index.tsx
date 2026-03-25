@@ -12,7 +12,7 @@ const ActivityPage = () => {
   const user = useAuthStore((state) => state.auth.user);
 
   const userData = {
-    name: user?.accountNo ?? '001',
+    name: user?.name ?? 'john',
     email: user?.email ?? 'email@admin.com',
     avatar: '/avatars/shadcn.jpg',
   };
