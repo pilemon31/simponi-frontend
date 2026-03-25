@@ -1,9 +1,7 @@
-import { Headphones, Smartphone, Laptop, Box } from "lucide-react";
-
 export const SyncStatuses = [
   {
-    label: "Synced",
-    value: "Synced" as const,
+    label: "Mapped",
+    value: "Mapped" as const,
     variant: "success",
   },
   {
@@ -17,10 +15,3 @@ export const SyncStatuses = [
     variant: "warning",
   },
 ];
-
-export const ProductIcons = {
-  Headphones,
-  Smartphone,
-  Laptop,
-  Box,
-};
