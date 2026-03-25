@@ -1,25 +1,52 @@
-import FilterInventorySection from '@/components/inventory/FilterInventorySection';
-import InventoryChart from '@/components/inventory/InventoryChart';
-import InventoryStatsCard from '@/components/inventory/InventoryStatsCard';
-import TableInventorySection from '@/components/inventory/TableInventorySection';
+import { inventories } from "@/components/inventory/data/inventories";
+import { InventoriesTable } from "@/components/inventory/inventories-table";
+import InventoryStatsCard from "@/components/inventory/inventories-cards";
+import { ConfigDrawer } from "@/components/shared/config-drawer";
+import { ProfileDropdown } from "@/components/shared/profile-dropdown";
+import { Search } from "@/components/shared/search";
+import { ThemeSwitch } from "@/components/shared/theme-switcher";
+
+import { Header } from "@/layouts/header";
+import { Main } from "@/layouts/main";
+import { useAuthStore } from "@/stores/auth-store";
+import InventoryAlertsCard from "@/components/inventory/inventories-alerts";
 
 const InventoryPage = () => {
-  return (
-    <div className='space-y-8'>
-      <div className='flex flex-col gap-[0.5px]'>
-        <h1 className='text-2xl font-bold tracking-tight'>
-          Inventory Management
-        </h1>
-        <p className='text-sm text-muted-foreground'>
-          Monitor and manage product stock across all platforms
-        </p>
-      </div>
+  const user = useAuthStore((state) => state.auth.user);
 
-      <InventoryStatsCard />
-      <InventoryChart />
-      <FilterInventorySection />
-      <TableInventorySection />
-    </div>
+  const userData = {
+    name: user?.accountNo ?? "001",
+    email: user?.email ?? "email@admin.com",
+    avatar: "/avatars/shadcn.jpg",
+  };
+  return (
+    <>
+      <Header>
+        <Search />
+        <div className="ms-auto flex items-center space-x-4">
+          <ThemeSwitch />
+          <ConfigDrawer />
+          <ProfileDropdown user={userData} />
+        </div>
+      </Header>
+
+      <Main className="flex flex-1 flex-col gap-4 sm:gap-6">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Inventory Management
+            </h2>
+            <p className="text-muted-foreground">
+              Monitor and manage product stock across all platforms
+            </p>
+          </div>
+        </div>
+
+        <InventoryStatsCard />
+        <InventoryAlertsCard />
+        <InventoriesTable data={inventories} />
+      </Main>
+    </>
   );
 };
 
