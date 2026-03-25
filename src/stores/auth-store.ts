@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { getCookie, setCookie, removeCookie } from '@/lib/cookies';
 
-const ACCESS_TOKEN = 'thisisjustarandomstring';
+const ACCESS_TOKEN = 'ACCESS_TOKEN';
+const REFRESH_TOKEN = 'REFRESH_TOKEN';
 
 interface AuthUser {
-  accountNo: string;
+  id: string;
   email: string;
-  role: string[];
-  exp: number;
+  name: string;
 }
 
 interface AuthState {
@@ -15,7 +15,9 @@ interface AuthState {
     user: AuthUser | null;
     setUser: (user: AuthUser | null) => void;
     accessToken: string;
+    refreshToken: string;
     setAccessToken: (accessToken: string) => void;
+    setRefreshToken: (refreshToken: string) => void;
     resetAccessToken: () => void;
     reset: () => void;
   };
@@ -23,18 +25,27 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()((set) => {
   const cookieState = getCookie(ACCESS_TOKEN);
-  const initToken = cookieState ? JSON.parse(cookieState) : '';
+  const initToken = cookieState ?? '';
+  const cookieRefreshState = getCookie(REFRESH_TOKEN);
+  const initRefreshToken = cookieRefreshState ?? '';
   return {
     auth: {
       user: null,
       setUser: (user) =>
         set((state) => ({ ...state, auth: { ...state.auth, user } })),
       accessToken: initToken,
+      refreshToken: initRefreshToken,
       setAccessToken: (accessToken) =>
         set((state) => {
-          setCookie(ACCESS_TOKEN, JSON.stringify(accessToken));
+          setCookie(ACCESS_TOKEN, accessToken);
           return { ...state, auth: { ...state.auth, accessToken } };
         }),
+      setRefreshToken: (refreshToken) => {
+        set((state) => {
+          setCookie(REFRESH_TOKEN, refreshToken);
+          return { ...state, auth: { ...state.auth, refreshToken } };
+        });
+      },
       resetAccessToken: () =>
         set((state) => {
           removeCookie(ACCESS_TOKEN);
@@ -43,9 +54,15 @@ export const useAuthStore = create<AuthState>()((set) => {
       reset: () =>
         set((state) => {
           removeCookie(ACCESS_TOKEN);
+          removeCookie(REFRESH_TOKEN);
           return {
             ...state,
-            auth: { ...state.auth, user: null, accessToken: '' },
+            auth: {
+              ...state.auth,
+              user: null,
+              accessToken: '',
+              refreshToken: '',
+            },
           };
         }),
     },
