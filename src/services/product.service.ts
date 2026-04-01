@@ -3,6 +3,7 @@ import type {
   CreateProductRequest,
   ProductDetailResponse,
   ProductListResponse,
+  ProductStatsResponse,
   UpdateProductRequest,
   UpdateStockRequest,
 } from "@/types/product.type";
@@ -28,6 +29,27 @@ export const getProducts = async (
     return {
       status: false,
       message: "An unexpected error occured",
+      timestamp: new Date().toISOString(),
+      error: "Unknown error",
+    } as ErrorResponse;
+  }
+};
+
+export const getProductStats = async (): Promise<
+  ProductStatsResponse | ErrorResponse
+> => {
+  try {
+    const response = await axiosConfig.get("/products/stats", {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data as ProductStatsResponse;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
+      return (error as AxiosError).response?.data as ErrorResponse;
+    }
+    return {
+      status: false,
+      message: "An unexpected error occurred",
       timestamp: new Date().toISOString(),
       error: "Unknown error",
     } as ErrorResponse;

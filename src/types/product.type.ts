@@ -58,6 +58,17 @@ export type ProductListResponse = SuccessResponse<{
 
 export type ProductDetailResponse = SuccessResponse<ProductData>;
 
+export type ProductStatsData = {
+  total_products: number;
+  total_skus: number;
+  stock_units: number;
+  low_stock: number;
+  out_of_stock: number;
+  unsynced: number;
+};
+
+export type ProductStatsResponse = SuccessResponse<ProductStatsData>;
+
 export type CreateProductRequest = {
   name: string;
   description?: string;

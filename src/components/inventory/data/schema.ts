@@ -23,7 +23,7 @@ export const inventoryMappingSchema = z.object({
   imageUrl: z.string().nullable(),
   externalProducts: z.array(externalProductSchema),
   status: z.object({
-    state: z.enum(["Mapped", "Low Stock", "Unmapped"]),
+    state: z.enum(["Mapped", "Low Stock", "Unmapped", "Out of Stock"]),
     lastUpdated: z.string(),
   }),
 });

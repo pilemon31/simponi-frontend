@@ -5,20 +5,21 @@ import { ConfigDrawer } from "@/components/shared/config-drawer";
 import { ProfileDropdown } from "@/components/shared/profile-dropdown";
 import { Search } from "@/components/shared/search";
 import { ThemeSwitch } from "@/components/shared/theme-switcher";
-
 import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
 import { useAuthStore } from "@/stores/auth-store";
 import InventoryAlertsCard from "@/components/inventory/inventories-alerts";
+import { useInventory } from "@/hooks/use-inventory";
 
 const InventoryPage = () => {
   const user = useAuthStore((state) => state.auth.user);
-
+  const { data } = useInventory();
   const userData = {
-    name: user?.accountNo ?? "001",
+    name: user?.name ?? "john",
     email: user?.email ?? "email@admin.com",
     avatar: "/avatars/shadcn.jpg",
   };
+
   return (
     <>
       <Header>
@@ -42,7 +43,7 @@ const InventoryPage = () => {
           </div>
         </div>
 
-        <InventoryStatsCard />
+        <InventoryStatsCard data={data} />
         <InventoryAlertsCard />
         <InventoriesTable data={inventories} />
       </Main>
