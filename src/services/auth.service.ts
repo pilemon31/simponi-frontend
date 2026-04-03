@@ -3,6 +3,7 @@ import axiosConfig from '@/lib/axios';
 import type { signInSchema } from '@/schemas/auth.schema';
 import type { SignInResponse } from '@/types/auth.type';
 import { type ErrorResponse } from '@/types/response.type';
+import { mapErrorResponse } from '@/lib/error-mapper';
 import type z from 'zod';
 
 export const signIn = async (
@@ -19,7 +20,7 @@ export const signIn = async (
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
       const response = (error as AxiosError).response?.data;
-      return response as ErrorResponse;
+      return mapErrorResponse(response as ErrorResponse);
     }
 
     return {
