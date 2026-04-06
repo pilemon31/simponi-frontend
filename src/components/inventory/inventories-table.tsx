@@ -32,9 +32,11 @@ import { cn } from "@/lib/utils";
 
 type DataTableProps = {
   data: Inventory[];
+  onEdit?: (item: Inventory) => void;
+  onDelete?: (item: Inventory) => void;
 };
 
-export function InventoriesTable({ data }: DataTableProps) {
+export function InventoriesTable({ data, onEdit, onDelete }: DataTableProps) {
   // Local UI-only states
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -45,6 +47,10 @@ export function InventoriesTable({ data }: DataTableProps) {
   const table = useReactTable({
     data,
     columns,
+    meta: {
+      onEdit,
+      onDelete,
+    },
     state: {
       sorting,
       columnVisibility,
