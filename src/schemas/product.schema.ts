@@ -14,6 +14,7 @@ export const createProductSchema = z.object({
     .number({ error: () => "Masukkan jumlah stok" })
     .int("Stok harus beruppa bilangan bulat")
     .min(0, "Stok tidak boleh negatif"),
+  image_id: z.uuid("Image ID tidak valid"),
   category_id: z.uuid("Category ID tidak valid").optional().nullable(),
 });
 

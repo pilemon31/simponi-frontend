@@ -13,18 +13,20 @@ export type ProductImageData = {
 
 export type ExternalProductData = {
   id: string;
-  product_id: string | null;
-  store_id: string | null;
-  external_product_id: string;
-  external_model_id: string;
+  image_url: string;
+  product_name: string;
+  platform: string;
   price: number;
+  created_at: string;
+  updated_at: string;
 };
 
 export type ProductStatus =
   | "Mapped"
   | "Unmapped"
   | "Low Stock"
-  | "Out of Stock";
+  | "Out of Stock"
+  | "Out of stock";
 
 export type ProductData = {
   id: string;
@@ -74,6 +76,7 @@ export type CreateProductRequest = {
   description?: string;
   sku: string;
   stock: number;
+  image_id: string;
   category_id?: string | null;
 };
 
@@ -87,6 +90,6 @@ export type UpdateProductRequest = {
 
 export type UpdateStockRequest = {
   change: number;
-  source: number;
+  source: "shopee" | "tiktok" | "manual";
   note?: string;
 };

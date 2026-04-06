@@ -17,9 +17,6 @@ export const getProducts = async (
   try {
     const response = await axiosConfig.get("/products", {
       params: { page, per_page: perPage },
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
     return response.data as ProductListResponse;
   } catch (error: unknown) {
@@ -39,9 +36,7 @@ export const getProductStats = async (): Promise<
   ProductStatsResponse | ErrorResponse
 > => {
   try {
-    const response = await axiosConfig.get("/products/stats", {
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await axiosConfig.get("/products/stats");
     return response.data as ProductStatsResponse;
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
@@ -60,11 +55,7 @@ export const getProductByID = async (
   productID: string,
 ): Promise<ProductDetailResponse | ErrorResponse> => {
   try {
-    const response = await axiosConfig.get(`/products/${productID}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axiosConfig.get(`/products/${productID}`);
     return response.data as ProductDetailResponse;
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
@@ -85,9 +76,6 @@ export const getProductBySKU = async (
   try {
     const response = await axiosConfig.get(`/products/sku`, {
       params: { sku },
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
     return response.data as ProductDetailResponse;
   } catch (error: unknown) {
@@ -111,9 +99,6 @@ export const getProductsByCategory = async (
   try {
     const response = await axiosConfig.get(`/products/category/${categoryID}`, {
       params: { page, per_page: perPage },
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
     return response.data as ProductListResponse;
   } catch (error: unknown) {
@@ -208,11 +193,7 @@ export const deleteProduct = async (
   productID: string,
 ): Promise<ErrorResponse | { status: true; message: string }> => {
   try {
-    const response = await axiosConfig.delete(`/products/${productID}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axiosConfig.delete(`/products/${productID}`);
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
