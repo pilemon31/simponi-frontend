@@ -18,6 +18,7 @@ import { DirectionProvider } from './context/direction-provider';
 import { FontProvider } from './context/font-provider';
 import { Dashboard } from './pages/dashboard';
 import { RootLayout } from './layouts/root-layout';
+import VendorPage from './pages/vendor';
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
               {
                 path: '/',
                 element: <Dashboard />,
+              },
+              {
+                path: '/vendor',
+                element: <VendorPage />
               },
               {
                 path: '/inventory',
