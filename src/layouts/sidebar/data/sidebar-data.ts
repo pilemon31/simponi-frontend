@@ -34,38 +34,45 @@ export const sidebarData = {
           title: 'Vendor',
           url: '/vendor',
           icon: ShelvingUnit,
+          permission_id: '40077ea2-351c-46b9-a78f-1da15c23138e',
         },
         {
           title: 'Inventory',
           icon: BoxesIcon,
           items: [
-            { title: 'Internal', url: '/inventory/internal' },
-            { title: 'Display', url: '/inventory/display' },
+            {
+              title: 'Internal',
+              url: '/inventory/internal',
+              permission_id: 'aaaaaaaa-0ea2-426c-89e7-e25e71c0b88f',
+            },
+            {
+              title: 'Display',
+              url: '/inventory/display',
+              permission_id: 'ab000001-0ea2-426c-89e7-e25e71c0b88f',
+            },
           ],
         },
-        {
-          title: 'Activity',
-          url: '/activity',
-          icon: Cctv,
-        },
-      ],
-    },
-
-    {
-      title: 'Tools',
-      items: [
         {
           title: 'Roles & Permissions',
           url: '/roles',
           icon: UserRoundKey,
+          permission_id: '2e93d440-bc56-46b2-afd7-a7acaa6f9275',
         },
         {
           title: 'Users Management',
           url: '/users',
           icon: UsersRound,
+          permission_id: '090331cb-5d7e-4ca2-84c7-d420bc8c2c0d',
+        },
+        {
+          title: 'Activity',
+          url: '/activity',
+          icon: Cctv,
+          permission_id: '55555555-0ea2-426c-89e7-e25e71c0b88f',
         },
       ],
     },
+
     {
       title: 'Others',
       items: [

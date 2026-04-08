@@ -32,9 +32,11 @@ import {
   type NavLink,
   type NavGroup as NavGroupProps,
 } from './types';
+import { useAuthStore } from '@/stores/auth-store';
 
 export function NavGroup({ title, items }: NavGroupProps) {
   const { state, isMobile } = useSidebar();
+  const user = useAuthStore((state) => state.auth.user);
   const location = useLocation();
   const href = location.pathname;
   return (
@@ -42,17 +44,47 @@ export function NavGroup({ title, items }: NavGroupProps) {
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const key = `${item.title}-${item.url}`;
+          const key = `${item.title}-${item.url || item.items?.[0]?.url}`;
 
-          if (!item.items)
-            return <SidebarMenuLink key={key} item={item} href={href} />;
+          if (!item.items) {
+            if (!item.permission_id) {
+              return <SidebarMenuLink key={key} item={item} href={href} />;
+            }
+
+            const authorized = user?.role.permissions.some(
+              (p) => p.id === item.permission_id,
+            );
+            if (authorized) {
+              return <SidebarMenuLink key={key} item={item} href={href} />;
+            }
+            return null;
+          }
+
+          const userPermissions = user?.role.permissions.map((p) => p.id) || [];
+          const authorizedSubItems = item.items.filter(
+            (subItem) =>
+              !subItem.permission_id ||
+              userPermissions.includes(subItem.permission_id),
+          );
+
+          if (authorizedSubItems.length === 0) {
+            return null;
+          }
+
+          const newItem = { ...item, items: authorizedSubItems };
 
           if (state === 'collapsed' && !isMobile)
             return (
-              <SidebarMenuCollapsedDropdown key={key} item={item} href={href} />
+              <SidebarMenuCollapsedDropdown
+                key={key}
+                item={newItem}
+                href={href}
+              />
             );
 
-          return <SidebarMenuCollapsible key={key} item={item} href={href} />;
+          return (
+            <SidebarMenuCollapsible key={key} item={newItem} href={href} />
+          );
         })}
       </SidebarMenu>
     </SidebarGroup>
