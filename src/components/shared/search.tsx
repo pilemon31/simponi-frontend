@@ -25,7 +25,7 @@ export function Search({
     >
       <SearchIcon
         aria-hidden='true'
-        className='absolute start-1.5 top-1/2 -translate-y-1/2'
+        className='absolute inset-s-1.5 top-1/2 -translate-y-1/2'
         size={16}
       />
       <span className='ms-4'>{placeholder}</span>

@@ -44,6 +44,7 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
     mutationFn: signIn,
     onSuccess: async (result) => {
       const toastId = toast.loading('Masuk ke akun...');
+      let signedInUserName = 'user';
 
       console.log('result', result.status);
       console.log('result', result);
@@ -66,7 +67,9 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
 
           if (profile && profile.status) {
             auth.setUser(profile.data ?? null);
+            signedInUserName = profile.data?.name ?? signedInUserName;
           }
+
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
           // Silently ignore profile fetch errors
@@ -74,7 +77,7 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
 
         const targetPath = redirectTo || '/';
         navigate(targetPath, { replace: true });
-        toast.success(`Selamat datang kembali, ${auth.user?.name ?? 'user'}!`, {
+        toast.success(`Selamat datang kembali, ${signedInUserName}!`, {
           id: toastId,
         });
       } else {
