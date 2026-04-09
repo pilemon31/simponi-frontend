@@ -24,19 +24,18 @@ import {
   DataTablePagination,
   DataTableToolbar,
 } from "@/components/shared/data-table";
-import { type Inventory } from "./internal/data/schema";
-import { SyncStatuses } from "./internal/data/data";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { inventoryColumns as columns } from "./inventories-columns";
+import { displayColumns as columns } from "./display-columns";
 import { cn } from "@/lib/utils";
+import { type ExternalProduct } from "./data/schema";
 
 type DataTableProps = {
-  data: Inventory[];
-  onEdit?: (item: Inventory) => void;
-  onDelete?: (item: Inventory) => void;
+  data: ExternalProduct[];
+  onEdit?: (item: ExternalProduct) => void;
+  onDelete?: (item: ExternalProduct) => void;
 };
 
-export function InventoriesTable({ data, onEdit, onDelete }: DataTableProps) {
+export function DiplayTable({ data, onEdit, onDelete }: DataTableProps) {
   // Local UI-only states
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -65,12 +64,12 @@ export function InventoriesTable({ data, onEdit, onDelete }: DataTableProps) {
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
     globalFilterFn: (row, _columnId, filterValue) => {
-      const productName = String(row.original.name).toLowerCase();
-      const internalSku = String(row.original.sku).toLowerCase();
+      const productName = String(row.original.product_name).toLowerCase();
+      const platform = String(row.original.platform).toLowerCase();
       const searchValue = String(filterValue).toLowerCase();
 
       return (
-        productName.includes(searchValue) || internalSku.includes(searchValue)
+        productName.includes(searchValue) || platform.includes(searchValue)
       );
     },
     getCoreRowModel: getCoreRowModel(),
@@ -89,12 +88,15 @@ export function InventoriesTable({ data, onEdit, onDelete }: DataTableProps) {
       )}>
       <DataTableToolbar
         table={table}
-        searchPlaceholder="Filter by activity or ID..."
+        searchPlaceholder="Filter by platform"
         filters={[
           {
-            columnId: "status",
-            title: "Status",
-            options: SyncStatuses,
+            columnId: "platform",
+            title: "Platform",
+            options: [
+              { label: "Shopee", value: "shopee" },
+              { label: "TikTok", value: "tiktok" },
+            ],
           },
         ]}
       />

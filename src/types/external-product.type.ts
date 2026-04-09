@@ -2,7 +2,6 @@ import type { Pagination, SuccessResponse } from "./response.type";
 
 export type ExternalProductItem = {
   id: string;
-  image_url?: string;
   image?: string;
   product_name: string;
   platform: string;
@@ -11,10 +10,12 @@ export type ExternalProductItem = {
   updated_at: string;
 };
 
-export type ExternalProductListResponse = SuccessResponse<{
-  data: ExternalProductItem[];
-  pagination: Pagination;
-}>;
+export type ExternalProductListResponse =
+  | SuccessResponse<{
+      data: ExternalProductItem[];
+      pagination: Pagination;
+    }>
+  | SuccessResponse<ExternalProductItem[]>;
 
 export type ExternalProductDetailResponse =
   SuccessResponse<ExternalProductItem>;

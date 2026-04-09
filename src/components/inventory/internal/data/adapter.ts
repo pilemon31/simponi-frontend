@@ -3,6 +3,11 @@ import type { Inventory } from "./schema";
 import { formatDistanceToNow } from "date-fns";
 import { resolveImageUrl } from "@/lib/media";
 
+type InventoryExternalProduct = Inventory["externalProducts"][number];
+type ProductExternalProduct = NonNullable<
+  ProductListItem["external_products"]
+>[number];
+
 const normalizePlatform = (platform: string): "shopee" | "tiktok" =>
   platform.toLowerCase().includes("tiktok") ? "tiktok" : "shopee";
 
@@ -15,6 +20,20 @@ const normalizeStatus = (
   return status as Inventory["status"]["state"];
 };
 
+export function adaptExternalProductToInventory(
+  externalProduct: ProductExternalProduct,
+): InventoryExternalProduct {
+  return {
+    id: externalProduct.id,
+    platform: normalizePlatform(externalProduct.platform),
+    product_name: externalProduct.product_name,
+    image: externalProduct.image_url,
+    price: externalProduct.price,
+    created_at: externalProduct.created_at,
+    updated_at: externalProduct.updated_at,
+  };
+}
+
 export function adaptProductToInventory(product: ProductListItem): Inventory {
   return {
     id: product.id,
@@ -26,13 +45,9 @@ export function adaptProductToInventory(product: ProductListItem): Inventory {
       ? { id: product.category.id, name: product.category.name }
       : null,
     imageUrl: resolveImageUrl(product.images?.[0]?.image_url),
-    externalProducts: (product.external_products ?? []).map((ep) => ({
-      id: ep.id,
-      platform: normalizePlatform(ep.platform),
-      externalProductId: ep.id,
-      externalModelId: null,
-      price: ep.price,
-    })),
+    externalProducts: (product.external_products ?? []).map(
+      adaptExternalProductToInventory,
+    ),
     status: {
       state: normalizeStatus(product.status),
       lastUpdated: formatDistanceToNow(new Date(product.created_at), {

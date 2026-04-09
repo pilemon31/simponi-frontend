@@ -47,16 +47,18 @@ export type ProductListItem = {
   sku: string;
   stock: number;
   category: ProductCategoryData | null;
-  images: ProductImageData[];
-  external_products: ExternalProductData[];
+  images?: ProductImageData[];
+  external_products?: ExternalProductData[];
   status: ProductStatus;
   created_at: string;
 };
 
-export type ProductListResponse = SuccessResponse<{
-  data: ProductListItem[];
-  pagination: Pagination;
-}>;
+export type ProductListResponse =
+  | SuccessResponse<{
+      data: ProductListItem[];
+      pagination: Pagination;
+    }>
+  | SuccessResponse<ProductListItem[]>;
 
 export type ProductDetailResponse = SuccessResponse<ProductData>;
 

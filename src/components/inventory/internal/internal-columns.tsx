@@ -1,7 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
-import { type Inventory } from "./internal/data/schema";
+import { type Inventory } from "./data/schema";
 import {
   MoreVertical,
   Music,
