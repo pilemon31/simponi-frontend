@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DataTableBulkActions as BulkActionsToolbar } from "@/components/shared/data-table";
-import { type Inventory } from "./internal/data/schema";
+import { type Inventory } from "./data/schema";
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;

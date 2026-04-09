@@ -3,6 +3,7 @@ import type {
   CreateExternalProductRequest,
   ExternalProductDetailResponse,
   ExternalProductListResponse,
+  ExternalProductItem,
   UpdateExternalProductRequest,
 } from "@/types/external-product.type";
 import type { ErrorResponse } from "@/types/response.type";
@@ -50,7 +51,7 @@ export const getExternalProductByID = async (
 
 export const getExternalProductsByProductID = async (
   productID: string,
-): Promise<ExternalProductDetailResponse[] | ErrorResponse> => {
+): Promise<ExternalProductItem[] | ErrorResponse> => {
   try {
     const response = await axiosConfig.get(
       `/external-products/product/${productID}`,
@@ -66,7 +67,7 @@ export const getExternalProductsByProductID = async (
 
 export const getExternalProductsByStorePlatformID = async (
   storePlatformID: string,
-): Promise<ExternalProductDetailResponse[] | ErrorResponse> => {
+): Promise<ExternalProductItem[] | ErrorResponse> => {
   try {
     const response = await axiosConfig.get(
       `/external-products/store-platform/${storePlatformID}`,

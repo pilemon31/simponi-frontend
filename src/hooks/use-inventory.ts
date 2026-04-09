@@ -1,5 +1,5 @@
-import { adaptProductToInventory } from "@/components/inventory/data/adapter";
-import type { Inventory } from "@/components/inventory/data/schema";
+import { adaptProductToInventory } from "@/components/inventory/internal/data/adapter";
+import type { Inventory } from "@/components/inventory/internal/data/schema";
 import { getProducts, getProductStats } from "@/services/product.service";
 import type { ProductListItem, ProductStatsData } from "@/types/product.type";
 import type { Pagination } from "@/types/response.type";
@@ -38,15 +38,18 @@ export const useInventory = (): UseInventoryResult => {
       : [];
 
   const pagination: Pagination | null = isSuccess
-    ? (responseData?.pagination ?? data.meta ?? null)
+    ? !Array.isArray(responseData)
+      ? (responseData?.pagination ?? data.meta ?? null)
+      : (data.meta ?? null)
     : null;
 
   const products = productItems.map(adaptProductToInventory);
+  const hasResponse = data !== undefined;
 
   return {
     data: products,
     isLoading,
-    isError: isError || !isSuccess,
+    isError: isError || (hasResponse && !isSuccess),
     page,
     perPage,
     maxPage: pagination?.max_page ?? 1,

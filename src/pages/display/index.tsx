@@ -7,7 +7,7 @@ import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
 import { useAuthStore } from "@/stores/auth-store";
 import { useExternalProduct } from "@/hooks/use-external-product";
-import { DisplayTable } from "@/components/display/display-table";
+import { DiplayTable } from "@/components/inventory/display/display-table";
 import type { ExternalProductItem } from "@/types/external-product.type";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -247,8 +247,8 @@ const DisplayProductPage = () => {
             Loading display products...
           </div>
         ) : (
-          <DisplayTable
-            data={externalProducts}
+          <DiplayTable
+            data={data}
             onEdit={handleOpenEdit}
             onDelete={setDeleteTarget}
           />

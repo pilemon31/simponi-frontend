@@ -1,11 +1,13 @@
-import type { ExternalProductItem } from "@/types/external-product.type";
+import type { ExternalProduct } from "@/components/inventory/display/data/schema";
+import { adaptExternalProductToInventory } from "@/components/inventory/display/data/adapter";
 import type { Pagination } from "@/types/response.type";
 import { getExternalProducts } from "@/services/external-product.service";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import type { ExternalProductItem } from "@/types/external-product.type";
 
 type UseExternalProductResult = {
-  data: ExternalProductItem[];
+  data: ExternalProduct[];
   isLoading: boolean;
   isError: boolean;
   page: number;
@@ -29,25 +31,29 @@ export const useExternalProduct = (): UseExternalProductResult => {
   const isSuccess = data?.status === true;
   const responseData = isSuccess ? data.data : null;
 
-  const externalProducts: ExternalProductItem[] = Array.isArray(responseData)
+  const externalProductItems: ExternalProductItem[] = Array.isArray(
+    responseData,
+  )
     ? responseData
     : Array.isArray(responseData?.data)
       ? responseData.data
       : [];
 
-  const normalizedExternalProducts = externalProducts.map((item) => ({
-    ...item,
-    image_url: item.image_url ?? item.image ?? "",
-  }));
-
   const pagination: Pagination | null = isSuccess
-    ? (responseData?.pagination ?? data.meta ?? null)
+    ? !Array.isArray(responseData)
+      ? (responseData?.pagination ?? data.meta ?? null)
+      : (data.meta ?? null)
     : null;
+
+  const normalizedExternalProducts = externalProductItems.map(
+    adaptExternalProductToInventory,
+  );
+  const hasResponse = data !== undefined;
 
   return {
     data: normalizedExternalProducts,
     isLoading,
-    isError: isError || !isSuccess,
+    isError: isError || (hasResponse && !isSuccess),
     page,
     perPage,
     maxPage: pagination?.max_page ?? 1,

@@ -24,10 +24,10 @@ import {
   DataTablePagination,
   DataTableToolbar,
 } from "@/components/shared/data-table";
-import { type Inventory } from "./internal/data/schema";
-import { SyncStatuses } from "./internal/data/data";
+import { type Inventory } from "./data/schema";
+import { SyncStatuses } from "./data/data";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { inventoryColumns as columns } from "./inventories-columns";
+import { inventoryColumns as columns } from "./internal-columns";
 import { cn } from "@/lib/utils";
 
 type DataTableProps = {

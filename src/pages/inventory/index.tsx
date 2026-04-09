@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
-import type { Inventory } from "@/components/inventory/data/schema";
+import type { Inventory } from "@/components/inventory/internal/data/schema";
 import { useAuthStore } from "@/stores/auth-store";
 import InventoryAlertsCard from "@/components/inventory/inventories-alerts";
 import { useInventory } from "@/hooks/use-inventory";
