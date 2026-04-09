@@ -46,14 +46,9 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
       const toastId = toast.loading('Masuk ke akun...');
       let signedInUserName = 'user';
 
-      console.log('result', result.status);
-      console.log('result', result);
       if (result && result.status) {
         const accessToken = result.data?.access_token ?? '';
         const refreshToken = result.data?.refresh_token ?? '';
-
-        console.log('Access Token:', accessToken);
-        console.log('Refresh Token:', refreshToken);
 
         auth.setAccessToken(accessToken);
         if (auth.setRefreshToken) auth.setRefreshToken(refreshToken);
