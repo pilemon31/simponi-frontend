@@ -1,4 +1,4 @@
-import { RolesActionDialog } from './roles-action-dialog';
+import { RolesMutateDrawer } from './roles-mutate-drawer';
 import { RolesDeleteDialog } from './roles-delete-dialog';
 import { useRoles } from './roles-provider';
 
@@ -6,7 +6,7 @@ export function RolesDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useRoles();
   return (
     <>
-      <RolesActionDialog
+      <RolesMutateDrawer
         key='roles-add'
         open={open === 'add'}
         onOpenChange={() => setOpen('add')}
@@ -14,7 +14,7 @@ export function RolesDialogs() {
 
       {currentRow && (
         <>
-          <RolesActionDialog
+          <RolesMutateDrawer
             key={`roles-edit-${currentRow.id}`}
             open={open === 'edit'}
             onOpenChange={() => {
