@@ -22,6 +22,7 @@ import type { Inventory } from "@/components/inventory/internal/data/schema";
 import { useAuthStore } from "@/stores/auth-store";
 import InventoryAlertsCard from "@/components/inventory/inventories-alerts";
 import { useInventory } from "@/hooks/use-inventory";
+import { useUpload } from "@/hooks/use-upload";
 import {
   createProduct,
   deleteProduct,
@@ -65,6 +66,11 @@ const getErrorMessage = (error: unknown, fallback: string) =>
 const InternalProductPage = () => {
   const user = useAuthStore((state) => state.auth.user);
   const { data, isLoading } = useInventory();
+  const {
+    uploadAsync,
+    isPending: isUploading,
+    reset: resetUpload,
+  } = useUpload();
   const queryClient = useQueryClient();
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -168,6 +174,37 @@ const InternalProductPage = () => {
     setEditOpen(true);
   };
 
+  const handleUploadCreateImage = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const selectedFiles = event.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) {
+      return;
+    }
+
+    const file = selectedFiles[0];
+
+    try {
+      const images = await uploadAsync([file]);
+      const firstImage = images[0];
+
+      if (!firstImage?.image_id) {
+        throw new Error("Upload succeeded but image ID is missing");
+      }
+
+      setCreateForm((prev) => ({
+        ...prev,
+        imageId: firstImage.image_id,
+      }));
+
+      toast.success("Image uploaded");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to upload image"));
+    } finally {
+      event.target.value = "";
+    }
+  };
+
   return (
     <>
       <Header>
@@ -215,7 +252,7 @@ const InternalProductPage = () => {
           <DialogHeader>
             <DialogTitle>Create Product</DialogTitle>
             <DialogDescription>
-              Fill product data. Use image ID from upload response.
+              Fill product data, upload image, then create product.
             </DialogDescription>
           </DialogHeader>
 
@@ -253,18 +290,16 @@ const InternalProductPage = () => {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="create-image-id">Image ID</Label>
+              <Label htmlFor="create-image-file">Image File</Label>
               <Input
-                id="create-image-id"
-                value={createForm.imageId}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    imageId: e.target.value,
-                  }))
-                }
+                id="create-image-file"
+                type="file"
+                accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
+                disabled={isUploading || createMutation.isPending}
+                onChange={handleUploadCreateImage}
               />
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="create-category-id">Category ID (optional)</Label>
               <Input
@@ -294,18 +329,28 @@ const InternalProductPage = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCreateOpen(false);
+                resetUpload();
+              }}>
               Cancel
             </Button>
             <Button
               disabled={
                 createMutation.isPending ||
+                isUploading ||
                 !createForm.name ||
                 !createForm.sku ||
                 !createForm.imageId
               }
               onClick={() => createMutation.mutate(createForm)}>
-              {createMutation.isPending ? "Creating..." : "Create"}
+              {isUploading
+                ? "Uploading image..."
+                : createMutation.isPending
+                  ? "Creating..."
+                  : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
