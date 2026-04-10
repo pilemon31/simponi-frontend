@@ -73,6 +73,13 @@ export type ProductStatsData = {
 
 export type ProductStatsResponse = SuccessResponse<ProductStatsData>;
 
+export type UploadImageData = {
+  image_id: string;
+  image_url: string;
+};
+
+export type UploadImageResponse = SuccessResponse<UploadImageData[]>;
+
 export type CreateProductRequest = {
   name: string;
   description?: string;
