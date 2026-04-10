@@ -2,6 +2,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/shared/data-table';
 import { type Role } from './data/schema';
+import { DataTableRowActions } from './data-table-row-actions';
 
 export const rolesColumns: ColumnDef<Role>[] = [
   {
@@ -69,5 +70,9 @@ export const rolesColumns: ColumnDef<Role>[] = [
         </div>
       );
     },
+  },
+  {
+    id: 'actions',
+    cell: DataTableRowActions,
   },
 ];

@@ -11,6 +11,7 @@ export const roles = Array.from({ length: 100 }, () => {
   ] as const;
 
   return {
+    id: faker.lorem.sentence({ min: 1, max: 5 }),
     name: faker.lorem.sentence({ min: 1, max: 5 }),
     permissions: faker.helpers.shuffle(permissions),
   };
