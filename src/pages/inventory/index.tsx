@@ -1,100 +1,178 @@
-import { InventoriesTable } from "@/components/inventory/inventories-table";
-import InventoryStatsCard from "@/components/inventory/inventories-cards";
+import InventoryAlertsCard from "@/components/inventory/internal/internal-alerts";
+import InventoryStatsCard from "@/components/inventory/internal/internal-cards";
+import { InternalDialogs } from "@/components/inventory/internal/internal-dialog";
+import {
+  InventoryProvider,
+  useInventoryDialogs,
+} from "@/components/inventory/internal/internal-provider";
+import { InternalPrimaryButtons } from "@/components/inventory/internal/internal-primary-buttons";
+import { InventoriesTable } from "@/components/inventory/internal/internal-table";
 import { ConfigDrawer } from "@/components/shared/config-drawer";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { ProfileDropdown } from "@/components/shared/profile-dropdown";
 import { Search } from "@/components/shared/search";
 import { ThemeSwitch } from "@/components/shared/theme-switcher";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Header } from "@/layouts/header";
-import { Main } from "@/layouts/main";
-import type { Inventory } from "@/components/inventory/internal/data/schema";
-import { useAuthStore } from "@/stores/auth-store";
-import InventoryAlertsCard from "@/components/inventory/inventories-alerts";
 import { useInventory } from "@/hooks/use-inventory";
 import { useUpload } from "@/hooks/use-upload";
+import { Header } from "@/layouts/header";
+import { Main } from "@/layouts/main";
 import {
   createProduct,
   deleteProduct,
+  getProductByID,
   updateProduct,
 } from "@/services/product.service";
+import { useAuthStore } from "@/stores/auth-store";
+import type { ProductCategoryData } from "@/types/product.type";
+import type { ErrorResponse } from "@/types/response.type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
+import { resolveImageUrl } from "@/lib/media";
 
-type CreateFormState = {
-  name: string;
-  sku: string;
-  stock: string;
-  imageId: string;
-  categoryId: string;
-  description: string;
-};
+const INTERNAL_CATEGORIES: ProductCategoryData[] = [
+  {
+    id: "a1b2c3d4-0001-4000-8000-000000000001",
+    name: "Electronics",
+    created_at: "2024-01-01T00:00:00Z",
+  },
+  {
+    id: "a1b2c3d4-0001-4000-8000-000000000002",
+    name: "Fashion",
+    created_at: "2024-01-01T00:00:00Z",
+  },
+  {
+    id: "a1b2c3d4-0001-4000-8000-000000000003",
+    name: "Health & Beauty",
+    created_at: "2024-01-01T00:00:00Z",
+  },
+  {
+    id: "a1b2c3d4-0001-4000-8000-000000000004",
+    name: "Home & Living",
+    created_at: "2024-01-01T00:00:00Z",
+  },
+];
 
-type EditFormState = {
-  id: string;
-  name: string;
-  sku: string;
-  stock: string;
-  categoryId: string;
-  description: string;
-};
+function InternalPageContent() {
+  const { data, isLoading } = useInventory();
+  const { setCurrentRow, setOpen } = useInventoryDialogs();
 
-const initialCreateForm: CreateFormState = {
-  name: "",
-  sku: "",
-  stock: "0",
-  imageId: "",
-  categoryId: "",
-  description: "",
-};
+  const handleOpenEdit = async (item: (typeof data)[number]) => {
+    const productDetailResponse = await getProductByID(item.id);
 
-const getErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof Error ? error.message : fallback;
+    if (productDetailResponse.status !== true) {
+      // Fallback to row data when detail fetch fails.
+      setCurrentRow(item);
+      setOpen("edit");
+      return;
+    }
+
+    const detail = productDetailResponse.data;
+
+    setCurrentRow({
+      ...item,
+      name: detail.name,
+      sku: detail.sku,
+      stock: detail.stock,
+      description: detail.description ?? "",
+      category: detail.category
+        ? {
+            id: detail.category.id,
+            name: detail.category.name,
+          }
+        : null,
+      imageUrl: resolveImageUrl(detail.images?.[0]?.image_url),
+    });
+    setOpen("edit");
+  };
+
+  return (
+    <Main className="flex flex-1 flex-col gap-4 sm:gap-6">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Internal Products
+          </h2>
+          <p className="text-muted-foreground">
+            Centralized inventory management and mapping status across platforms
+          </p>
+        </div>
+        <InternalPrimaryButtons />
+      </div>
+
+      <InventoryStatsCard />
+      <InventoryAlertsCard />
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
+          Loading internal products...
+        </div>
+      ) : (
+        <InventoriesTable
+          data={data}
+          onEdit={handleOpenEdit}
+          onDelete={(item) => {
+            setCurrentRow(item);
+            setOpen("delete");
+          }}
+        />
+      )}
+    </Main>
+  );
+}
 
 const InternalProductPage = () => {
   const user = useAuthStore((state) => state.auth.user);
-  const { data, isLoading } = useInventory();
-  const {
-    uploadAsync,
-    isPending: isUploading,
-    reset: resetUpload,
-  } = useUpload();
   const queryClient = useQueryClient();
+  const { data: inventoryData } = useInventory();
+  const { uploadAsync, isPending: isUploading } = useUpload();
 
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<Inventory | null>(null);
-  const [createForm, setCreateForm] =
-    useState<CreateFormState>(initialCreateForm);
-  const [editForm, setEditForm] = useState<EditFormState | null>(null);
+  const categoriesFromProducts = inventoryData
+    .map((product) => product.category)
+    .filter((category): category is NonNullable<typeof category> =>
+      Boolean(category),
+    )
+    .map((category) => ({ id: category.id, name: category.name }));
 
-  const userData = {
-    name: user?.name ?? "john",
-    email: user?.email ?? "email@admin.com",
-    avatar: "/avatars/shadcn.jpg",
+  const categories = [
+    ...categoriesFromProducts,
+    ...INTERNAL_CATEGORIES.map((category) => ({
+      id: category.id,
+      name: category.name,
+    })),
+  ].filter(
+    (category, index, list) =>
+      index === list.findIndex((item) => item.id === category.id),
+  );
+
+  const mutateSuccess = async (message: string) => {
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
+    await queryClient.invalidateQueries({ queryKey: ["product-stats"] });
+    toast.success(message);
+  };
+
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return (error as ErrorResponse)?.error || fallback;
   };
 
   const createMutation = useMutation({
-    mutationFn: async (payload: CreateFormState) => {
+    mutationFn: async (payload: {
+      name: string;
+      sku: string;
+      stock: number;
+      imageId: string;
+      categoryId?: string;
+      description?: string;
+    }) => {
       const response = await createProduct({
         name: payload.name,
         sku: payload.sku,
-        stock: Number(payload.stock),
-        image_id: payload.imageId,
-        description: payload.description || undefined,
+        stock: payload.stock,
+        image_id: payload.imageId || "",
         category_id: payload.categoryId || null,
+        description: payload.description || undefined,
       });
 
       if (response.status !== true) {
@@ -104,11 +182,7 @@ const InternalProductPage = () => {
       return response;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["products"] });
-      await queryClient.invalidateQueries({ queryKey: ["product-stats"] });
-      toast.success("Product created");
-      setCreateOpen(false);
-      setCreateForm(initialCreateForm);
+      await mutateSuccess("Product created");
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Failed to create product"));
@@ -116,13 +190,20 @@ const InternalProductPage = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (payload: EditFormState) => {
+    mutationFn: async (payload: {
+      id: string;
+      name: string;
+      sku: string;
+      stock: number;
+      categoryId?: string;
+      description?: string;
+    }) => {
       const response = await updateProduct(payload.id, {
         name: payload.name,
         sku: payload.sku,
-        stock: Number(payload.stock),
-        description: payload.description || undefined,
+        stock: payload.stock,
         category_id: payload.categoryId || null,
+        description: payload.description || undefined,
       });
 
       if (response.status !== true) {
@@ -132,11 +213,7 @@ const InternalProductPage = () => {
       return response;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["products"] });
-      await queryClient.invalidateQueries({ queryKey: ["product-stats"] });
-      toast.success("Product updated");
-      setEditOpen(false);
-      setEditForm(null);
+      await mutateSuccess("Product updated");
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Failed to update product"));
@@ -146,67 +223,75 @@ const InternalProductPage = () => {
   const deleteMutation = useMutation({
     mutationFn: async (productId: string) => {
       const response = await deleteProduct(productId);
+
       if (response.status !== true) {
         throw new Error(response.message || "Failed to delete product");
       }
+
       return response;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["products"] });
-      await queryClient.invalidateQueries({ queryKey: ["product-stats"] });
-      toast.success("Product deleted");
-      setDeleteTarget(null);
+      await mutateSuccess("Product deleted");
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "Failed to delete product"));
     },
   });
 
-  const handleOpenEdit = (item: Inventory) => {
-    setEditForm({
-      id: item.id,
-      name: item.name,
-      sku: item.sku,
-      stock: String(item.stock),
-      categoryId: item.category?.id ?? "",
-      description: item.description ?? "",
-    });
-    setEditOpen(true);
-  };
-
-  const handleUploadCreateImage = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const selectedFiles = event.target.files;
-    if (!selectedFiles || selectedFiles.length === 0) {
-      return;
-    }
-
-    const file = selectedFiles[0];
-
-    try {
-      const images = await uploadAsync([file]);
-      const firstImage = images[0];
-
-      if (!firstImage?.image_id) {
-        throw new Error("Upload succeeded but image ID is missing");
-      }
-
-      setCreateForm((prev) => ({
-        ...prev,
-        imageId: firstImage.image_id,
-      }));
-
-      toast.success("Image uploaded");
-    } catch (error) {
-      toast.error(getErrorMessage(error, "Failed to upload image"));
-    } finally {
-      event.target.value = "";
-    }
+  const userData = {
+    name: user?.name ?? "john",
+    email: user?.email ?? "email@admin.com",
+    avatar: "/avatars/shadcn.jpg",
   };
 
   return (
-    <>
+    <InventoryProvider>
+      <InternalDialogs
+        categories={categories}
+        isMutating={
+          createMutation.isPending || updateMutation.isPending || isUploading
+        }
+        isDeleting={deleteMutation.isPending}
+        onCreate={async (values) => {
+          if (!values.imageFile) {
+            toast.error("Product image is required for creating product");
+            return false;
+          }
+
+          const uploadedImages = await uploadAsync([values.imageFile]);
+          const firstImage = uploadedImages[0];
+
+          if (!firstImage?.image_id) {
+            toast.error("Upload succeeded but image ID is missing");
+            return false;
+          }
+
+          await createMutation.mutateAsync({
+            name: values.name,
+            sku: values.sku,
+            stock: values.stock,
+            imageId: firstImage.image_id,
+            categoryId: values.categoryId,
+            description: values.description,
+          });
+          return true;
+        }}
+        onEdit={async (row, values) => {
+          await updateMutation.mutateAsync({
+            id: row.id,
+            name: values.name,
+            sku: values.sku,
+            stock: values.stock,
+            categoryId: values.categoryId,
+            description: values.description,
+          });
+
+          return true;
+        }}
+        onDelete={async (row) => {
+          await deleteMutation.mutateAsync(row.id);
+        }}
+      />
       <Header>
         <Search />
         <div className="ms-auto flex items-center space-x-4">
@@ -215,266 +300,8 @@ const InternalProductPage = () => {
           <ProfileDropdown user={userData} />
         </div>
       </Header>
-
-      <Main className="flex flex-1 flex-col gap-4 sm:gap-6">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Internal Products
-            </h2>
-            <p className="text-muted-foreground">
-              Manage your internal product catalog and central stock
-            </p>
-          </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="size-4" />
-            Add Product
-          </Button>
-        </div>
-
-        <InventoryStatsCard />
-        <InventoryAlertsCard />
-        {isLoading ? (
-          <div className="flex items-center justify-center py-10 text-muted-foreground text-sm">
-            Loading products...
-          </div>
-        ) : (
-          <InventoriesTable
-            data={data}
-            onEdit={handleOpenEdit}
-            onDelete={setDeleteTarget}
-          />
-        )}
-      </Main>
-
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create Product</DialogTitle>
-            <DialogDescription>
-              Fill product data, upload image, then create product.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-3">
-            <div className="grid gap-2">
-              <Label htmlFor="create-name">Name</Label>
-              <Input
-                id="create-name"
-                value={createForm.name}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, name: e.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="create-sku">SKU</Label>
-              <Input
-                id="create-sku"
-                value={createForm.sku}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, sku: e.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="create-stock">Stock</Label>
-              <Input
-                id="create-stock"
-                type="number"
-                min={0}
-                value={createForm.stock}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, stock: e.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="create-image-file">Image File</Label>
-              <Input
-                id="create-image-file"
-                type="file"
-                accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
-                disabled={isUploading || createMutation.isPending}
-                onChange={handleUploadCreateImage}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="create-category-id">Category ID (optional)</Label>
-              <Input
-                id="create-category-id"
-                value={createForm.categoryId}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    categoryId: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="create-description">Description (optional)</Label>
-              <Input
-                id="create-description"
-                value={createForm.description}
-                onChange={(e) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setCreateOpen(false);
-                resetUpload();
-              }}>
-              Cancel
-            </Button>
-            <Button
-              disabled={
-                createMutation.isPending ||
-                isUploading ||
-                !createForm.name ||
-                !createForm.sku ||
-                !createForm.imageId
-              }
-              onClick={() => createMutation.mutate(createForm)}>
-              {isUploading
-                ? "Uploading image..."
-                : createMutation.isPending
-                  ? "Creating..."
-                  : "Create"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={editOpen && !!editForm}
-        onOpenChange={(open) => {
-          setEditOpen(open);
-          if (!open) {
-            setEditForm(null);
-          }
-        }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update Product</DialogTitle>
-            <DialogDescription>
-              Update selected internal product data.
-            </DialogDescription>
-          </DialogHeader>
-
-          {editForm ? (
-            <div className="grid gap-3">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-name">Name</Label>
-                <Input
-                  id="edit-name"
-                  value={editForm.name}
-                  onChange={(e) =>
-                    setEditForm((prev) =>
-                      prev ? { ...prev, name: e.target.value } : prev,
-                    )
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-sku">SKU</Label>
-                <Input
-                  id="edit-sku"
-                  value={editForm.sku}
-                  onChange={(e) =>
-                    setEditForm((prev) =>
-                      prev ? { ...prev, sku: e.target.value } : prev,
-                    )
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-stock">Stock</Label>
-                <Input
-                  id="edit-stock"
-                  type="number"
-                  min={0}
-                  value={editForm.stock}
-                  onChange={(e) =>
-                    setEditForm((prev) =>
-                      prev ? { ...prev, stock: e.target.value } : prev,
-                    )
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-category-id">Category ID (optional)</Label>
-                <Input
-                  id="edit-category-id"
-                  value={editForm.categoryId}
-                  onChange={(e) =>
-                    setEditForm((prev) =>
-                      prev ? { ...prev, categoryId: e.target.value } : prev,
-                    )
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-description">Description (optional)</Label>
-                <Input
-                  id="edit-description"
-                  value={editForm.description}
-                  onChange={(e) =>
-                    setEditForm((prev) =>
-                      prev ? { ...prev, description: e.target.value } : prev,
-                    )
-                  }
-                />
-              </div>
-            </div>
-          ) : null}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              disabled={updateMutation.isPending || !editForm}
-              onClick={() => {
-                if (editForm) {
-                  updateMutation.mutate(editForm);
-                }
-              }}>
-              {updateMutation.isPending ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteTarget(null);
-          }
-        }}
-        title="Delete Product"
-        desc={`Delete ${deleteTarget?.name ?? "this product"}? This action cannot be undone.`}
-        confirmText={deleteMutation.isPending ? "Deleting..." : "Delete"}
-        destructive
-        isLoading={deleteMutation.isPending}
-        handleConfirm={() => {
-          if (deleteTarget) {
-            deleteMutation.mutate(deleteTarget.id);
-          }
-        }}
-      />
-    </>
+      <InternalPageContent />
+    </InventoryProvider>
   );
 };
 

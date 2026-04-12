@@ -21,5 +21,4 @@ export const inventoryMappingSchema = z.object({
   }),
 });
 
-export type ExternalProduct = z.infer<typeof externalProductSchema>;
 export type Inventory = z.infer<typeof inventoryMappingSchema>;
