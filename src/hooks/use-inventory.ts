@@ -1,10 +1,12 @@
 import { adaptProductToInventory } from "@/components/inventory/internal/data/adapter";
 import type { Inventory } from "@/components/inventory/internal/data/schema";
 import { getProducts, getProductStats } from "@/services/product.service";
+import { uploadProductImages } from "@/services/upload.service";
 import type { ProductListItem, ProductStatsData } from "@/types/product.type";
-import type { Pagination } from "@/types/response.type";
-import { useQuery } from "@tanstack/react-query";
+import type { ErrorResponse, Pagination } from "@/types/response.type";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type UseInventoryResult = {
   data: Inventory[];
@@ -80,3 +82,20 @@ export function useProductStats() {
 
   return { stats, isLoading, isError };
 }
+
+export const useUploadProductImage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: File[]) => uploadProductImages(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+
+    onError: (error: unknown) => {
+      toast.error(
+        (error as ErrorResponse)?.error || "Gagal mengupload gambar produk",
+      );
+    },
+  });
+};

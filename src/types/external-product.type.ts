@@ -5,6 +5,7 @@ export type ExternalProductItem = {
   image?: string;
   product_name: string;
   platform: string;
+  store_platform_name?: string;
   price: number;
   created_at: string;
   updated_at: string;

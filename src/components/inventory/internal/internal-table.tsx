@@ -89,7 +89,7 @@ export function InventoriesTable({ data, onEdit, onDelete }: DataTableProps) {
       )}>
       <DataTableToolbar
         table={table}
-        searchPlaceholder="Filter by activity or ID..."
+        searchPlaceholder="Filter by product name or SKU..."
         filters={[
           {
             columnId: "status",
