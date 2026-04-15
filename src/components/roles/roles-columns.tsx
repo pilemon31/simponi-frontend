@@ -1,7 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/shared/data-table';
-import { type Role } from './data/schema';
+import { type Permissions, type Role } from './data/schema';
 import { DataTableRowActions } from './data-table-row-actions';
 
 export const rolesColumns: ColumnDef<Role>[] = [
@@ -56,11 +56,12 @@ export const rolesColumns: ColumnDef<Role>[] = [
       tdClassName: 'ps-4',
     },
     cell: ({ row }) => {
-      const permissions: string[] = row.getValue('permissions');
+      const permissions: Permissions[] = row.getValue('permissions');
       const capitalizedPermissions = permissions
         .map(
           (permission) =>
-            permission.charAt(0).toUpperCase() + permission.slice(1),
+            permission.module.charAt(0).toUpperCase() +
+            permission.module.slice(1),
         )
         .join(', ');
 

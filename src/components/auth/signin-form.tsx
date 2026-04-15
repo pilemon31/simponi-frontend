@@ -47,11 +47,15 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
       let signedInUserName = 'user';
 
       if ('status' in result && result.status) {
-        const accessToken = result.data?.access_token ?? '';
-        const refreshToken = result.data?.refresh_token ?? '';
+        const accessToken = result.data?.access_token;
+        const refreshToken = result.data?.refresh_token;
+
+        if (!accessToken || !refreshToken) {
+          return;
+        }
 
         auth.setAccessToken(accessToken);
-        if (auth.setRefreshToken) auth.setRefreshToken(refreshToken);
+        auth.setRefreshToken(refreshToken);
 
         try {
           const profile = await getProfileMutation.mutateAsync();

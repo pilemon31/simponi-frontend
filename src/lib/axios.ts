@@ -50,8 +50,11 @@ axiosConfig.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401) {
-      const { refreshToken, setAccessToken, reset } =
-        useAuthStore.getState().auth;
+      const { setAccessToken, reset } = useAuthStore.getState().auth;
+
+      // Get refreshToken from localStorage
+      let refreshToken: string | null = null;
+      refreshToken = localStorage.getItem('REFRESH_TOKEN');
 
       // If this request already retried, avoid infinite loop
       if ((originalRequest as any)?._retry) {
