@@ -20,6 +20,8 @@ import { RootLayout } from './layouts/root-layout';
 import InternalProductPage from './pages/inventory';
 import DisplayProductPage from './pages/display';
 import UserManagementPage from './pages/user_management';
+import RolePage from './pages/roles';
+import InventoryLogPage from './pages/inventory_log';
 
 const router = createBrowserRouter([
   {
@@ -57,8 +59,16 @@ const router = createBrowserRouter([
                 element: <ActivityPage />,
               },
               {
+                path: '/inventory-log',
+                element: <InventoryLogPage />,
+              },
+              {
                 path: '/users',
                 element: <UserManagementPage />,
+              },
+              {
+                path: '/roles',
+                element: <RolePage />,
               },
             ],
           },

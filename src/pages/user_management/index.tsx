@@ -10,6 +10,8 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import UserCardsSkeleton from '@/components/users/user-cards-skeleton';
+import { UsersTable } from '@/components/users/users-table';
+import { users } from '@/components/users/data/users';
 
 const UserManagementPage = () => {
   const user = useAuthStore((state) => state.auth.user);
@@ -54,6 +56,8 @@ const UserManagementPage = () => {
             </p>
           </div>
         </div>
+
+        <UsersTable data={users} />
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {isLoading || isFetching ? (

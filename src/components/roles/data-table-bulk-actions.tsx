@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/shared/data-table';
-import { type Activity } from './data/schema';
+import { type Role } from './data/schema';
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;
@@ -22,11 +22,9 @@ export function DataTableBulkActions<TData>({
   const selectedRows = table.getFilteredSelectedRowModel().rows;
 
   const handleBulkExport = () => {
-    const selectedActivities = selectedRows.map(
-      (row) => row.original as Activity,
-    );
+    const selectedActivities = selectedRows.map((row) => row.original as Role);
     toast.promise(sleep(2000), {
-      loading: 'Exporting activities...',
+      loading: 'Exporting roles...',
       success: () => {
         table.resetRowSelection();
         return `Exported ${selectedActivities.length} activites${selectedActivities.length > 1 ? 's' : ''} to CSV.`;
@@ -38,23 +36,23 @@ export function DataTableBulkActions<TData>({
 
   return (
     <>
-      <BulkActionsToolbar table={table} entityName="task">
+      <BulkActionsToolbar table={table} entityName='task'>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="outline"
-              size="icon"
+              variant='outline'
+              size='icon'
               onClick={() => handleBulkExport()}
-              className="size-8"
-              aria-label="Export activities"
-              title="Export activites"
+              className='size-8'
+              aria-label='Export activities'
+              title='Export activites'
             >
               <Download />
-              <span className="sr-only">Export activity</span>
+              <span className='sr-only'>Export Role</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Export activity</p>
+            <p>Export Role</p>
           </TooltipContent>
         </Tooltip>
       </BulkActionsToolbar>
