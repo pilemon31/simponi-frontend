@@ -1,21 +1,21 @@
-import axiosConfig from "@/lib/axios";
+import axiosConfig from '@/lib/axios';
 import type {
   CreateExternalProductRequest,
   ExternalProductDetailResponse,
   ExternalProductListResponse,
   ExternalProductItem,
   UpdateExternalProductRequest,
-} from "@/types/external-product.type";
-import type { ErrorResponse } from "@/types/response.type";
-import axios, { AxiosError } from "axios";
+} from '@/types/external-product.type';
+import type { ErrorResponse } from '@/types/response.type';
+import axios, { AxiosError } from 'axios';
 
 const fallbackError = (
-  message = "An unexpected error occurred",
+  message = 'An unexpected error occurred',
 ): ErrorResponse => ({
   status: false,
   message,
   timestamp: new Date().toISOString(),
-  error: "Unknown error",
+  error: 'Unknown error',
 });
 
 export const getExternalProducts = async (
@@ -23,7 +23,7 @@ export const getExternalProducts = async (
   perPage: number = 10,
 ): Promise<ExternalProductListResponse | ErrorResponse> => {
   try {
-    const response = await axiosConfig.get("/external-products", {
+    const response = await axiosConfig.get('/external-products', {
       params: { page, per_page: perPage },
     });
     return response.data as ExternalProductListResponse;
@@ -85,7 +85,7 @@ export const createExternalProduct = async (
   data: CreateExternalProductRequest,
 ): Promise<ExternalProductDetailResponse | ErrorResponse> => {
   try {
-    const response = await axiosConfig.post("/external-products", data);
+    const response = await axiosConfig.post('/external-products', data);
     return response.data as ExternalProductDetailResponse;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {

@@ -14,7 +14,6 @@ import { RolesDialogs } from '@/components/roles/roles-dialog';
 import { useCallback, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useRoles } from '@/hooks/use-roles';
-import type { Role } from '@/components/roles/data/schema';
 
 const RolePage = () => {
   const user = useAuthStore((state) => state.auth.user);
@@ -72,19 +71,19 @@ const RolePage = () => {
         <RolesDialogs />
         <Header>
           <Search />
-          <div className='ms-auto flex items-center space-x-4'>
+          <div className="ms-auto flex items-center space-x-4">
             <ThemeSwitch />
             <ConfigDrawer />
             <ProfileDropdown user={userData} />
           </div>
         </Header>
-        <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
-          <div className='flex flex-wrap items-end justify-between gap-2'>
+        <Main className="flex flex-1 flex-col gap-4 sm:gap-6">
+          <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
-              <h2 className='text-2xl font-bold tracking-tight'>
+              <h2 className="text-2xl font-bold tracking-tight">
                 Roles and Permissions
               </h2>
-              <p className='text-muted-foreground'>
+              <p className="text-muted-foreground">
                 Here&apos;s a list of your system roles and permissions
               </p>
             </div>

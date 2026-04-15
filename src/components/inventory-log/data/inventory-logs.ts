@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 faker.seed(12345);
 
 export const inventoryLogs = Array.from({ length: 100 }, () => {
-  const source = ['shopee', 'tiktok-shop'] as const;
+  const source = ['shopee', 'tiktok', 'manual'] as const;
 
   return {
     id: `IVL-${faker.number.int({ min: 1000, max: 9999 })}`,

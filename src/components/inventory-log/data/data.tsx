@@ -1,4 +1,4 @@
-import { ShoppingBag, Music2 } from 'lucide-react';
+import { ShoppingBag, Music2, Store } from 'lucide-react';
 
 export const Sources = [
   {
@@ -8,7 +8,12 @@ export const Sources = [
   },
   {
     label: 'TikTok Shop',
-    value: 'tiktok-shop' as const,
+    value: 'tiktok' as const,
     icon: Music2,
+  },
+  {
+    label: 'Manual',
+    value: 'manual' as const,
+    icon: Store,
   },
 ];
