@@ -34,7 +34,9 @@ export const inventoryLogsColumns: ColumnDef<InventoryLog>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="ID" />
     ),
-    cell: ({ row }) => <div className="w-20">{row.getValue('id')}</div>,
+    cell: ({ row }) => (
+      <div className="w-20 truncate">{row.getValue('id')}</div>
+    ),
     enableSorting: false,
     enableHiding: false,
   },

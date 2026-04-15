@@ -25,7 +25,7 @@ import {
   DataTableToolbar,
 } from '@/components/shared/data-table';
 import { type InventoryLog } from './data/schema';
-import { DataTableBulkActions } from './data/data-table-bulks';
+import { DataTableBulkActions } from './data-table-bulks';
 import { inventoryLogsColumns as columns } from './inventory-log-columns';
 import { cn } from '@/lib/utils';
 import { Sources } from './data/data';
