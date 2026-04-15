@@ -13,18 +13,20 @@ export type ProductImageData = {
 
 export type ExternalProductData = {
   id: string;
-  product_id: string | null;
-  store_id: string | null;
-  external_product_id: string;
-  external_model_id: string;
+  image_url: string;
+  product_name: string;
+  platform: string;
   price: number;
+  created_at: string;
+  updated_at: string;
 };
 
 export type ProductStatus =
   | "Mapped"
   | "Unmapped"
   | "Low Stock"
-  | "Out of Stock";
+  | "Out of Stock"
+  | "Out of stock";
 
 export type ProductData = {
   id: string;
@@ -45,16 +47,18 @@ export type ProductListItem = {
   sku: string;
   stock: number;
   category: ProductCategoryData | null;
-  images: ProductImageData[];
-  external_products: ExternalProductData[];
+  images?: ProductImageData[];
+  external_products?: ExternalProductData[];
   status: ProductStatus;
   created_at: string;
 };
 
-export type ProductListResponse = SuccessResponse<{
-  data: ProductListItem[];
-  pagination: Pagination;
-}>;
+export type ProductListResponse =
+  | SuccessResponse<{
+      data: ProductListItem[];
+      pagination: Pagination;
+    }>
+  | SuccessResponse<ProductListItem[]>;
 
 export type ProductDetailResponse = SuccessResponse<ProductData>;
 
@@ -69,11 +73,19 @@ export type ProductStatsData = {
 
 export type ProductStatsResponse = SuccessResponse<ProductStatsData>;
 
+export type UploadImageData = {
+  image_id: string;
+  image_url: string;
+};
+
+export type UploadImageResponse = SuccessResponse<UploadImageData[]>;
+
 export type CreateProductRequest = {
   name: string;
   description?: string;
   sku: string;
   stock: number;
+  image_id: string;
   category_id?: string | null;
 };
 
@@ -87,6 +99,6 @@ export type UpdateProductRequest = {
 
 export type UpdateStockRequest = {
   change: number;
-  source: number;
+  source: "shopee" | "tiktok" | "manual";
   note?: string;
 };

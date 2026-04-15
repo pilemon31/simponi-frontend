@@ -1,9 +1,12 @@
-import { adaptProductToInventory } from "@/components/inventory/data/adapter";
-import type { Inventory } from "@/components/inventory/data/schema";
+import { adaptProductToInventory } from "@/components/inventory/internal/data/adapter";
+import type { Inventory } from "@/components/inventory/internal/data/schema";
 import { getProducts, getProductStats } from "@/services/product.service";
-import type { ProductStatsData } from "@/types/product.type";
-import { useQuery } from "@tanstack/react-query";
+import { uploadProductImages } from "@/services/upload.service";
+import type { ProductListItem, ProductStatsData } from "@/types/product.type";
+import type { ErrorResponse, Pagination } from "@/types/response.type";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type UseInventoryResult = {
   data: Inventory[];
@@ -14,7 +17,7 @@ type UseInventoryResult = {
   maxPage: number;
   totalCount: number;
   setPage: (page: number) => void;
-  setPerPage: (page: number) => void;
+  setPerPage: (perPage: number) => void;
   refetch: () => void;
 };
 
@@ -28,13 +31,27 @@ export const useInventory = (): UseInventoryResult => {
   });
 
   const isSuccess = data?.status === true;
-  const products = isSuccess ? data.data.data.map(adaptProductToInventory) : [];
-  const pagination = isSuccess ? data.data.pagination : null;
+  const responseData = isSuccess ? data.data : null;
+
+  const productItems: ProductListItem[] = Array.isArray(responseData)
+    ? responseData
+    : Array.isArray(responseData?.data)
+      ? responseData.data
+      : [];
+
+  const pagination: Pagination | null = isSuccess
+    ? !Array.isArray(responseData)
+      ? (responseData?.pagination ?? data.meta ?? null)
+      : (data.meta ?? null)
+    : null;
+
+  const products = productItems.map(adaptProductToInventory);
+  const hasResponse = data !== undefined;
 
   return {
     data: products,
     isLoading,
-    isError: isError || isSuccess,
+    isError: isError || (hasResponse && !isSuccess),
     page,
     perPage,
     maxPage: pagination?.max_page ?? 1,
@@ -51,16 +68,34 @@ export function useProductStats() {
     queryFn: getProductStats,
   });
 
-  const stats: ProductStatsData = data?.status
-    ? data.data
-    : {
-        total_products: 0,
-        total_skus: 0,
-        stock_units: 0,
-        low_stock: 0,
-        out_of_stock: 0,
-        unsynced: 0,
-      };
+  const stats: ProductStatsData =
+    data?.status === true
+      ? data.data
+      : {
+          total_products: 0,
+          total_skus: 0,
+          stock_units: 0,
+          low_stock: 0,
+          out_of_stock: 0,
+          unsynced: 0,
+        };
 
   return { stats, isLoading, isError };
 }
+
+export const useUploadProductImage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: File[]) => uploadProductImages(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+
+    onError: (error: unknown) => {
+      toast.error(
+        (error as ErrorResponse)?.error || "Gagal mengupload gambar produk",
+      );
+    },
+  });
+};

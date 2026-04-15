@@ -38,19 +38,19 @@ export function DataTableBulkActions<TData>({
 
   return (
     <>
-      <BulkActionsToolbar table={table} entityName='task'>
+      <BulkActionsToolbar table={table} entityName="task">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant='outline'
-              size='icon'
+              variant="outline"
+              size="icon"
               onClick={() => handleBulkExport()}
-              className='size-8'
-              aria-label='Export activities'
-              title='Export activites'
+              className="size-8"
+              aria-label="Export activities"
+              title="Export activites"
             >
               <Download />
-              <span className='sr-only'>Export activity</span>
+              <span className="sr-only">Export activity</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>

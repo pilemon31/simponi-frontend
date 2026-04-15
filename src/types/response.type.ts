@@ -2,7 +2,7 @@ export type SuccessResponse<T = unknown> = {
   meta?: Pagination;
   status: true;
   message: string;
-  timestamp: string;
+  timestamp?: string;
   data: T;
 };
 

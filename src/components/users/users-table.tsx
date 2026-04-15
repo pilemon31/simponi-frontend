@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   type ColumnFiltersState,
   type SortingState,
@@ -11,7 +11,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table";
+} from '@tanstack/react-table';
 import {
   Table,
   TableBody,
@@ -19,27 +19,27 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DataTablePagination,
   DataTableToolbar,
-} from "@/components/shared/data-table";
-import { type Inventory } from "./data/schema";
-import { SyncStatuses } from "./data/data";
-import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { inventoryColumns as columns } from "./inventories-columns";
-import { cn } from "@/lib/utils";
+} from '@/components/shared/data-table';
+import { DataTableBulkActions } from './data-table-bulk-actions';
+import { cn } from '@/lib/utils';
+import type { User } from './data/schema';
+import { usersColumns as columns } from './users-columns';
+import { Roles, Status } from './data/data';
 
 type DataTableProps = {
-  data: Inventory[];
+  data: User[];
 };
 
-export function InventoriesTable({ data }: DataTableProps) {
+export function UsersTable({ data }: DataTableProps) {
   // Local UI-only states
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [globalFilter, setGlobalFilter] = useState('');
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
@@ -59,13 +59,11 @@ export function InventoriesTable({ data }: DataTableProps) {
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
     globalFilterFn: (row, _columnId, filterValue) => {
-      const productName = String(row.original.name).toLowerCase();
-      const internalSku = String(row.original.sku).toLowerCase();
+      const id = String(row.getValue('id')).toLowerCase();
+      const activity = String(row.getValue('activity')).toLowerCase();
       const searchValue = String(filterValue).toLowerCase();
 
-      return (
-        productName.includes(searchValue) || internalSku.includes(searchValue)
-      );
+      return id.includes(searchValue) || activity.includes(searchValue);
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -79,16 +77,22 @@ export function InventoriesTable({ data }: DataTableProps) {
     <div
       className={cn(
         'max-sm:has-[div[role="toolbar"]]:mb-16',
-        "flex flex-1 flex-col gap-4",
-      )}>
+        'flex flex-1 flex-col gap-4',
+      )}
+    >
       <DataTableToolbar
         table={table}
         searchPlaceholder="Filter by activity or ID..."
         filters={[
           {
-            columnId: "status",
-            title: "Status",
-            options: SyncStatuses,
+            columnId: 'status',
+            title: 'Status',
+            options: Status,
+          },
+          {
+            columnId: 'role_name',
+            title: 'Role',
+            options: Roles,
           },
         ]}
       />
@@ -117,7 +121,8 @@ export function InventoriesTable({ data }: DataTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}>
+                  data-state={row.getIsSelected() && 'selected'}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -132,7 +137,8 @@ export function InventoriesTable({ data }: DataTableProps) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center">
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>

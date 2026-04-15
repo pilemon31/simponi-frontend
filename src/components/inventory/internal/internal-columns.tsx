@@ -8,8 +8,16 @@ import {
   ShoppingCart,
   AlertTriangle,
   Image as ImageIcon,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const inventoryColumns: ColumnDef<Inventory>[] = [
   {
@@ -102,13 +110,13 @@ export const inventoryColumns: ColumnDef<Inventory>[] = [
           {tiktok && (
             <div className="flex items-center gap-1.5 text-blue-500">
               <Music className="size-3.5" />
-              <span className="font-mono">{tiktok.externalProductId}</span>
+              <span className="font-mono">{tiktok.id}</span>
             </div>
           )}
           {shopee && (
             <div className="flex items-center gap-1.5 text-orange-500">
               <ShoppingCart className="size-3.5" />
-              <span className="font-mono">{shopee.externalProductId}</span>
+              <span className="font-mono">{shopee.id}</span>
             </div>
           )}
         </div>
@@ -182,15 +190,39 @@ export const inventoryColumns: ColumnDef<Inventory>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Actions" />
     ),
-    cell: () => {
+    cell: ({ row, table }) => {
+      const rowData = row.original;
+      const meta = table.options.meta as
+        | {
+            onEdit?: (item: Inventory) => void;
+            onDelete?: (item: Inventory) => void;
+          }
+        | undefined;
+
       return (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-muted-foreground">
-          <MoreVertical className="size-4" />
-          <span className="sr-only">Open menu</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground">
+              <MoreVertical className="size-4" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => meta?.onEdit?.(rowData)}>
+              <Pencil className="size-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => meta?.onDelete?.(rowData)}>
+              <Trash2 className="size-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },

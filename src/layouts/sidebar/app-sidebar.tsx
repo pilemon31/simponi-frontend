@@ -17,6 +17,8 @@ export function AppSidebar() {
   const user = useAuthStore((state) => state.auth.user);
   const { dir } = useDirection();
 
+  console.log(user);
+
   const userData = {
     name: user?.name ?? 'john',
     email: user?.email ?? 'email@admin.com',

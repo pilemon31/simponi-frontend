@@ -1,12 +1,5 @@
 import { z } from "zod";
-
-export const externalProductSchema = z.object({
-  id: z.uuid(),
-  platform: z.enum(["tiktok", "shopee"]),
-  externalProductId: z.string(),
-  externalModelId: z.string().nullable(),
-  price: z.number(),
-});
+import { externalProductSchema } from "../../display/data/schema";
 
 export const inventoryMappingSchema = z.object({
   id: z.uuid(),
@@ -28,5 +21,4 @@ export const inventoryMappingSchema = z.object({
   }),
 });
 
-export type ExternalProduct = z.infer<typeof externalProductSchema>;
 export type Inventory = z.infer<typeof inventoryMappingSchema>;

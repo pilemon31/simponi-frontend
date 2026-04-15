@@ -8,17 +8,21 @@ import { SearchProvider } from './context/search-provider';
 import { ThemeProvider } from './context/theme-provider';
 import { TooltipProvider } from './components/ui/tooltip';
 import { Toaster } from 'sonner';
+import { AuthProvider } from './context/auth.provider';
 import AuthPage from './pages/auth';
 import ProtectedRoute from './layouts/middlewares/protected-route';
 import PublicRoute from './layouts/middlewares/public-route';
 import { AuthenticatedLayout } from './layouts/sidebar/authenticated-layout';
-import InventoryPage from './pages/inventory';
 import ActivityPage from './pages/activity';
 import { DirectionProvider } from './context/direction-provider';
 import { FontProvider } from './context/font-provider';
 import { Dashboard } from './pages/dashboard';
 import { RootLayout } from './layouts/root-layout';
-import VendorPage from './pages/vendor';
+import InternalProductPage from './pages/inventory';
+import DisplayProductPage from './pages/display';
+import UserManagementPage from './pages/user_management';
+import RolePage from './pages/roles';
+import InventoryLogPage from './pages/inventory_log';
 
 const router = createBrowserRouter([
   {
@@ -44,16 +48,28 @@ const router = createBrowserRouter([
                 element: <Dashboard />,
               },
               {
-                path: '/vendor',
-                element: <VendorPage />
+                path: '/inventory/internal',
+                element: <InternalProductPage />,
               },
               {
-                path: '/inventory',
-                element: <InventoryPage />,
+                path: '/inventory/display',
+                element: <DisplayProductPage />,
               },
               {
                 path: '/activity',
                 element: <ActivityPage />,
+              },
+              {
+                path: '/inventory-log',
+                element: <InventoryLogPage />,
+              },
+              {
+                path: '/users',
+                element: <UserManagementPage />,
+              },
+              {
+                path: '/roles',
+                element: <RolePage />,
               },
             ],
           },
@@ -70,11 +86,13 @@ ReactDOM.createRoot(root!).render(
     <Toaster></Toaster>
     <UseQueryContext>
       <SearchProvider>
-        <ThemeProvider defaultTheme='light'>
+        <ThemeProvider defaultTheme="light">
           <TooltipProvider>
             <DirectionProvider>
               <FontProvider>
-                <RouterProvider router={router} />
+                <AuthProvider>
+                  <RouterProvider router={router} />
+                </AuthProvider>
               </FontProvider>
             </DirectionProvider>
           </TooltipProvider>

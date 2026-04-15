@@ -14,4 +14,9 @@ export const SyncStatuses = [
     value: "Unmapped" as const,
     variant: "warning",
   },
+  {
+    label: "Out of Stock",
+    value: "Out of Stock" as const,
+    variant: "danger",
+  },
 ];

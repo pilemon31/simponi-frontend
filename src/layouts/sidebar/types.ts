@@ -19,10 +19,11 @@ type BaseNavItem = {
 type NavLink = BaseNavItem & {
   url: string;
   items?: never;
+  permission_id?: string;
 };
 
 type NavCollapsible = BaseNavItem & {
-  items: (BaseNavItem & { url: string })[];
+  items: (BaseNavItem & { url: string; permission_id?: string })[];
   url?: never;
 };
 

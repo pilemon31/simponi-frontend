@@ -4,10 +4,23 @@ import { getCookie, setCookie, removeCookie } from '@/lib/cookies';
 const ACCESS_TOKEN = 'ACCESS_TOKEN';
 const REFRESH_TOKEN = 'REFRESH_TOKEN';
 
+interface AuthPermission {
+  id: string;
+  name: string;
+  endpoint: string;
+  method: string;
+}
+
 interface AuthUser {
   id: string;
   email: string;
   name: string;
+  image_url: string;
+  role: {
+    id: string;
+    name: string;
+    permissions: AuthPermission[];
+  };
 }
 
 interface AuthState {
@@ -40,12 +53,11 @@ export const useAuthStore = create<AuthState>()((set) => {
           setCookie(ACCESS_TOKEN, accessToken);
           return { ...state, auth: { ...state.auth, accessToken } };
         }),
-      setRefreshToken: (refreshToken) => {
+      setRefreshToken: (refreshToken) =>
         set((state) => {
           setCookie(REFRESH_TOKEN, refreshToken);
           return { ...state, auth: { ...state.auth, refreshToken } };
-        });
-      },
+        }),
       resetAccessToken: () =>
         set((state) => {
           removeCookie(ACCESS_TOKEN);
