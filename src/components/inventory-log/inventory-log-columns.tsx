@@ -1,10 +1,10 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/shared/data-table';
-import { Modules, Actions } from './data/data';
-import { type Activity } from './data/schema';
+import { type InventoryLog } from './data/schema';
+import { Sources } from './data/data';
 
-export const activitiesColumns: ColumnDef<Activity>[] = [
+export const inventoryLogsColumns: ColumnDef<InventoryLog>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -39,65 +39,9 @@ export const activitiesColumns: ColumnDef<Activity>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'module',
+    accessorKey: 'product',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Module" />
-    ),
-    meta: { className: 'ps-1', tdClassName: 'ps-3' },
-    cell: ({ row }) => {
-      const module = Modules.find(
-        (module) => module.value === row.getValue('module'),
-      );
-
-      if (!module) {
-        return null;
-      }
-
-      return (
-        <div className="flex w-25 items-center gap-2">
-          {module.icon && (
-            <module.icon className="size-4 text-muted-foreground" />
-          )}
-          <span>{module.label}</span>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: 'action',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Action" />
-    ),
-    meta: { className: 'ps-1', tdClassName: 'ps-3' },
-    cell: ({ row }) => {
-      const action = Actions.find(
-        (action) => action.value === row.getValue('action'),
-      );
-
-      if (!action) {
-        return null;
-      }
-
-      return (
-        <div className="flex w-25 items-center gap-2">
-          {action.icon && (
-            <action.icon className="size-4 text-muted-foreground" />
-          )}
-          <span>{action.label}</span>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: 'message',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Message" />
+      <DataTableColumnHeader column={column} title="Product" />
     ),
     meta: {
       className: 'ps-1 max-w-0 w-2/3',
@@ -107,8 +51,70 @@ export const activitiesColumns: ColumnDef<Activity>[] = [
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.getValue('message')}
+            {row.getValue('product')}
           </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: 'change',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Change" />
+    ),
+    meta: {
+      className: 'ps-1 max-w-0 w-2/3',
+      tdClassName: 'ps-4',
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2 justify-center">
+          <span className="truncate font-normal">{row.getValue('change')}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: 'source',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Source" />
+    ),
+    meta: { className: 'ps-1', tdClassName: 'ps-3' },
+    cell: ({ row }) => {
+      const source = Sources.find(
+        (source) => source.value === row.getValue('source'),
+      );
+
+      if (!source) {
+        return null;
+      }
+
+      return (
+        <div className="flex w-25 items-center gap-2">
+          {source.icon && (
+            <source.icon className="size-4 text-muted-foreground" />
+          )}
+          <span>{source.label}</span>
+        </div>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+  },
+  {
+    accessorKey: 'note',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Note" />
+    ),
+    meta: {
+      className: 'ps-1 max-w-0 w-2/3',
+      tdClassName: 'ps-4',
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">{row.getValue('note')}</span>
         </div>
       );
     },

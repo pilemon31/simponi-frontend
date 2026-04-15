@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/shared/data-table';
-import { type Activity } from './data/schema';
+import type { InventoryLog } from './schema';
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;
@@ -23,13 +23,13 @@ export function DataTableBulkActions<TData>({
 
   const handleBulkExport = () => {
     const selectedActivities = selectedRows.map(
-      (row) => row.original as Activity,
+      (row) => row.original as InventoryLog,
     );
     toast.promise(sleep(2000), {
       loading: 'Exporting activities...',
       success: () => {
         table.resetRowSelection();
-        return `Exported ${selectedActivities.length} activites${selectedActivities.length > 1 ? 's' : ''} to CSV.`;
+        return `Exported ${selectedActivities.length} inventory logs to CSV.`;
       },
       error: 'Error',
     });
@@ -38,7 +38,7 @@ export function DataTableBulkActions<TData>({
 
   return (
     <>
-      <BulkActionsToolbar table={table} entityName="task">
+      <BulkActionsToolbar table={table} entityName="inventory log">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -46,15 +46,15 @@ export function DataTableBulkActions<TData>({
               size="icon"
               onClick={() => handleBulkExport()}
               className="size-8"
-              aria-label="Export activities"
-              title="Export activites"
+              aria-label="Export inventory logs"
+              title="Export inventory logs"
             >
               <Download />
-              <span className="sr-only">Export activity</span>
+              <span className="sr-only">Export Inventory Logs</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Export activity</p>
+            <p>Export inventory logs</p>
           </TooltipContent>
         </Tooltip>
       </BulkActionsToolbar>

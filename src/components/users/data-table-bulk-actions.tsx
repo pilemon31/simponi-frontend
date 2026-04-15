@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/shared/data-table';
-import { type Activity } from './data/schema';
+import type { User } from './data/schema';
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;
@@ -22,9 +22,7 @@ export function DataTableBulkActions<TData>({
   const selectedRows = table.getFilteredSelectedRowModel().rows;
 
   const handleBulkExport = () => {
-    const selectedActivities = selectedRows.map(
-      (row) => row.original as Activity,
-    );
+    const selectedActivities = selectedRows.map((row) => row.original as User);
     toast.promise(sleep(2000), {
       loading: 'Exporting activities...',
       success: () => {
@@ -50,11 +48,11 @@ export function DataTableBulkActions<TData>({
               title="Export activites"
             >
               <Download />
-              <span className="sr-only">Export activity</span>
+              <span className="sr-only">Export user</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Export activity</p>
+            <p>Export user</p>
           </TooltipContent>
         </Tooltip>
       </BulkActionsToolbar>

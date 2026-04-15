@@ -46,15 +46,19 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
       const toastId = toast.loading('Masuk ke akun...');
       let signedInUserName = 'user';
 
-      if ('status' in result && result.status) {
+      if (result && result.status) {
         const accessToken = result.data?.access_token ?? '';
         const refreshToken = result.data?.refresh_token ?? '';
 
         auth.setAccessToken(accessToken);
         if (auth.setRefreshToken) auth.setRefreshToken(refreshToken);
 
+        console.log('Auth after setting tokens:', auth);
+
         try {
           const profile = await getProfileMutation.mutateAsync();
+          console.log('Profile:', profile);
+          console.log('Auth:', auth);
 
           if (profile && profile.status) {
             auth.setUser(profile.data ?? null);
@@ -96,12 +100,12 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
       >
         <FormField
           control={form.control}
-          name='email'
+          name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Alamat Email</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input placeholder="name@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -109,17 +113,17 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
         />
         <FormField
           control={form.control}
-          name='password'
+          name="password"
           render={({ field }) => (
-            <FormItem className='relative'>
+            <FormItem className="relative">
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <PasswordInput placeholder='********' {...field} />
+                <PasswordInput placeholder="********" {...field} />
               </FormControl>
               <FormMessage />
               <Link
-                to='/forgot-password'
-                className='absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75'
+                to="/forgot-password"
+                className="absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75"
               >
                 Lupa password?
               </Link>
@@ -127,11 +131,11 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
           )}
         />
         <Button
-          className='cursor-pointer'
+          className="cursor-pointer"
           disabled={signInMutation.isPending || getProfileMutation.isPending}
         >
           {signInMutation.isPending || getProfileMutation.isPending ? (
-            <Loader2 className='animate-spin' />
+            <Loader2 className="animate-spin" />
           ) : (
             <LogIn />
           )}

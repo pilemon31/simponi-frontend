@@ -20,3 +20,4 @@ export type ProfileResponseData = {
 };
 
 export type ProfileResponse = SuccessResponse<ProfileResponseData>;
+export type UsersResponse = SuccessResponse<ProfileResponseData[]>;
