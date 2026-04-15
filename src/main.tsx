@@ -8,6 +8,7 @@ import { SearchProvider } from './context/search-provider';
 import { ThemeProvider } from './context/theme-provider';
 import { TooltipProvider } from './components/ui/tooltip';
 import { Toaster } from 'sonner';
+import { AuthProvider } from './context/auth.provider';
 import AuthPage from './pages/auth';
 import ProtectedRoute from './layouts/middlewares/protected-route';
 import PublicRoute from './layouts/middlewares/public-route';
@@ -89,7 +90,9 @@ ReactDOM.createRoot(root!).render(
           <TooltipProvider>
             <DirectionProvider>
               <FontProvider>
-                <RouterProvider router={router} />
+                <AuthProvider>
+                  <RouterProvider router={router} />
+                </AuthProvider>
               </FontProvider>
             </DirectionProvider>
           </TooltipProvider>

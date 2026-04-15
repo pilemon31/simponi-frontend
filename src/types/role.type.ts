@@ -14,3 +14,6 @@ interface RoleResponseData {
 }
 
 export type RoleResponse = SuccessResponse<RoleResponseData>;
+export type GetAllRoleResponse = SuccessResponse<{
+  data: RoleResponseData[];
+}>;
