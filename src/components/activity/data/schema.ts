@@ -2,10 +2,9 @@ import { z } from 'zod';
 
 export const activitySchema = z.object({
   id: z.string(),
-  activity: z.string(),
-  description: z.string(),
   module: z.string(),
   action: z.string(),
+  message: z.string(),
   timestamp: z.date(),
 });
 
