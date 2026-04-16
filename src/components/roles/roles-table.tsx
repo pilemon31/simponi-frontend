@@ -32,10 +32,15 @@ import { cn } from '@/lib/utils';
 
 type DataTableProps = {
   data: Role[];
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 };
 
-export function RolesTable({ data }: DataTableProps) {
-  // Local UI-only states
+export function RolesTable({
+  data,
+  searchValue,
+  onSearchChange,
+}: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -58,13 +63,6 @@ export function RolesTable({ data }: DataTableProps) {
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const id = String(row.getValue('id')).toLowerCase();
-      const role = String(row.getValue('role')).toLowerCase();
-      const searchValue = String(filterValue).toLowerCase();
-
-      return id.includes(searchValue) || role.includes(searchValue);
-    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -82,7 +80,9 @@ export function RolesTable({ data }: DataTableProps) {
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter by Role or ID...'
+        searchPlaceholder='Filter by role name or module.'
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
       />
       <div className='overflow-hidden rounded-md border'>
         <Table className='min-w-xl'>

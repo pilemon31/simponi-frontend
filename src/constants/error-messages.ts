@@ -5,3 +5,7 @@ export const AUTH_ERROR_MESSAGES = {
   'failed to generate access token': 'Gagal masuk, ada kesalahan pada sistem!',
   'failed to generate refresh token': 'Gagal masuk, ada kesalahan pada sistem!',
 } as const;
+
+export const ROLE_ERROR_MESSAGES = {
+  'failed to get all': 'Failed to get all',
+};
