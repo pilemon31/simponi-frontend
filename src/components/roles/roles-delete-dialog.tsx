@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '../shared/confirm-dialog';
 import { type Role } from './data/schema';
+import { useDeleteRole } from '@/hooks/use-roles';
 
 type RoleDeleteDialogProps = {
   open: boolean;
@@ -20,9 +21,12 @@ export function RolesDeleteDialog({
   currentRow,
 }: RoleDeleteDialogProps) {
   const [value, setValue] = useState('');
+  const deleteRole = useDeleteRole();
 
   const handleDelete = () => {
     if (value.trim() !== currentRow.name) return;
+
+    deleteRole.mutate(currentRow.id);
 
     onOpenChange(false);
   };

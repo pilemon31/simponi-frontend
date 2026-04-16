@@ -11,7 +11,7 @@ import { Main } from '@/layouts/main';
 import { RolesProvider } from '@/components/roles/roles-provider';
 import { RolesPrimaryButtons } from '@/components/roles/roles-primary-buttons';
 import { RolesDialogs } from '@/components/roles/roles-dialog';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useRoles } from '@/hooks/use-roles';
 
@@ -26,27 +26,25 @@ const RolePage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const search = searchParams.get('search') ?? '';
   const [searchInput, setSearchInput] = useState(search);
 
-  const { data: rolesData } = useRoles(search);
-  console.log(rolesData);
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
 
-  const setQueryParams = useCallback(
-    (key: string, value: string) => {
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
       setSearchParams(
         (prev) => {
           const params = new URLSearchParams(prev);
-          if (!value || value === 'all') {
-            params.delete(key);
+          if (!value) {
+            params.delete('search');
           } else {
-            params.set(key, value);
+            params.set('search', value);
           }
-          if (key !== 'page') {
-            params.set('page', '1');
-          }
+          params.set('page', '1');
           return params;
         },
         { replace: true },
@@ -55,15 +53,7 @@ const RolePage = () => {
     [setSearchParams],
   );
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchInput(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(
-      () => setQueryParams('search', value),
-      500,
-    );
-  };
+  const { data: rolesData } = useRoles(searchInput);
 
   return (
     <>
@@ -89,7 +79,11 @@ const RolePage = () => {
             </div>
             <RolesPrimaryButtons />
           </div>
-          <RolesTable data={rolesData?.data.data || []} />
+          <RolesTable
+            data={rolesData?.data || []}
+            searchValue={searchInput}
+            onSearchChange={handleSearchChange}
+          />
         </Main>
       </RolesProvider>
     </>
