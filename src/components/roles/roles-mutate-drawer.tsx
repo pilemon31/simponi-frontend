@@ -19,7 +19,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { type Role } from './data/schema';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Field,
@@ -30,13 +29,13 @@ import {
 } from '@/components/ui/field';
 import { usePermissions } from '@/hooks/use-permission';
 import { useCreateRole, useUpdateRole } from '@/hooks/use-roles';
-import { type Permissions } from './data/schema';
 import {
   type CreateRoleFormValues,
   createRoleSchema,
   type UpdateRoleFormValues,
   updateRoleSchema,
 } from '@/schemas/roles.schema';
+import { type Role, type Permissions } from '@/schemas/roles.schema';
 
 const toTitleCase = (value: string) =>
   value
