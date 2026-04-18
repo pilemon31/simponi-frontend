@@ -1,7 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/shared/data-table';
-import { type Permissions, type Role } from './data/schema';
+import { type Permissions, type Role } from '@/schemas/roles.schema';
 import { DataTableRowActions } from './data-table-row-actions';
 
 export const rolesColumns: ColumnDef<Role>[] = [
@@ -41,10 +41,17 @@ export const rolesColumns: ColumnDef<Role>[] = [
     cell: ({ row }) => {
       return (
         <div className='flex space-x-2'>
-          <span className='truncate font-medium'>{row.getValue('name')}</span>
+          <span className='truncate font-medium'>
+            {String(row.getValue('name'))
+              .split(' ')
+              .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+              .join(' ')}
+          </span>
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     accessorKey: 'permissions',
@@ -57,11 +64,15 @@ export const rolesColumns: ColumnDef<Role>[] = [
     },
     cell: ({ row }) => {
       const permissions: Permissions[] = row.getValue('permissions');
-      const capitalizedPermissions = permissions
-        .map(
-          (permission) =>
-            permission.module.charAt(0).toUpperCase() +
-            permission.module.slice(1),
+      const uniqueModules = Array.from(
+        new Set(permissions.map((permission) => permission.module)),
+      );
+      const capitalizedPermissions = uniqueModules
+        .map((module) =>
+          module
+            .split('_')
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join('_'),
         )
         .join(', ');
 
@@ -71,9 +82,13 @@ export const rolesColumns: ColumnDef<Role>[] = [
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     id: 'actions',
     cell: DataTableRowActions,
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

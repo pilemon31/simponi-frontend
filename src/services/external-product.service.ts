@@ -1,21 +1,22 @@
-import axiosConfig from '@/lib/axios';
+import axiosConfig from "@/lib/axios";
+import { mapErrorResponse } from "@/lib/error-mapper";
 import type {
   CreateExternalProductRequest,
   ExternalProductDetailResponse,
   ExternalProductListResponse,
   ExternalProductItem,
   UpdateExternalProductRequest,
-} from '@/types/external-product.type';
-import type { ErrorResponse } from '@/types/response.type';
-import axios, { AxiosError } from 'axios';
+} from "@/types/external-product.type";
+import type { ErrorResponse } from "@/types/response.type";
+import axios, { AxiosError } from "axios";
 
 const fallbackError = (
-  message = 'An unexpected error occurred',
+  message = "An unexpected error occurred",
 ): ErrorResponse => ({
   status: false,
   message,
   timestamp: new Date().toISOString(),
-  error: 'Unknown error',
+  error: "Unknown error",
 });
 
 export const getExternalProducts = async (
@@ -23,13 +24,14 @@ export const getExternalProducts = async (
   perPage: number = 10,
 ): Promise<ExternalProductListResponse | ErrorResponse> => {
   try {
-    const response = await axiosConfig.get('/external-products', {
+    const response = await axiosConfig.get("/external-products", {
       params: { page, per_page: perPage },
     });
     return response.data as ExternalProductListResponse;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      return (error as AxiosError).response?.data as ErrorResponse;
+      const response = (error as AxiosError).response?.data;
+      return mapErrorResponse(response as ErrorResponse);
     }
     return fallbackError();
   }
@@ -43,7 +45,8 @@ export const getExternalProductByID = async (
     return response.data as ExternalProductDetailResponse;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      return (error as AxiosError).response?.data as ErrorResponse;
+      const response = (error as AxiosError).response?.data;
+      return mapErrorResponse(response as ErrorResponse);
     }
     return fallbackError();
   }
@@ -59,7 +62,8 @@ export const getExternalProductsByProductID = async (
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      return (error as AxiosError).response?.data as ErrorResponse;
+      const response = (error as AxiosError).response?.data;
+      return mapErrorResponse(response as ErrorResponse);
     }
     return fallbackError();
   }
@@ -75,7 +79,8 @@ export const getExternalProductsByStorePlatformID = async (
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      return (error as AxiosError).response?.data as ErrorResponse;
+      const response = (error as AxiosError).response?.data;
+      return mapErrorResponse(response as ErrorResponse);
     }
     return fallbackError();
   }
@@ -85,11 +90,12 @@ export const createExternalProduct = async (
   data: CreateExternalProductRequest,
 ): Promise<ExternalProductDetailResponse | ErrorResponse> => {
   try {
-    const response = await axiosConfig.post('/external-products', data);
+    const response = await axiosConfig.post("/external-products", data);
     return response.data as ExternalProductDetailResponse;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      return (error as AxiosError).response?.data as ErrorResponse;
+      const response = (error as AxiosError).response?.data;
+      return mapErrorResponse(response as ErrorResponse);
     }
     return fallbackError();
   }
@@ -104,7 +110,8 @@ export const updateExternalProduct = async (
     return response.data as ExternalProductDetailResponse;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      return (error as AxiosError).response?.data as ErrorResponse;
+      const response = (error as AxiosError).response?.data;
+      return mapErrorResponse(response as ErrorResponse);
     }
     return fallbackError();
   }
@@ -118,7 +125,8 @@ export const deleteExternalProduct = async (
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
-      return (error as AxiosError).response?.data as ErrorResponse;
+      const response = (error as AxiosError).response?.data;
+      return mapErrorResponse(response as ErrorResponse);
     }
     return fallbackError();
   }

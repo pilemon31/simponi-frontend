@@ -1,52 +1,48 @@
 import { DisplayDialogs } from "@/components/inventory/display/display-dialog";
 import { DisplayPrimaryButtons } from "@/components/inventory/display/display-primary-buttons";
-import { DisplayProvider, useDisplayDialogs } from "@/components/inventory/display/display-provider";
+import {
+  DisplayProvider,
+  useDisplayDialogs,
+} from "@/components/inventory/display/display-provider";
 import { DisplayTable } from "@/components/inventory/display/display-table";
-import { adaptExternalProductToInventory } from "@/components/inventory/display/data/adapter";
+import type { ExternalProduct } from "@/components/inventory/display/data/schema";
 import { ConfigDrawer } from "@/components/shared/config-drawer";
 import { ProfileDropdown } from "@/components/shared/profile-dropdown";
 import { Search } from "@/components/shared/search";
 import { ThemeSwitch } from "@/components/shared/theme-switcher";
+import {
+  STORE_PLATFORM_OPTIONS,
+  useDisplayManagement,
+} from "@/hooks/use-display-management";
 import { useExternalProduct } from "@/hooks/use-external-product";
 import { useInventory } from "@/hooks/use-inventory";
 import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
-import {
-  createExternalProduct,
-  deleteExternalProduct,
-  getExternalProductByID,
-  updateExternalProduct,
-} from "@/services/external-product.service";
 import { useAuthStore } from "@/stores/auth-store";
-import type { ErrorResponse } from "@/types/response.type";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { DollarSign, Link2, Music, ShoppingCart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
 
-const STORE_PLATFORM_OPTIONS = [
-  { id: "c1b2c3d4-0008-4000-8000-000000000001", label: "Shopee" },
-  { id: "c1b2c3d4-0008-4000-8000-000000000002", label: "TikTok" },
-];
+type DisplayPageContentProps = {
+  onPrepareEdit: (item: ExternalProduct) => Promise<ExternalProduct>;
+};
 
-function DisplayPageContent() {
-  const { data, isLoading, totalCount } = useExternalProduct();
+function DisplayPageContent({ onPrepareEdit }: DisplayPageContentProps) {
+  const {
+    data: externalProducts,
+    isLoading,
+    totalCount,
+  } = useExternalProduct();
   const { setCurrentRow, setOpen } = useDisplayDialogs();
 
-  const externalProducts = Array.isArray(data) ? data : [];
-
-  const handleOpenEdit = async (item: (typeof data)[number]) => {
-    const detailResponse = await getExternalProductByID(item.id);
-
-    if (detailResponse.status !== true) {
-      setCurrentRow(item);
+  const handleOpenEdit = useCallback(
+    async (item: ExternalProduct) => {
+      const hydratedRow = await onPrepareEdit(item);
+      setCurrentRow(hydratedRow);
       setOpen("edit");
-      return;
-    }
-
-    setCurrentRow(adaptExternalProductToInventory(detailResponse.data));
-    setOpen("edit");
-  };
+    },
+    [onPrepareEdit, setCurrentRow, setOpen],
+  );
 
   const shopeeCount = externalProducts.filter((ep) =>
     ep.platform.toLowerCase().includes("shopee"),
@@ -97,7 +93,9 @@ function DisplayPageContent() {
     <Main className="flex flex-1 flex-col gap-4 sm:gap-6">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Display Products</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Display Products
+          </h2>
           <p className="text-muted-foreground">
             Manage product listings across Shopee and TikTok platforms
           </p>
@@ -109,7 +107,9 @@ function DisplayPageContent() {
         {statsItems.map((item) => (
           <Card key={item.label}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {item.label}
+              </CardTitle>
               {item.icon}
             </CardHeader>
             <CardContent>
@@ -131,7 +131,7 @@ function DisplayPageContent() {
         </div>
       ) : (
         <DisplayTable
-          data={data}
+          data={externalProducts}
           onEdit={handleOpenEdit}
           onDelete={(item) => {
             setCurrentRow(item);
@@ -139,97 +139,26 @@ function DisplayPageContent() {
           }}
         />
       )}
-
     </Main>
   );
 }
 
 const DisplayProductPage = () => {
   const user = useAuthStore((state) => state.auth.user);
-  const queryClient = useQueryClient();
   const { data: inventoryData } = useInventory();
+  const {
+    isMutating,
+    isDeleting,
+    createDisplayProduct,
+    updateDisplayProduct,
+    deleteDisplayProduct,
+    getDisplayForEdit,
+  } = useDisplayManagement();
 
   const productOptions = inventoryData.map((product) => ({
     id: product.id,
     name: product.name,
   }));
-
-  const mutateSuccess = async (message: string) => {
-    await queryClient.invalidateQueries({ queryKey: ["external-products"] });
-    toast.success(message);
-  };
-
-  const getErrorMessage = (error: unknown, fallback: string) => {
-    if (error instanceof Error) {
-      return error.message;
-    }
-
-    return (error as ErrorResponse)?.error || fallback;
-  };
-
-  const createMutation = useMutation({
-    mutationFn: async (payload: {
-      productId: string;
-      storePlatformId: string;
-      price: number;
-    }) => {
-      const response = await createExternalProduct({
-        product_id: payload.productId,
-        store_platform_id: payload.storePlatformId,
-        price: payload.price,
-      });
-
-      if (response.status !== true) {
-        throw new Error(response.message || "Failed to create listing");
-      }
-
-      return response;
-    },
-    onSuccess: async () => {
-      await mutateSuccess("Listing created");
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error, "Failed to create listing"));
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async (payload: { id: string; price: number }) => {
-      const response = await updateExternalProduct(payload.id, {
-        price: payload.price,
-      });
-
-      if (response.status !== true) {
-        throw new Error(response.message || "Failed to update listing");
-      }
-
-      return response;
-    },
-    onSuccess: async () => {
-      await mutateSuccess("Listing updated");
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error, "Failed to update listing"));
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await deleteExternalProduct(id);
-
-      if (response.status !== true) {
-        throw new Error(response.message || "Failed to delete listing");
-      }
-
-      return response;
-    },
-    onSuccess: async () => {
-      await mutateSuccess("Listing deleted");
-    },
-    onError: (error) => {
-      toast.error(getErrorMessage(error, "Failed to delete listing"));
-    },
-  });
 
   const userData = {
     name: user?.name ?? "john",
@@ -242,19 +171,11 @@ const DisplayProductPage = () => {
       <DisplayDialogs
         productOptions={productOptions}
         storePlatformOptions={STORE_PLATFORM_OPTIONS}
-        isMutating={createMutation.isPending || updateMutation.isPending}
-        isDeleting={deleteMutation.isPending}
-        onCreate={async (values) => {
-          await createMutation.mutateAsync(values);
-          return true;
-        }}
-        onEdit={async (row, values) => {
-          await updateMutation.mutateAsync({ id: row.id, price: values.price });
-          return true;
-        }}
-        onDelete={async (row) => {
-          await deleteMutation.mutateAsync(row.id);
-        }}
+        isMutating={isMutating}
+        isDeleting={isDeleting}
+        onCreate={createDisplayProduct}
+        onEdit={updateDisplayProduct}
+        onDelete={deleteDisplayProduct}
       />
 
       <Header>
@@ -266,7 +187,7 @@ const DisplayProductPage = () => {
         </div>
       </Header>
 
-      <DisplayPageContent />
+      <DisplayPageContent onPrepareEdit={getDisplayForEdit} />
     </DisplayProvider>
   );
 };

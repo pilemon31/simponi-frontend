@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   type ColumnFiltersState,
   type SortingState,
@@ -11,7 +11,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -19,27 +19,32 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   DataTablePagination,
   DataTableToolbar,
-} from '@/components/shared/data-table';
+} from "@/components/shared/data-table";
 
-import { type Role } from './data/schema';
-import { DataTableBulkActions } from './data-table-bulk-actions';
-import { rolesColumns as columns } from './roles-columns';
-import { cn } from '@/lib/utils';
+import { type Role } from "./data/schema";
+import { DataTableBulkActions } from "./data-table-bulk-actions";
+import { rolesColumns as columns } from "./roles-columns";
+import { cn } from "@/lib/utils";
 
 type DataTableProps = {
   data: Role[];
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 };
 
-export function RolesTable({ data }: DataTableProps) {
-  // Local UI-only states
+export function RolesTable({
+  data,
+  searchValue,
+  onSearchChange,
+}: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
@@ -58,13 +63,6 @@ export function RolesTable({ data }: DataTableProps) {
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const id = String(row.getValue('id')).toLowerCase();
-      const role = String(row.getValue('role')).toLowerCase();
-      const searchValue = String(filterValue).toLowerCase();
-
-      return id.includes(searchValue) || role.includes(searchValue);
-    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -77,15 +75,16 @@ export function RolesTable({ data }: DataTableProps) {
     <div
       className={cn(
         'max-sm:has-[div[role="toolbar"]]:mb-16',
-        'flex flex-1 flex-col gap-4',
-      )}
-    >
+        "flex flex-1 flex-col gap-4",
+      )}>
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter by Role or ID...'
+        searchPlaceholder="Filter by role name or module."
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
       />
-      <div className='overflow-hidden rounded-md border'>
-        <Table className='min-w-xl'>
+      <div className="overflow-hidden rounded-md border">
+        <Table className="min-w-xl">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -109,8 +108,7 @@ export function RolesTable({ data }: DataTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
+                  data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -125,8 +123,7 @@ export function RolesTable({ data }: DataTableProps) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
-                >
+                  className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
@@ -134,7 +131,7 @@ export function RolesTable({ data }: DataTableProps) {
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} className='mt-auto' />
+      <DataTablePagination table={table} className="mt-auto" />
       <DataTableBulkActions table={table} />
     </div>
   );

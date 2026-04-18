@@ -1,61 +1,51 @@
 import { type Table } from '@tanstack/react-table';
-import { Download } from 'lucide-react';
-import { toast } from 'sonner';
-import { sleep } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-
+import { Trash2 } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/shared/data-table';
-import { type Role } from './data/schema';
+import { RolesMultiDeleteDialog } from './roles-multi-delete-dialog';
+import { useState } from 'react';
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;
 };
 
-export function DataTableBulkActions<TData>({
+export function DataTableBulkActions<TData extends { id: string }>({
   table,
 }: DataTableBulkActionsProps<TData>) {
-  const selectedRows = table.getFilteredSelectedRowModel().rows;
-
-  const handleBulkExport = () => {
-    const selectedActivities = selectedRows.map((row) => row.original as Role);
-    toast.promise(sleep(2000), {
-      loading: 'Exporting roles...',
-      success: () => {
-        table.resetRowSelection();
-        return `Exported ${selectedActivities.length} activites${selectedActivities.length > 1 ? 's' : ''} to CSV.`;
-      },
-      error: 'Error',
-    });
-    table.resetRowSelection();
-  };
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   return (
     <>
-      <BulkActionsToolbar table={table} entityName='task'>
+      <BulkActionsToolbar table={table} entityName='role'>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant='outline'
               size='icon'
-              onClick={() => handleBulkExport()}
+              onClick={() => setShowDeleteConfirm(true)}
               className='size-8'
-              aria-label='Export activities'
-              title='Export activites'
+              aria-label='delete roles'
+              title='delete roles'
             >
-              <Download />
-              <span className='sr-only'>Export Role</span>
+              <Trash2 />
+              <span className='sr-only'>Delete Roles</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Export Role</p>
+            <p>Delete Roles</p>
           </TooltipContent>
         </Tooltip>
       </BulkActionsToolbar>
+      <RolesMultiDeleteDialog
+        table={table}
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+      ></RolesMultiDeleteDialog>
     </>
   );
 }

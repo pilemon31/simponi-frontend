@@ -5,6 +5,7 @@ interface Permissions {
   name: string;
   endpoint: string;
   method: string;
+  module: string;
 }
 
 interface RoleResponseData {
@@ -14,6 +15,4 @@ interface RoleResponseData {
 }
 
 export type RoleResponse = SuccessResponse<RoleResponseData>;
-export type GetAllRoleResponse = SuccessResponse<{
-  data: RoleResponseData[];
-}>;
+export type GetAllRoleResponse = SuccessResponse<RoleResponseData[]>;

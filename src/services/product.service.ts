@@ -1,4 +1,5 @@
 import axiosConfig from "@/lib/axios";
+import { mapErrorResponse } from "@/lib/error-mapper";
 import type {
   CreateProductRequest,
   ProductDetailResponse,
@@ -10,22 +11,46 @@ import type {
 import type { ErrorResponse } from "@/types/response.type";
 import axios, { AxiosError } from "axios";
 
-export const getProducts = async (
-  page: number = 1,
-  perPage: number = 10,
-): Promise<ProductListResponse | ErrorResponse> => {
+// export const getProducts = async (
+//   page: number = 1,
+//   perPage: number = 10,
+// ): Promise<ProductListResponse | ErrorResponse> => {
+//   try {
+//     const response = await axiosConfig.get("/products", {
+//       params: { page, per_page: perPage },
+//     });
+//     return response.data as ProductListResponse;
+//   } catch (error: unknown) {
+//     if (axios.isAxiosError(error) && error.response) {
+//       return (error as AxiosError).response?.data as ErrorResponse;
+//     }
+//     return {
+//       status: false,
+//       message: "An unexpected error occured",
+//       timestamp: new Date().toISOString(),
+//       error: "Unknown error",
+//     } as ErrorResponse;
+//   }
+// };
+
+export const getProducts = async (search = "") => {
   try {
-    const response = await axiosConfig.get("/products", {
-      params: { page, per_page: perPage },
+    const response = await axiosConfig.get<ProductListResponse>("/products", {
+      params: {
+        search: search || undefined,
+      },
     });
+
     return response.data as ProductListResponse;
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response) {
-      return (error as AxiosError).response?.data as ErrorResponse;
+      const response = (error as AxiosError).response?.data;
+      return mapErrorResponse(response as ErrorResponse);
     }
+
     return {
       status: false,
-      message: "An unexpected error occured",
+      message: "An unexpected error occurred",
       timestamp: new Date().toISOString(),
       error: "Unknown error",
     } as ErrorResponse;
