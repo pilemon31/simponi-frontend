@@ -23,6 +23,7 @@ import DisplayProductPage from './pages/display';
 import UserManagementPage from './pages/user_management';
 import RolePage from './pages/roles';
 import InventoryLogPage from './pages/inventory_log';
+import OrderPage from './pages/orders';
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
               {
                 path: '/inventory/internal',
                 element: <InternalProductPage />,
+              },
+              {
+                path: '/order',
+                element: <OrderPage />,
               },
               {
                 path: '/inventory/display',

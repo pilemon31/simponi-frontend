@@ -7,8 +7,8 @@ export const Modules = [
     icon: Boxes,
   },
   {
-    label: 'Order',
-    value: 'order' as const,
+    label: 'Orders',
+    value: 'orders' as const,
     icon: ShoppingCart,
   },
 ];
