@@ -28,6 +28,8 @@ export function adaptExternalProductToInventory(
     platform: normalizePlatform(externalProduct.platform),
     product_name: externalProduct.product_name,
     image: externalProduct.image_url,
+    store_platform_name:
+      externalProduct.store_platform_name || externalProduct.platform,
     price: externalProduct.price,
     created_at: externalProduct.created_at,
     updated_at: externalProduct.updated_at,

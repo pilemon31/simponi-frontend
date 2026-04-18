@@ -2,62 +2,74 @@ import { adaptProductToInventory } from "@/components/inventory/internal/data/ad
 import type { Inventory } from "@/components/inventory/internal/data/schema";
 import { getProducts, getProductStats } from "@/services/product.service";
 import { uploadProductImages } from "@/services/upload.service";
-import type { ProductListItem, ProductStatsData } from "@/types/product.type";
+import type {
+  ProductListItem,
+  ProductListResponse,
+  ProductStatsData,
+} from "@/types/product.type";
 import type { ErrorResponse, Pagination } from "@/types/response.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { toast } from "sonner";
 
 type UseInventoryResult = {
   data: Inventory[];
   isLoading: boolean;
   isError: boolean;
-  page: number;
-  perPage: number;
   maxPage: number;
   totalCount: number;
-  setPage: (page: number) => void;
-  setPerPage: (perPage: number) => void;
   refetch: () => void;
 };
 
-export const useInventory = (): UseInventoryResult => {
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+const normalizeProductItems = (
+  response: ProductListResponse | ErrorResponse | undefined,
+): {
+  isSuccess: boolean;
+  items: ProductListItem[];
+  pagination: Pagination | null;
+} => {
+  if (!response || response.status !== true) {
+    return {
+      isSuccess: false,
+      items: [],
+      pagination: null,
+    };
+  }
 
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["products", page, perPage],
-    queryFn: () => getProducts(page, perPage),
-  });
+  const responseData = response.data;
 
-  const isSuccess = data?.status === true;
-  const responseData = isSuccess ? data.data : null;
-
-  const productItems: ProductListItem[] = Array.isArray(responseData)
+  const items: ProductListItem[] = Array.isArray(responseData)
     ? responseData
-    : Array.isArray(responseData?.data)
+    : Array.isArray(responseData.data)
       ? responseData.data
       : [];
 
-  const pagination: Pagination | null = isSuccess
-    ? !Array.isArray(responseData)
-      ? (responseData?.pagination ?? data.meta ?? null)
-      : (data.meta ?? null)
-    : null;
+  const pagination: Pagination | null = Array.isArray(responseData)
+    ? (response.meta ?? null)
+    : (responseData.pagination ?? response.meta ?? null);
 
-  const products = productItems.map(adaptProductToInventory);
+  return {
+    isSuccess: true,
+    items,
+    pagination,
+  };
+};
+
+export const useInventory = (search = ""): UseInventoryResult => {
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["products", search],
+    queryFn: () => getProducts(search),
+  });
+
+  const normalized = normalizeProductItems(data);
+  const mappedData = normalized.items.map(adaptProductToInventory);
   const hasResponse = data !== undefined;
 
   return {
-    data: products,
+    data: mappedData,
     isLoading,
-    isError: isError || (hasResponse && !isSuccess),
-    page,
-    perPage,
-    maxPage: pagination?.max_page ?? 1,
-    totalCount: pagination?.count ?? 0,
-    setPage,
-    setPerPage,
+    isError: isError || (hasResponse && !normalized.isSuccess),
+    maxPage: normalized.pagination?.max_page ?? 1,
+    totalCount: normalized.pagination?.count ?? mappedData.length,
     refetch,
   };
 };
