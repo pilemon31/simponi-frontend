@@ -27,7 +27,7 @@ export const sidebarData = {
         },
         {
           title: 'Order',
-          url: '/order',
+          url: '/orders',
           icon: BadgeDollarSign,
         },
         {
