@@ -1,28 +1,28 @@
-import { StrictMode } from 'react';
-import './styles/globals.css';
-import ReactDOM from 'react-dom/client';
-import { createBrowserRouter } from 'react-router';
-import { RouterProvider } from 'react-router/dom';
-import UseQueryContext from './context/use-query.context';
-import { SearchProvider } from './context/search-provider';
-import { ThemeProvider } from './context/theme-provider';
-import { TooltipProvider } from './components/ui/tooltip';
-import { Toaster } from 'sonner';
-import { AuthProvider } from './context/auth.provider';
-import AuthPage from './pages/auth';
-import ProtectedRoute from './layouts/middlewares/protected-route';
-import PublicRoute from './layouts/middlewares/public-route';
-import { AuthenticatedLayout } from './layouts/sidebar/authenticated-layout';
-import ActivityPage from './pages/activity';
-import { DirectionProvider } from './context/direction-provider';
-import { FontProvider } from './context/font-provider';
-import { Dashboard } from './pages/dashboard';
-import { RootLayout } from './layouts/root-layout';
-import InternalProductPage from './pages/inventory';
-import DisplayProductPage from './pages/display';
-import UserManagementPage from './pages/user_management';
-import RolePage from './pages/roles';
-import InventoryLogPage from './pages/inventory_log';
+import { StrictMode } from "react";
+import "./styles/globals.css";
+import ReactDOM from "react-dom/client";
+import { createBrowserRouter } from "react-router";
+import { RouterProvider } from "react-router/dom";
+import UseQueryContext from "./context/use-query.context";
+import { SearchProvider } from "./context/search-provider";
+import { ThemeProvider } from "./context/theme-provider";
+import { TooltipProvider } from "./components/ui/tooltip";
+import { Toaster } from "sonner";
+import { AuthProvider } from "./context/auth.provider";
+import AuthPage from "./pages/auth";
+import ProtectedRoute from "./layouts/middlewares/protected-route";
+import PublicRoute from "./layouts/middlewares/public-route";
+import { AuthenticatedLayout } from "./layouts/sidebar/authenticated-layout";
+import ActivityPage from "./pages/activity";
+import { DirectionProvider } from "./context/direction-provider";
+import { FontProvider } from "./context/font-provider";
+import { Dashboard } from "./pages/dashboard";
+import { RootLayout } from "./layouts/root-layout";
+import DisplayProductPage from "./pages/display";
+import UserManagementPage from "./pages/user_management";
+import RolePage from "./pages/roles";
+import InventoryLogPage from "./pages/inventory_log";
+import InternalProductPage from "./pages/inventory";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +32,7 @@ const router = createBrowserRouter([
         element: <PublicRoute />,
         children: [
           {
-            path: '/signin',
+            path: "/signin",
             element: <AuthPage />,
           },
         ],
@@ -44,31 +44,31 @@ const router = createBrowserRouter([
             element: <AuthenticatedLayout />,
             children: [
               {
-                path: '/',
+                path: "/",
                 element: <Dashboard />,
               },
               {
-                path: '/inventory/internal',
+                path: "/inventory/internal",
                 element: <InternalProductPage />,
               },
               {
-                path: '/inventory/display',
+                path: "/inventory/display",
                 element: <DisplayProductPage />,
               },
               {
-                path: '/activity',
+                path: "/activity",
                 element: <ActivityPage />,
               },
               {
-                path: '/inventory-log',
+                path: "/inventory-log",
                 element: <InventoryLogPage />,
               },
               {
-                path: '/users',
+                path: "/users",
                 element: <UserManagementPage />,
               },
               {
-                path: '/roles',
+                path: "/roles",
                 element: <RolePage />,
               },
             ],
@@ -79,7 +79,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-const root = document.getElementById('root');
+const root = document.getElementById("root");
 
 ReactDOM.createRoot(root!).render(
   <StrictMode>

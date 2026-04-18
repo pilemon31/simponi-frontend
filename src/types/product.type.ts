@@ -16,6 +16,7 @@ export type ExternalProductData = {
   image_url: string;
   product_name: string;
   platform: string;
+  store_platform_name: string;
   price: number;
   created_at: string;
   updated_at: string;
@@ -31,7 +32,7 @@ export type ProductStatus =
 export type ProductData = {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   sku: string;
   stock: number;
   category: ProductCategoryData | null;
