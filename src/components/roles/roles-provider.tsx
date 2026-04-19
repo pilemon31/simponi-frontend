@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useDialogState from '@/hooks/use-dialog-state';
-import { type Role } from './data/schema';
+import { type Role } from '@/schemas/roles.schema';
 
 type RolesDialogType = 'add' | 'edit' | 'delete';
 
