@@ -24,6 +24,8 @@ import RolePage from "./pages/roles";
 import InventoryLogPage from "./pages/inventory_log";
 import InternalProductPage from "./pages/inventory";
 import OrderPage from "./pages/orders";
+import VendorPage from "./pages/vendor";
+
 
 const router = createBrowserRouter([
   {
@@ -76,6 +78,10 @@ const router = createBrowserRouter([
                 path: "/roles",
                 element: <RolePage />,
               },
+              {
+                path: "/vendors",
+                element: <VendorPage />,
+              },
             ],
           },
         ],
@@ -88,7 +94,7 @@ const root = document.getElementById("root");
 
 ReactDOM.createRoot(root!).render(
   <StrictMode>
-    <Toaster></Toaster>
+    <Toaster />
     <UseQueryContext>
       <SearchProvider>
         <ThemeProvider defaultTheme="light">
