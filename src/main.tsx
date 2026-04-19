@@ -24,6 +24,8 @@ import RolePage from "./pages/roles";
 import InventoryLogPage from "./pages/inventory_log";
 import InternalProductPage from "./pages/inventory";
 import OrderPage from "./pages/orders";
+import VendorPage from "./pages/vendor";
+
 
 const router = createBrowserRouter([
   {

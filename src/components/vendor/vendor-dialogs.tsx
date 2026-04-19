@@ -82,13 +82,13 @@ export function VendorMutateDrawer({ open, onOpenChange, currentRow }: VendorMut
   const isPending = createVendor.isPending || updateVendor.isPending;
 
   return (
-    <Sheet open={open} onOpenChange={(v) => { onOpenChange(v); form.reset(); }}>
+    <Sheet open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) form.reset(); }}>
       <SheetContent className="flex flex-col py-3 sm:max-w-sm">
         <SheetHeader className="text-start">
           <SheetTitle>{isEdit ? 'Edit' : 'Add'} Vendor</SheetTitle>
           <SheetDescription>
             {isEdit ? 'Edit vendor information.' : 'Add a new vendor to the system.'}
-            {' '}Click save when you're done.
+            {' '}Click save when you&apos;re done.
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
@@ -220,28 +220,33 @@ export function VendorDialogs() {
 
   return (
     <>
+      {/* ✅ FIX: onOpenChange set null untuk menutup dialog */}
       <VendorMutateDrawer
         key="vendor-add"
         open={open === 'add'}
-        onOpenChange={() => setOpen('add')}
+        onOpenChange={(v) => { if (!v) setOpen(null); }}
       />
       {currentRow && (
         <>
           <VendorMutateDrawer
             key={`vendor-edit-${currentRow.id}`}
             open={open === 'edit'}
-            onOpenChange={() => {
-              setOpen('edit');
-              setTimeout(() => setCurrentRow(null), 500);
+            onOpenChange={(v) => {
+              if (!v) {
+                setOpen(null);
+                setTimeout(() => setCurrentRow(null), 500);
+              }
             }}
             currentRow={currentRow}
           />
           <VendorDeleteDialog
             key={`vendor-delete-${currentRow.id}`}
             open={open === 'delete'}
-            onOpenChange={() => {
-              setOpen('delete');
-              setTimeout(() => setCurrentRow(null), 500);
+            onOpenChange={(v) => {
+              if (!v) {
+                setOpen(null);
+                setTimeout(() => setCurrentRow(null), 500);
+              }
             }}
             currentRow={currentRow}
           />

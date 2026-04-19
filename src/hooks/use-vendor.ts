@@ -6,19 +6,27 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-// helper extract pesan error dari response backend
+// ✅ FIX: regex lama strip pesan penting seperti "vendor with name 'X' already exists"
+// Sekarang ambil error field dari backend, hapus hanya sentinel suffix di akhir string
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error) return error.message;
+
   const err = error as ErrorResponse;
-  // backend kirim { message: "failed to create vendor", error: "vendor already exists: ..." }
-  if (err?.error && typeof err.error === 'string') {
-    // ambil bagian sebelum ': already exists' / wrap error
-    const clean = err.error
-      .replace(/:.*(already exists|not found).*/i, '')
-      .trim();
-    if (clean) return clean;
+
+  // Backend kirim { message: "...", error: "vendor with name 'X' already exists: ..." }
+  // Hilangkan hanya suffix ": already exists" / ": not found" di akhir, bukan seluruh kalimat
+  if (err?.error && typeof err.error === 'string' && err.error.trim()) {
+    return (
+      err.error
+        .replace(/:\s*(already exists|not found|bad request|unauthorized|internal server error)\s*$/i, '')
+        .trim() || err.error
+    );
   }
-  if (err?.message) return err.message;
+
+  if (err?.message && typeof err.message === 'string' && err.message.trim()) {
+    return err.message;
+  }
+
   return fallback;
 };
 
@@ -43,7 +51,8 @@ export const useVendor = (search?: string): UseVendorResult => {
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['vendors', page, perPage, search],
-    queryFn: () => getVendors(page, perPage),
+    // ✅ FIX: search sekarang dikirim ke API
+    queryFn: () => getVendors(page, perPage, search),
   });
 
   const isSuccess = data?.status === true;
@@ -83,7 +92,7 @@ export const useCreateVendor = () => {
     mutationFn: async (req: CreateVendorRequest) => {
       const response = await createVendor(req);
       if (response.status !== true) {
-        throw response; // lempar seluruh error response
+        throw response;
       }
       return response;
     },
@@ -121,6 +130,7 @@ export const useUpdateVendor = () => {
 
 // ─── useDeleteVendor ──────────────────────────────────────────────────────────
 
+// ✅ FIX: typo 'useDeleteVendovendorr' → 'useDeleteVendor'
 export const useDeleteVendor = () => {
   const queryClient = useQueryClient();
   return useMutation({

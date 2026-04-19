@@ -1,16 +1,12 @@
-import { useState } from 'react';
 import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
   type ColumnFiltersState,
   type SortingState,
   type VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -20,13 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DataTablePagination,
-  DataTableToolbar,
-} from '@/components/shared/data-table';
-import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { vendorColumns } from './vendors-columns';
 import type { VendorData } from './data/schema';
-import { vendorColumns as columns } from './vendors-columns';
 
 type VendorsTableProps = {
   data: VendorData[];
@@ -34,67 +27,50 @@ type VendorsTableProps = {
   onSearchChange?: (value: string) => void;
 };
 
-export function VendorsTable({ data, searchValue, onSearchChange }: VendorsTableProps) {
-  const [rowSelection, setRowSelection] = useState({});
+export function VendorsTable({ data, searchValue = '', onSearchChange }: VendorsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [globalFilter, setGlobalFilter] = useState('');
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
-    columns,
+    columns: vendorColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
-      columnVisibility,
-      rowSelection,
       columnFilters,
-      globalFilter,
+      columnVisibility,
     },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnVisibilityChange: setColumnVisibility,
-    onGlobalFilterChange: setGlobalFilter,
-    onColumnFiltersChange: setColumnFilters,
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const search = String(filterValue).toLowerCase();
-      const { name, email, phone } = row.original;
-      return (
-        name.toLowerCase().includes(search) ||
-        email.toLowerCase().includes(search) ||
-        phone.toLowerCase().includes(search)
-      );
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
   return (
-    <div className={cn('max-sm:has-[div[role="toolbar"]]:mb-16', 'flex flex-1 flex-col gap-4')}>
-      <DataTableToolbar
-        table={table}
-        searchPlaceholder="Search by name, email, or phone..."
-        searchValue={searchValue}
-        onSearchChange={onSearchChange}
-      />
-      <div className="overflow-hidden rounded-md border">
-        <Table className="min-w-xl">
+    <div className="space-y-4">
+      {/* Search bar */}
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="Search vendors..."
+          value={searchValue}
+          onChange={(e) => onSearchChange?.(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
+
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} colSpan={header.colSpan}>
+                  <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -103,23 +79,17 @@ export function VendorsTable({ data, searchValue, onSearchChange }: VendorsTable
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
+                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={vendorColumns.length} className="h-24 text-center text-muted-foreground">
                   No vendors found.
                 </TableCell>
               </TableRow>
@@ -127,7 +97,6 @@ export function VendorsTable({ data, searchValue, onSearchChange }: VendorsTable
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} className="mt-auto" />
     </div>
   );
 }

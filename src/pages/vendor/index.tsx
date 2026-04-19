@@ -57,7 +57,7 @@ const VendorPage = () => {
     setSearchInput(value);
   }, []);
 
-  const { data: vendorData, isLoading } = useVendor(debouncedSearch);
+  const { data: vendorData } = useVendor(debouncedSearch);
 
   return (
     <VendorProvider>
