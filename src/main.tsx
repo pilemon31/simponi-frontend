@@ -23,7 +23,7 @@ import UserManagementPage from "./pages/user_management";
 import RolePage from "./pages/roles";
 import InventoryLogPage from "./pages/inventory_log";
 import InternalProductPage from "./pages/inventory";
-import VendorPage from "./pages/vendor";
+import OrderPage from "./pages/orders";
 
 const router = createBrowserRouter([
   {
@@ -47,6 +47,10 @@ const router = createBrowserRouter([
               {
                 path: "/",
                 element: <Dashboard />,
+              },
+               {
+                path: "/orders",
+                element: <OrderPage />,
               },
               {
                 path: "/inventory/internal",
