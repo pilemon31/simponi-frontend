@@ -5,10 +5,16 @@ import { type ErrorResponse } from '@/types/response.type';
 import { type GetAllPermissionsResponse } from '@/types/permission.type';
 
 export const PermissionsApi = {
-  getAll: async () => {
+  getAll: async (pagination: false) => {
     try {
-      const response =
-        await axiosConfig.get<GetAllPermissionsResponse>('/permissions');
+      const response = await axiosConfig.get<GetAllPermissionsResponse>(
+        '/permissions',
+        {
+          params: {
+            pagination: pagination,
+          },
+        },
+      );
 
       return response;
     } catch (error: unknown) {
