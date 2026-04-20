@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   type ColumnFiltersState,
   type SortingState,
@@ -25,31 +25,38 @@ import {
   DataTableToolbar,
 } from "@/components/shared/data-table";
 import { type Inventory } from "./data/schema";
-import { SyncStatuses } from "./data/data";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
 import { inventoryColumns as columns } from "./internal-columns";
 import { cn } from "@/lib/utils";
+import type { Pagination } from "@/types/response.type";
 
 type DataTableProps = {
   data: Inventory[];
   onEdit?: (item: Inventory) => void;
   onDelete?: (item: Inventory) => void;
+  meta?: Pagination;
   searchValue?: string;
-  onSearchChange?: (value: string) => void;
+  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onPageChange?: (page: number) => void;
+  onPerPageChange?: (perPage: number) => void;
+  onSetQueryParam?: (key: string, value: string) => void;
+  onClearFilters?: () => void;
 };
 
 export function InventoriesTable({
   data,
-  searchValue,
-  onSearchChange,
   onEdit,
   onDelete,
+  meta,
+  searchValue,
+  onSearchChange,
+  onPageChange,
+  onPerPageChange,
+  onClearFilters,
 }: DataTableProps) {
-  // Local UI-only states
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
@@ -64,23 +71,12 @@ export function InventoriesTable({
       columnVisibility,
       rowSelection,
       columnFilters,
-      globalFilter,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
-    onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const productName = String(row.original.name).toLowerCase();
-      const internalSku = String(row.original.sku).toLowerCase();
-      const searchValue = String(filterValue).toLowerCase();
-
-      return (
-        productName.includes(searchValue) || internalSku.includes(searchValue)
-      );
-    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -100,13 +96,7 @@ export function InventoriesTable({
         searchPlaceholder="Filter by product name or SKU..."
         searchValue={searchValue}
         onSearchChange={onSearchChange}
-        filters={[
-          {
-            columnId: "status",
-            title: "Status",
-            options: SyncStatuses,
-          },
-        ]}
+        onClearFilters={onClearFilters}
       />
       <div className="overflow-hidden rounded-md border">
         <Table className="min-w-xl">
@@ -156,7 +146,13 @@ export function InventoriesTable({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} className="mt-auto" />
+      <DataTablePagination
+        table={table}
+        className="mt-auto"
+        meta={meta}
+        onPageChange={onPageChange}
+        onPerPageChange={onPerPageChange}
+      />
       <DataTableBulkActions table={table} />
     </div>
   );

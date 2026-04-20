@@ -21,4 +21,13 @@ export const inventoryMappingSchema = z.object({
   }),
 });
 
+export const createProductSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  sku: z.string().min(1, "SKU is required"),
+  stock: z.number().min(0, "Stock cannot be negative"),
+  categoryId: z.string().optional(),
+  description: z.string().optional(),
+});
+
 export type Inventory = z.infer<typeof inventoryMappingSchema>;
+export type CreateProductFormValues = z.infer<typeof createProductSchema>;

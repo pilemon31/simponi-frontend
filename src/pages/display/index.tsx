@@ -19,7 +19,7 @@ import { useInventory } from "@/hooks/use-inventory";
 import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCallback, useEffect, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 import { DollarSign, Link2, Music, ShoppingCart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams } from "react-router";
@@ -55,7 +55,8 @@ function DisplayPageContent({ onPrepareEdit }: DisplayPageContentProps) {
   }, [search]);
 
   const handleSearchChange = useCallback(
-    (value: string) => {
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
       setSearchInput(value);
       setSearchParams(
         (prev) => {
@@ -168,6 +169,7 @@ function DisplayPageContent({ onPrepareEdit }: DisplayPageContentProps) {
             setCurrentRow(item);
             setOpen("delete");
           }}
+            searchValue={searchInput}
           onSearchChange={handleSearchChange}
         />
       )}
