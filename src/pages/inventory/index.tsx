@@ -1,4 +1,3 @@
-import InventoryAlertsCard from "@/components/inventory/internal/internal-alerts";
 import InventoryStatsCard from "@/components/inventory/internal/internal-cards";
 import { InternalDialogs } from "@/components/inventory/internal/internal-dialog";
 import {
@@ -17,7 +16,7 @@ import { useInventoryManagement } from "@/hooks/use-inventory-management";
 import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCallback, useEffect, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 
 function InventoryPageContent() {
@@ -60,7 +59,8 @@ function InventoryPageContent() {
   }, [search]);
 
   const handleSearchChange = useCallback(
-    (value: string) => {
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
       setSearchInput(value);
       setSearchParams(
         (prev) => {
@@ -117,6 +117,7 @@ function InventoryPageContent() {
             data={inventoryData}
             onEdit={handleOpenEdit}
             onDelete={handleOpenDelete}
+            searchValue={searchInput}
             onSearchChange={handleSearchChange}
           />
         )}

@@ -87,6 +87,10 @@ export function DisplayMutateDrawer({
         },
   });
 
+  const resetDrawerState = () => {
+    form.reset();
+  };
+
   const onSubmit = async (values: DisplayForm) => {
     const shouldClose = await onSubmitForm?.(values, currentRow);
 
@@ -95,7 +99,7 @@ export function DisplayMutateDrawer({
     }
 
     onOpenChange(false);
-    form.reset();
+    resetDrawerState();
   };
 
   return (
@@ -103,16 +107,17 @@ export function DisplayMutateDrawer({
       open={open}
       onOpenChange={(value) => {
         onOpenChange(value);
-        form.reset();
+        resetDrawerState();
       }}
     >
-      <SheetContent className="flex flex-col">
+      <SheetContent className="flex flex-col py-3 sm:max-w-sm">
         <SheetHeader className="text-start">
           <SheetTitle>{isEdit ? "Edit" : "Create"} External Product</SheetTitle>
           <SheetDescription>
             {isEdit
               ? "Update external listing information."
               : "Create a new external product listing."}
+            Click save when you&apos;re done.
           </SheetDescription>
         </SheetHeader>
 

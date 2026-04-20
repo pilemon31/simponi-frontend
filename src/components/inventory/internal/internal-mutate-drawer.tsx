@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,21 +27,17 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { type Inventory } from "./data/schema";
+import {
+  createProductSchema,
+  type CreateProductFormValues,
+  type Inventory,
+} from "./data/schema";
 import { resolveImageUrl } from "@/lib/media";
 
 type CategoryOption = {
   id: string;
   name: string;
 };
-
-const formSchema = z.object({
-  name: z.string().min(1, "Product name is required"),
-  sku: z.string().min(1, "SKU is required"),
-  stock: z.number().min(0, "Stock cannot be negative"),
-  categoryId: z.string().optional(),
-  description: z.string().optional(),
-});
 
 type InventoryMutateDrawerProps = {
   currentRow?: Inventory;
@@ -51,12 +46,10 @@ type InventoryMutateDrawerProps = {
   isPending?: boolean;
   categories?: CategoryOption[];
   onSubmitForm?: (
-    values: InventoryForm & { imageFile?: File | null },
+    values: CreateProductFormValues & { imageFile?: File | null },
     currentRow?: Inventory,
   ) => boolean | void | Promise<boolean | void>;
 };
-
-type InventoryForm = z.infer<typeof formSchema>;
 
 export function InventoryMutateDrawer({
   open,
@@ -86,8 +79,8 @@ export function InventoryMutateDrawer({
   const existingImagePreview = resolveImageUrl(currentRow?.imageUrl);
   const previewImageSrc = selectedImagePreview || existingImagePreview;
 
-  const form = useForm<InventoryForm>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<CreateProductFormValues>({
+    resolver: zodResolver(createProductSchema),
     defaultValues: isEdit
       ? {
           name: currentRow.name,
@@ -105,7 +98,12 @@ export function InventoryMutateDrawer({
         },
   });
 
-  const onSubmit = async (values: InventoryForm) => {
+  const resetDrawerState = () => {
+    form.reset();
+    setImageFile(null);
+  };
+
+  const onSubmit = async (values: CreateProductFormValues) => {
     const shouldClose = await onSubmitForm?.(
       { ...values, imageFile },
       currentRow,
@@ -116,19 +114,17 @@ export function InventoryMutateDrawer({
     }
 
     onOpenChange(false);
-    form.reset();
-    setImageFile(null);
+    resetDrawerState();
   };
 
   return (
     <Sheet
       open={open}
-      onOpenChange={(v) => {
-        onOpenChange(v);
-        form.reset();
-        setImageFile(null);
+      onOpenChange={(value) => {
+        onOpenChange(value);
+        resetDrawerState();
       }}>
-      <SheetContent className="flex flex-col">
+      <SheetContent className="flex flex-col py-3 sm:max-w-sm">
         <SheetHeader className="text-start">
           <SheetTitle>{isEdit ? "Edit" : "Create"} Product</SheetTitle>
           <SheetDescription>
@@ -140,7 +136,7 @@ export function InventoryMutateDrawer({
         </SheetHeader>
         <Form {...form}>
           <form
-            id="tasks-form"
+            id="inventory-form"
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex-1 space-y-6 overflow-y-auto px-4">
             <FormField
@@ -298,7 +294,7 @@ export function InventoryMutateDrawer({
               Close
             </Button>
           </SheetClose>
-          <Button form="tasks-form" type="submit" disabled={isPending}>
+          <Button form="inventory-form" type="submit" disabled={isPending}>
             {isPending ? "Saving..." : "Save changes"}
           </Button>
         </SheetFooter>

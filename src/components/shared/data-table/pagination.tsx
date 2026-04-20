@@ -21,7 +21,7 @@ type DataTablePaginationProps<TData> = {
   className?: string;
   meta?: Pagination;
   onPageChange?: (page: number) => void;
-  onPerPageChange: (perPage: number) => void;
+  onPerPageChange?: (perPage: number) => void;
 };
 
 export function DataTablePagination<TData>({
@@ -57,7 +57,13 @@ export function DataTablePagination<TData>({
           <Select
             value={`${perPage}`}
             onValueChange={(value) => {
-              onPerPageChange(Number(value));
+              const nextPerPage = Number(value);
+              if (onPerPageChange) {
+                onPerPageChange(nextPerPage);
+                return;
+              }
+
+              table.setPageSize(nextPerPage);
             }}
           >
             <SelectTrigger className='h-8 w-[70px]'>
