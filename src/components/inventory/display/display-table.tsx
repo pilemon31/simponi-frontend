@@ -33,9 +33,17 @@ type DataTableProps = {
   data: ExternalProduct[];
   onEdit?: (item: ExternalProduct) => void;
   onDelete?: (item: ExternalProduct) => void;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 };
 
-export function DisplayTable({ data, onEdit, onDelete }: DataTableProps) {
+export function DisplayTable({
+  data,
+  searchValue,
+  onEdit,
+  onDelete,
+  onSearchChange,
+}: DataTableProps) {
   // Local UI-only states
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);

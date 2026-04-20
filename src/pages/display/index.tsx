@@ -19,9 +19,10 @@ import { useInventory } from "@/hooks/use-inventory";
 import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DollarSign, Link2, Music, ShoppingCart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSearchParams } from "react-router";
 
 type DisplayPageContentProps = {
   onPrepareEdit: (item: ExternalProduct) => Promise<ExternalProduct>;
@@ -42,6 +43,36 @@ function DisplayPageContent({ onPrepareEdit }: DisplayPageContentProps) {
       setOpen("edit");
     },
     [onPrepareEdit, setCurrentRow, setOpen],
+  );
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const search = searchParams.get("search") ?? "";
+  const [searchInput, setSearchInput] = useState(search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      setSearchParams(
+        (prev) => {
+          const params = new URLSearchParams(prev);
+          if (!value) {
+            params.delete("search");
+          } else {
+            params.set("search", value);
+          }
+          params.set("page", "1");
+          return params;
+        },
+
+        { replace: true },
+      );
+    },
+    [setSearchParams],
   );
 
   const shopeeCount = externalProducts.filter((ep) =>
@@ -137,6 +168,7 @@ function DisplayPageContent({ onPrepareEdit }: DisplayPageContentProps) {
             setCurrentRow(item);
             setOpen("delete");
           }}
+          onSearchChange={handleSearchChange}
         />
       )}
     </Main>
