@@ -17,7 +17,8 @@ import { useInventoryManagement } from "@/hooks/use-inventory-management";
 import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 
 function InventoryPageContent() {
   const { data: inventoryData, isLoading } = useInventory();
@@ -49,6 +50,36 @@ function InventoryPageContent() {
     [setCurrentRow, setOpen],
   );
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const search = searchParams.get("search") ?? "";
+  const [searchInput, setSearchInput] = useState(search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      setSearchParams(
+        (prev) => {
+          const params = new URLSearchParams(prev);
+          if (!value) {
+            params.delete("search");
+          } else {
+            params.set("search", value);
+          }
+          params.set("page", "1");
+          return params;
+        },
+
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   return (
     <>
       <InternalDialogs
@@ -75,7 +106,7 @@ function InventoryPageContent() {
         </div>
 
         <InventoryStatsCard />
-        <InventoryAlertsCard />
+        {/* <InventoryAlertsCard /> */}
 
         {isLoading ? (
           <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
@@ -86,6 +117,7 @@ function InventoryPageContent() {
             data={inventoryData}
             onEdit={handleOpenEdit}
             onDelete={handleOpenDelete}
+            onSearchChange={handleSearchChange}
           />
         )}
       </Main>

@@ -34,9 +34,17 @@ type DataTableProps = {
   data: Inventory[];
   onEdit?: (item: Inventory) => void;
   onDelete?: (item: Inventory) => void;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 };
 
-export function InventoriesTable({ data, onEdit, onDelete }: DataTableProps) {
+export function InventoriesTable({
+  data,
+  searchValue,
+  onSearchChange,
+  onEdit,
+  onDelete,
+}: DataTableProps) {
   // Local UI-only states
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -90,6 +98,8 @@ export function InventoriesTable({ data, onEdit, onDelete }: DataTableProps) {
       <DataTableToolbar
         table={table}
         searchPlaceholder="Filter by product name or SKU..."
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
         filters={[
           {
             columnId: "status",

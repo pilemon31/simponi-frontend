@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { RolesTable } from '@/components/roles/roles-table';
 import { Header } from '@/layouts/header';
@@ -25,9 +25,9 @@ const RolePage = () => {
   const user = useAuthStore((state) => state.auth.user);
 
   const userData = {
-    name: user?.name ?? 'john',
-    email: user?.email ?? 'email@admin.com',
-    avatar: '/avatars/shadcn.jpg',
+    name: user?.name ?? "john",
+    email: user?.email ?? "email@admin.com",
+    avatar: "/avatars/shadcn.jpg",
   };
 
   const [searchParams, setSearchParams] = useSearchParams();
