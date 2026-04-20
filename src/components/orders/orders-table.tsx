@@ -24,14 +24,14 @@ import {
   DataTablePagination,
   DataTableToolbar,
 } from '@/components/shared/data-table';
-import { type Role } from '@/schemas/roles.schema';
+import { type OrderItem } from '@/types/order.type';
 import { DataTableBulkActions } from './data-table-bulk-actions';
-import { rolesColumns as columns } from './roles-columns';
+import { orderColumns as columns } from './orders-columns';
 import { cn } from '@/lib/utils';
 import { type Pagination } from '@/types/response.type';
 
 type DataTableProps = {
-  data: Role[];
+  data: OrderItem[];
   meta?: Pagination;
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -41,7 +41,7 @@ type DataTableProps = {
   onClearFilters?: () => void;
 };
 
-export function RolesTable({
+export function OrdersTable({
   data,
   meta,
   searchValue,

@@ -27,12 +27,12 @@ export const sidebarData = {
         },
         {
           title: 'Order',
-          url: '/order',
+          url: '/orders',
           icon: BadgeDollarSign,
         },
         {
           title: 'Vendor',
-          url: '/vendor',
+          url: '/vendors',
           icon: ShelvingUnit,
           permission_id: '40077ea2-351c-46b9-a78f-1da15c23138e',
         },

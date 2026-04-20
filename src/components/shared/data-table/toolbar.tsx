@@ -10,7 +10,8 @@ type DataTableToolbarProps<TData> = {
   searchPlaceholder?: string;
   searchKey?: string;
   searchValue?: string;
-  onSearchChange?: (value: string) => void;
+  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClearFilters?: () => void;
   filters?: {
     columnId: string;
     title: string;
@@ -28,6 +29,7 @@ export function DataTableToolbar<TData>({
   searchKey,
   searchValue,
   onSearchChange,
+  onClearFilters,
   filters = [],
 }: DataTableToolbarProps<TData>) {
   const effectiveSearchValue =
@@ -55,7 +57,7 @@ export function DataTableToolbar<TData>({
             onChange={(event) => {
               const value = event.target.value;
               table.getColumn(searchKey)?.setFilterValue(value);
-              onSearchChange?.(value);
+              onSearchChange?.(event);
             }}
             className='h-8 w-[150px] lg:w-[250px]'
           />
@@ -66,7 +68,7 @@ export function DataTableToolbar<TData>({
             onChange={(event) => {
               const value = event.target.value;
               table.setGlobalFilter(value);
-              onSearchChange?.(value);
+              onSearchChange?.(event);
             }}
             className='h-8 w-[150px] lg:w-[250px]'
           />
@@ -94,7 +96,7 @@ export function DataTableToolbar<TData>({
               if (searchKey) {
                 table.getColumn(searchKey)?.setFilterValue('');
               }
-              onSearchChange?.('');
+              onClearFilters?.();
             }}
             className='h-8 px-2 lg:px-3'
           >

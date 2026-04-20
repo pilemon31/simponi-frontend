@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '../shared/confirm-dialog';
-import { type Role } from './data/schema';
+import type { Role } from '@/schemas/roles.schema';
 import { useDeleteRole } from '@/hooks/use-roles';
 
 type RoleDeleteDialogProps = {

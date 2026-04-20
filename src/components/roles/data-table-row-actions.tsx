@@ -10,7 +10,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { type Role } from './data/schema';
+import type { Role } from '@/schemas/roles.schema';
 import { useRoles } from './roles-provider';
 
 type DataTableRowActionsProps = {

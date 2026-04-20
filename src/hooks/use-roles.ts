@@ -8,10 +8,10 @@ import type {
 } from '@/schemas/roles.schema';
 import { toast } from 'sonner';
 
-export const useRoles = (search = '') => {
+export const useRoles = (search = '', page = 1, perPage = 10) => {
   return useQuery({
-    queryKey: ['roles', search],
-    queryFn: () => RolesApi.getAll(search),
+    queryKey: ['roles', search, page, perPage],
+    queryFn: () => RolesApi.getAll(search, page, perPage),
   });
 };
 

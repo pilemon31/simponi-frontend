@@ -15,17 +15,17 @@ const fallbackError = (): ErrorResponse => ({
   error: "Unknown error",
 });
 
+// ✅ FIX: tambah param search, dikirim ke backend via query params
 export const getVendors = async (
   page = 1,
-  perPage = 10
+  perPage = 10,
+  search = ""
 ): Promise<VendorListResponse | ErrorResponse> => {
   try {
-    const response = await axiosConfig.get("/vendors", {
-      params: { page, per_page: perPage },
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const params: Record<string, unknown> = { page, per_page: perPage };
+    if (search) params.search = search;
+
+    const response = await axiosConfig.get("/vendors", { params });
     return response.data as VendorListResponse;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response)

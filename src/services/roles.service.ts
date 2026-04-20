@@ -9,11 +9,13 @@ import type {
 } from '@/schemas/roles.schema';
 
 export const RolesApi = {
-  getAll: async (search = '') => {
+  getAll: async (search = '', page = 1, perPage = 10) => {
     try {
       const response = await axiosConfig.get<GetAllRoleResponse>('/roles', {
         params: {
           search: search || undefined,
+          page: String(page),
+          per_page: String(perPage),
         },
       });
 
