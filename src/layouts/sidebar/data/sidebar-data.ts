@@ -66,8 +66,17 @@ export const sidebarData = {
         },
         {
           title: 'Activity',
-          url: '/activity',
           icon: Cctv,
+          items: [
+            {
+              title: 'Logging',
+              url: '/activity',
+            },
+            {
+              title: 'Inventory Log',
+              url: '/inventory-log',
+            },
+          ],
           permission_id: '55555555-0ea2-426c-89e7-e25e71c0b88f',
         },
       ],

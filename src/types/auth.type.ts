@@ -5,4 +5,9 @@ export type SignInResponseData = {
   refresh_token: string;
 };
 
+export type ImpersonateData = {
+  access_token: string;
+};
+
 export type SignInResponse = SuccessResponse<SignInResponseData>;
+export type ImpersonateResponse = SuccessResponse<ImpersonateData>;

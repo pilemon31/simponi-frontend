@@ -2,16 +2,13 @@ import { ConfigDrawer } from '@/components/shared/config-drawer';
 import { ProfileDropdown } from '@/components/shared/profile-dropdown';
 import { Search } from '@/components/shared/search';
 import { ThemeSwitch } from '@/components/shared/theme-switcher';
-import UserCards from '@/components/users/user-cards';
 import { Header } from '@/layouts/header';
 import { Main } from '@/layouts/main';
 import { getUsers } from '@/services/users.service';
 import { useAuthStore } from '@/stores/auth-store';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import UserCardsSkeleton from '@/components/users/user-cards-skeleton';
 import { UsersTable } from '@/components/users/users-table';
-import { users } from '@/components/users/data/users';
 
 const UserManagementPage = () => {
   const user = useAuthStore((state) => state.auth.user);
@@ -57,24 +54,15 @@ const UserManagementPage = () => {
           </div>
         </div>
 
-        <UsersTable data={users} />
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {isLoading || isFetching ? (
-            <>
-              <UserCardsSkeleton />
-              <UserCardsSkeleton />
-            </>
-          ) : isError || !usersData?.status ? (
-            <p className="text-center text-sm text-gray-700">
-              Failed to load users. Please try again later.
-            </p>
-          ) : (
-            usersData.data.map((user) => (
-              <UserCards key={user.id} user={user} />
-            ))
-          )}
-        </div>
+        {isLoading || isFetching ? (
+          <UsersTable data={[]} />
+        ) : isError || !usersData?.status ? (
+          <p className="text-center text-sm text-gray-700">
+            Failed to load users. Please try again later.
+          </p>
+        ) : (
+          <UsersTable data={usersData.data} />
+        )}
       </Main>
     </>
   );
