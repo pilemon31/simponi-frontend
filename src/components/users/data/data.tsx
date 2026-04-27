@@ -1,23 +1,17 @@
-import {
-  User,
-  ShieldCheck,
-  ShieldMinus,
-  UserStar,
-  UserKey,
-} from 'lucide-react';
+import { User, UserStar, UserKey } from 'lucide-react';
 
-export const Status = [
-  {
-    label: 'Active',
-    value: 'active' as const,
-    icon: ShieldCheck,
-  },
-  {
-    label: 'Inactive',
-    value: 'inactive' as const,
-    icon: ShieldMinus,
-  },
-];
+// export const Status = [
+//   {
+//     label: 'Active',
+//     value: 'active' as const,
+//     icon: ShieldCheck,
+//   },
+//   {
+//     label: 'Inactive',
+//     value: 'inactive' as const,
+//     icon: ShieldMinus,
+//   },
+// ];
 
 export const Roles = [
   {

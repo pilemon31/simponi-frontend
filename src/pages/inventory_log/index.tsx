@@ -4,9 +4,7 @@ import { ThemeSwitch } from '@/components/shared/theme-switcher';
 import { ConfigDrawer } from '@/components/shared/config-drawer';
 import { ProfileDropdown } from '@/components/shared/profile-dropdown';
 import { Main } from '@/layouts/main';
-import { Redo, Undo } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router';
-import { Button } from '@/components/ui/button';
+import { useSearchParams } from 'react-router';
 import { InventoryLogsTable } from '@/components/inventory-log/inventory-logs-table';
 import { Input } from '@/components/ui/input';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -14,7 +12,6 @@ import { useInventoryLogs } from '@/hooks/use-inventory-log';
 import { type InventoryLog } from '@/components/inventory-log/data/schema';
 
 const InventoryLogPage = () => {
-  const navigate = useNavigate();
   const user = useAuthStore((state) => state.auth.user);
 
   const userData = {
@@ -97,18 +94,7 @@ const InventoryLogPage = () => {
             <div className="flex gap-1">
               <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                 Inventory Log
-                <span>
-                  <Redo size={12} className="translate-y-1" />
-                  <Undo className="transform scale-y-[-1]" size={12} />
-                </span>
               </h2>
-              <Button
-                variant={'ghost'}
-                onClick={() => navigate('/activity')}
-                className="text-xs px-1 hover:bg-transparent hover:underline"
-              >
-                Activity Log
-              </Button>
             </div>
           </div>
           <p className="text-muted-foreground">

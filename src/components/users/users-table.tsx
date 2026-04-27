@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
   type VisibilityState,
@@ -26,12 +27,12 @@ import {
 } from '@/components/shared/data-table';
 import { DataTableBulkActions } from './data-table-bulk-actions';
 import { cn } from '@/lib/utils';
-import type { User } from './data/schema';
 import { usersColumns as columns } from './users-columns';
-import { Roles, Status } from './data/data';
+import { Roles } from './data/data';
+import type { ProfileResponseData } from '@/types/user.type';
 
 type DataTableProps = {
-  data: User[];
+  data: ProfileResponseData[];
 };
 
 export function UsersTable({ data }: DataTableProps) {
@@ -42,9 +43,11 @@ export function UsersTable({ data }: DataTableProps) {
   const [globalFilter, setGlobalFilter] = useState('');
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const typedColumns = columns as ColumnDef<ProfileResponseData, unknown>[];
+
   const table = useReactTable({
     data,
-    columns,
+    columns: typedColumns,
     state: {
       sorting,
       columnVisibility,
@@ -84,11 +87,6 @@ export function UsersTable({ data }: DataTableProps) {
         table={table}
         searchPlaceholder="Filter by activity or ID..."
         filters={[
-          {
-            columnId: 'status',
-            title: 'Status',
-            options: Status,
-          },
           {
             columnId: 'role_name',
             title: 'Role',
