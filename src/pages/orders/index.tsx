@@ -1,6 +1,5 @@
 'use client';
 
-
 import { Header } from '@/layouts/header';
 import { useAuthStore } from '@/stores/auth-store';
 import { Search } from '@/components/shared/search';
@@ -8,22 +7,33 @@ import { ThemeSwitch } from '@/components/shared/theme-switcher';
 import { ConfigDrawer } from '@/components/shared/config-drawer';
 import { ProfileDropdown } from '@/components/shared/profile-dropdown';
 import { Main } from '@/layouts/main';
-import { RolesProvider } from '@/components/roles/roles-provider';
-import { RolesPrimaryButtons } from '@/components/roles/roles-primary-buttons';
-import { RolesDialogs } from '@/components/roles/roles-dialog';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import type { ErrorResponse } from '@/types/response.type';
-import type { GetAllOrdersResponse } from '@/types/order.type';
-import { useOrders } from '@/hooks/use-orders';
+import type { GetAllOrdersResponse, OrderItem } from '@/types/order.type';
+import { useOrders as useOrdersQuery } from '@/hooks/use-orders';
 import { OrdersTable } from '@/components/orders/orders-table';
+import {
+  OrdersProvider,
+  useOrders as useOrdersDialogs,
+} from '@/components/orders/orders-provider';
+import { OrdersDialogs } from '@/components/orders/orders-dialog';
 
 const isGetAllOrdersSuccess = (
   response: GetAllOrdersResponse | ErrorResponse | undefined,
 ): response is GetAllOrdersResponse => response?.status === true;
 
 const OrderPage = () => {
+  return (
+    <OrdersProvider>
+      <OrderPageContent />
+    </OrdersProvider>
+  );
+};
+
+const OrderPageContent = () => {
   const user = useAuthStore((state) => state.auth.user);
+  const { setCurrentRow, setOpen } = useOrdersDialogs();
 
   const userData = {
     name: user?.name ?? 'john',
@@ -70,7 +80,7 @@ const OrderPage = () => {
       () => {
         const params = new URLSearchParams();
         params.set('page', '1');
-        params.set('limit', String(perPage));
+        params.set('per_page', String(perPage));
         return params;
       },
       { replace: true },
@@ -103,46 +113,47 @@ const OrderPage = () => {
     );
   };
 
-  const { data: ordersData } = useOrders(searchInput, page, perPage);
+  const { data: ordersData } = useOrdersQuery(searchInput, page, perPage);
   const data = isGetAllOrdersSuccess(ordersData) ? ordersData.data : [];
   const meta = isGetAllOrdersSuccess(ordersData) ? ordersData.meta : undefined;
 
+  const handleViewDetail = (item: OrderItem) => {
+    setCurrentRow(item);
+    setOpen('detail');
+  };
+
   return (
     <>
-      <RolesProvider>
-        <RolesDialogs />
-        <Header>
-          <Search />
-          <div className='ms-auto flex items-center space-x-4'>
-            <ThemeSwitch />
-            <ConfigDrawer />
-            <ProfileDropdown user={userData} />
+      <OrdersDialogs />
+      <Header>
+        <Search />
+        <div className='ms-auto flex items-center space-x-4'>
+          <ThemeSwitch />
+          <ConfigDrawer />
+          <ProfileDropdown user={userData} />
+        </div>
+      </Header>
+      <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
+        <div className='flex flex-wrap items-end justify-between gap-2'>
+          <div>
+            <h2 className='text-2xl font-bold tracking-tight'>Orders</h2>
+            <p className='text-muted-foreground'>
+              Here&apos;s a list of your orders
+            </p>
           </div>
-        </Header>
-        <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
-          <div className='flex flex-wrap items-end justify-between gap-2'>
-            <div>
-              <h2 className='text-2xl font-bold tracking-tight'>
-                Orders
-              </h2>
-              <p className='text-muted-foreground'>
-                Here&apos;s a list of your orders
-              </p>
-            </div>
-            <RolesPrimaryButtons />
-          </div>
-          <OrdersTable
-            data={data}
-            meta={meta}
-            searchValue={searchInput}
-            onSearchChange={handleSearchChange}
-            onPageChange={handlePageChange}
-            onPerPageChange={handlePerPageChange}
-            onSetQueryParam={HandleQueryParam}
-            onClearFilters={HandleFilters}
-          />
-        </Main>
-      </RolesProvider>
+        </div>
+        <OrdersTable
+          data={data}
+          meta={meta}
+          onViewDetail={handleViewDetail}
+          searchValue={searchInput}
+          onSearchChange={handleSearchChange}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSetQueryParam={HandleQueryParam}
+          onClearFilters={HandleFilters}
+        />
+      </Main>
     </>
   );
 };

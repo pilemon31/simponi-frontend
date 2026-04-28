@@ -33,6 +33,7 @@ import { type Pagination } from '@/types/response.type';
 type DataTableProps = {
   data: OrderItem[];
   meta?: Pagination;
+  onViewDetail?: (item: OrderItem) => void;
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPageChange?: (page: number) => void;
@@ -44,6 +45,7 @@ type DataTableProps = {
 export function OrdersTable({
   data,
   meta,
+  onViewDetail,
   searchValue,
   onSearchChange,
   onPageChange,
@@ -58,6 +60,9 @@ export function OrdersTable({
   const table = useReactTable({
     data,
     columns,
+    meta: {
+      onViewDetail,
+    },
     state: {
       sorting,
       columnVisibility,
@@ -86,7 +91,7 @@ export function OrdersTable({
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Filter by role name or module.'
+        searchPlaceholder='Filter by order number or buyer.'
         searchValue={searchValue}
         onSearchChange={onSearchChange}
         onClearFilters={onClearFilters}
