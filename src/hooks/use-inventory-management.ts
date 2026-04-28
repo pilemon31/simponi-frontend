@@ -1,5 +1,9 @@
-import { adaptExternalProductToInventory } from "@/components/inventory/internal/data/adapter";
-import type { Inventory } from "@/components/inventory/internal/data/schema";
+import type {
+  ExternalProductData,
+  InternalInventory,
+  ProductCategoryData,
+} from "@/types/product.type";
+import type { InternalInventoryMutateValues } from "@/schemas/product.schema";
 import { resolveImageUrl } from "@/lib/media";
 import {
   createProduct,
@@ -7,25 +11,36 @@ import {
   getProductByID,
   updateProduct,
 } from "@/services/product.service";
-import type { ProductCategoryData } from "@/types/product.type";
 import type { ErrorResponse } from "@/types/response.type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { useUpload } from "./use-upload";
 
+const normalizePlatform = (platform: string): "shopee" | "tiktok" =>
+  platform.toLowerCase().includes("tiktok") ? "tiktok" : "shopee";
+
+const adaptExternalProductToInventory = (
+  externalProduct: ExternalProductData,
+) => ({
+  id: externalProduct.id,
+  platform: normalizePlatform(externalProduct.platform),
+  product_name: externalProduct.product_name,
+  image: externalProduct.image_url ?? null,
+  store_platform_name:
+    externalProduct.store_platform_name || externalProduct.platform,
+  price: externalProduct.price,
+  created_at: externalProduct.created_at,
+  updated_at: externalProduct.updated_at,
+});
+
 type CategoryOption = {
   id: string;
   name: string;
 };
 
-type InventoryMutateValues = {
-  name: string;
-  sku: string;
-  stock: number;
+type InventoryMutateValues = InternalInventoryMutateValues & {
   imageFile?: File | null;
-  categoryId?: string;
-  description?: string;
 };
 
 const INTERNAL_CATEGORIES: ProductCategoryData[] = [
@@ -66,7 +81,7 @@ const uniqueCategories = (categories: CategoryOption[]): CategoryOption[] => {
   );
 };
 
-export function useInventoryManagement(inventoryItems: Inventory[]) {
+export function useInventoryManagement(inventoryItems: InternalInventory[]) {
   const queryClient = useQueryClient();
   const { uploadAsync, isPending: isUploading } = useUpload();
 
@@ -205,7 +220,7 @@ export function useInventoryManagement(inventoryItems: Inventory[]) {
   };
 
   const updateInventory = async (
-    row: Inventory,
+    row: InternalInventory,
     values: InventoryMutateValues,
   ) => {
     await updateMutation.mutateAsync({
@@ -220,11 +235,13 @@ export function useInventoryManagement(inventoryItems: Inventory[]) {
     return true;
   };
 
-  const deleteInventory = async (row: Inventory) => {
+  const deleteInventory = async (row: InternalInventory) => {
     await deleteMutation.mutateAsync(row.id);
   };
 
-  const getInventoryForEdit = async (item: Inventory): Promise<Inventory> => {
+  const getInventoryForEdit = async (
+    item: InternalInventory,
+  ): Promise<InternalInventory> => {
     const detailResponse = await getProductByID(item.id);
 
     if (detailResponse.status !== true) {

@@ -1,12 +1,12 @@
-import InventoryStatsCard from "@/components/inventory/internal/internal-cards";
-import { InternalDialogs } from "@/components/inventory/internal/internal-dialog";
+import InventoryStatsCard from "@/components/inventory/internal-cards";
+import { InternalDialogs } from "@/components/inventory/internal-dialog";
 import {
   InventoryProvider,
   useInventoryDialogs,
-} from "@/components/inventory/internal/internal-provider";
-import { InternalPrimaryButtons } from "@/components/inventory/internal/internal-primary-buttons";
-import { InventoriesTable } from "@/components/inventory/internal/internal-table";
-import type { Inventory } from "@/components/inventory/internal/data/schema";
+} from "@/components/inventory/internal-provider";
+import { InternalPrimaryButtons } from "@/components/inventory/internal-primary-buttons";
+import { InventoriesTable } from "@/components/inventory/internal-table";
+import type { InternalInventory } from "@/types/product.type";
 import { ConfigDrawer } from "@/components/shared/config-drawer";
 import { ProfileDropdown } from "@/components/shared/profile-dropdown";
 import { Search } from "@/components/shared/search";
@@ -16,11 +16,30 @@ import { useInventoryManagement } from "@/hooks/use-inventory-management";
 import { Header } from "@/layouts/header";
 import { Main } from "@/layouts/main";
 import { useAuthStore } from "@/stores/auth-store";
-import { type ChangeEvent, useCallback, useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router";
 
 function InventoryPageContent() {
-  const { data: inventoryData, isLoading } = useInventory();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const search = searchParams.get("search") ?? "";
+  const page = Number(searchParams.get("page")) || 1;
+  const perPage = Number(searchParams.get("per_page")) || 10;
+  const [searchInput, setSearchInput] = useState(search);
+
+  const { data: inventoryData, meta } = useInventory(
+    searchInput,
+    page,
+    perPage,
+  );
+
   const { setCurrentRow, setOpen } = useInventoryDialogs();
   const {
     categories,
@@ -33,7 +52,7 @@ function InventoryPageContent() {
   } = useInventoryManagement(inventoryData);
 
   const handleOpenEdit = useCallback(
-    async (item: Inventory) => {
+    async (item: InternalInventory) => {
       const hydratedRow = await getInventoryForEdit(item);
       setCurrentRow(hydratedRow);
       setOpen("edit");
@@ -42,43 +61,85 @@ function InventoryPageContent() {
   );
 
   const handleOpenDelete = useCallback(
-    (item: Inventory) => {
+    (item: InternalInventory) => {
       setCurrentRow(item);
       setOpen("delete");
     },
     [setCurrentRow, setOpen],
   );
 
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const search = searchParams.get("search") ?? "";
-  const [searchInput, setSearchInput] = useState(search);
-
   useEffect(() => {
     setSearchInput(search);
   }, [search]);
 
-  const handleSearchChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      setSearchInput(value);
+  const handleQueryParam = useCallback(
+    (key: string, value: string) => {
       setSearchParams(
         (prev) => {
           const params = new URLSearchParams(prev);
-          if (!value) {
-            params.delete("search");
+
+          if (!value || value === "all") {
+            params.delete(key);
           } else {
-            params.set("search", value);
+            params.set(key, value);
           }
-          params.set("page", "1");
+
+          if (key !== "page") {
+            params.set("page", "1");
+          }
+
           return params;
         },
-
         { replace: true },
       );
     },
     [setSearchParams],
   );
+
+  const handleClearFilters = () => {
+    setSearchInput("");
+    setSearchParams(
+      () => {
+        const params = new URLSearchParams();
+        params.set("page", "1");
+        params.set("per_page", String(perPage));
+        return params;
+      },
+      { replace: true },
+    );
+  };
+
+  const handleSearchChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setSearchInput(value);
+
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+
+      debounceRef.current = setTimeout(() => {
+        handleQueryParam("search", value);
+      }, 500);
+    },
+    [handleQueryParam],
+  );
+
+  const handlePageChange = (nextPage: number) => {
+    handleQueryParam("page", String(nextPage));
+  };
+
+  const handlePerPageChange = (nextPerPage: number) => {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        params.set("per_page", String(nextPerPage));
+        params.set("page", "1");
+        return params;
+      },
+      { replace: true },
+    );
+  };
 
   return (
     <>
@@ -108,19 +169,18 @@ function InventoryPageContent() {
         <InventoryStatsCard />
         {/* <InventoryAlertsCard /> */}
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-            Loading internal products...
-          </div>
-        ) : (
-          <InventoriesTable
-            data={inventoryData}
-            onEdit={handleOpenEdit}
-            onDelete={handleOpenDelete}
-            searchValue={searchInput}
-            onSearchChange={handleSearchChange}
-          />
-        )}
+        <InventoriesTable
+          data={inventoryData}
+          meta={meta}
+          onEdit={handleOpenEdit}
+          onDelete={handleOpenDelete}
+          searchValue={searchInput}
+          onSearchChange={handleSearchChange}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSetQueryParam={handleQueryParam}
+          onClearFilters={handleClearFilters}
+        />
       </Main>
     </>
   );

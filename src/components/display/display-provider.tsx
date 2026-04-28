@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { type ExternalProduct } from "./data/schema";
+import type { DisplayExternalProduct } from "@/types/external-product.type";
 import useDialogState from "@/hooks/use-dialog-state";
 
 type DisplayDialogType = "add" | "edit" | "delete";
@@ -7,15 +7,19 @@ type DisplayDialogType = "add" | "edit" | "delete";
 type DisplayContextType = {
   open: DisplayDialogType | null;
   setOpen: (str: DisplayDialogType | null) => void;
-  currentRow: ExternalProduct | null;
-  setCurrentRow: React.Dispatch<React.SetStateAction<ExternalProduct | null>>;
+  currentRow: DisplayExternalProduct | null;
+  setCurrentRow: React.Dispatch<
+    React.SetStateAction<DisplayExternalProduct | null>
+  >;
 };
 
 const DisplayContext = React.createContext<DisplayContextType | null>(null);
 
 export function DisplayProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useDialogState<DisplayDialogType>(null);
-  const [currentRow, setCurrentRow] = useState<ExternalProduct | null>(null);
+  const [currentRow, setCurrentRow] = useState<DisplayExternalProduct | null>(
+    null,
+  );
 
   return (
     <DisplayContext value={{ open, setOpen, currentRow, setCurrentRow }}>

@@ -24,16 +24,16 @@ import {
   DataTablePagination,
   DataTableToolbar,
 } from "@/components/shared/data-table";
-import { type Inventory } from "./data/schema";
+import type { InternalInventory } from "@/types/product.type";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
 import { inventoryColumns as columns } from "./internal-columns";
 import { cn } from "@/lib/utils";
 import type { Pagination } from "@/types/response.type";
 
 type DataTableProps = {
-  data: Inventory[];
-  onEdit?: (item: Inventory) => void;
-  onDelete?: (item: Inventory) => void;
+  data: InternalInventory[];
+  onEdit?: (item: InternalInventory) => void;
+  onDelete?: (item: InternalInventory) => void;
   meta?: Pagination;
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;

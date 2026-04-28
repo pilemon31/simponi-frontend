@@ -20,12 +20,17 @@ const fallbackError = (
 });
 
 export const getExternalProducts = async (
+  search = "",
   page: number = 1,
   perPage: number = 10,
 ): Promise<ExternalProductListResponse | ErrorResponse> => {
   try {
     const response = await axiosConfig.get("/external-products", {
-      params: { page, per_page: perPage },
+      params: {
+        search: search || undefined,
+        page,
+        per_page: perPage,
+      },
     });
     return response.data as ExternalProductListResponse;
   } catch (error) {

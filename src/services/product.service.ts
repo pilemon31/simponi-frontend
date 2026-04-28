@@ -33,11 +33,17 @@ import axios, { AxiosError } from "axios";
 //   }
 // };
 
-export const getProducts = async (search = "") => {
+export const getProducts = async (
+  search = "",
+  page: number = 1,
+  perPage: number = 10,
+): Promise<ProductListResponse | ErrorResponse> => {
   try {
     const response = await axiosConfig.get<ProductListResponse>("/products", {
       params: {
         search: search || undefined,
+        page,
+        per_page: perPage,
       },
     });
 

@@ -1,8 +1,10 @@
-import { adaptProductToInventory } from "@/components/inventory/internal/data/adapter";
-import type { Inventory } from "@/components/inventory/internal/data/schema";
+import { resolveImageUrl } from "@/lib/media";
 import { getProducts, getProductStats } from "@/services/product.service";
 import { uploadProductImages } from "@/services/upload.service";
 import type {
+  InternalInventory,
+  InternalInventoryExternalProduct,
+  InternalInventoryStatusState,
   ProductListItem,
   ProductListResponse,
   ProductStatsData,
@@ -10,15 +12,67 @@ import type {
 import type { ErrorResponse, Pagination } from "@/types/response.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 type UseInventoryResult = {
-  data: Inventory[];
+  data: InternalInventory[];
   isLoading: boolean;
   isError: boolean;
   maxPage: number;
   totalCount: number;
+  meta?: Pagination;
   refetch: () => void;
 };
+
+const normalizePlatform = (platform: string): "shopee" | "tiktok" =>
+  platform.toLowerCase().includes("tiktok") ? "tiktok" : "shopee";
+
+const normalizeStatus = (
+  status: ProductListItem["status"],
+): InternalInventoryStatusState => {
+  if (status === "Out of stock") {
+    return "Out of Stock";
+  }
+
+  return status as InternalInventoryStatusState;
+};
+
+const adaptExternalProductToInventory = (
+  externalProduct: NonNullable<ProductListItem["external_products"]>[number],
+): InternalInventoryExternalProduct => ({
+  id: externalProduct.id,
+  platform: normalizePlatform(externalProduct.platform),
+  product_name: externalProduct.product_name,
+  image: externalProduct.image_url ?? null,
+  store_platform_name:
+    externalProduct.store_platform_name || externalProduct.platform,
+  price: externalProduct.price,
+  created_at: externalProduct.created_at,
+  updated_at: externalProduct.updated_at,
+});
+
+const adaptProductToInventory = (
+  product: ProductListItem,
+): InternalInventory => ({
+  id: product.id,
+  name: product.name,
+  description: "",
+  sku: product.sku,
+  stock: product.stock,
+  category: product.category
+    ? { id: product.category.id, name: product.category.name }
+    : null,
+  imageUrl: resolveImageUrl(product.images?.[0]?.image_url),
+  externalProducts: (product.external_products ?? []).map(
+    adaptExternalProductToInventory,
+  ),
+  status: {
+    state: normalizeStatus(product.status),
+    lastUpdated: formatDistanceToNow(new Date(product.created_at), {
+      addSuffix: false,
+    }),
+  },
+});
 
 const normalizeProductItems = (
   response: ProductListResponse | ErrorResponse | undefined,
@@ -39,13 +93,13 @@ const normalizeProductItems = (
 
   const items: ProductListItem[] = Array.isArray(responseData)
     ? responseData
-    : Array.isArray(responseData.data)
+    : responseData && Array.isArray(responseData.data)
       ? responseData.data
       : [];
 
   const pagination: Pagination | null = Array.isArray(responseData)
     ? (response.meta ?? null)
-    : (responseData.pagination ?? response.meta ?? null);
+    : (responseData?.pagination ?? response.meta ?? null);
 
   return {
     isSuccess: true,
@@ -54,10 +108,14 @@ const normalizeProductItems = (
   };
 };
 
-export const useInventory = (search = ""): UseInventoryResult => {
+export const useInventory = (
+  search = "",
+  page = 1,
+  perPage = 10,
+): UseInventoryResult => {
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["products", search],
-    queryFn: () => getProducts(search),
+    queryKey: ["products", search, page, perPage],
+    queryFn: () => getProducts(search, page, perPage),
   });
 
   const normalized = normalizeProductItems(data);
@@ -70,6 +128,7 @@ export const useInventory = (search = ""): UseInventoryResult => {
     isError: isError || (hasResponse && !normalized.isSuccess),
     maxPage: normalized.pagination?.max_page ?? 1,
     totalCount: normalized.pagination?.count ?? mappedData.length,
+    meta: normalized.pagination ?? undefined,
     refetch,
   };
 };

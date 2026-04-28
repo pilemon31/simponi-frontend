@@ -43,3 +43,15 @@ export const updateStockSchema = z.object({
   }),
   note: z.string().optional(),
 });
+
+export const internalInventoryMutateSchema = z.object({
+  name: z.string().trim().min(1, "Product name is required"),
+  sku: z.string().trim().min(1, "SKU is required"),
+  stock: z.number().min(0, "Stock cannot be negative"),
+  categoryId: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export type InternalInventoryMutateValues = z.infer<
+  typeof internalInventoryMutateSchema
+>;

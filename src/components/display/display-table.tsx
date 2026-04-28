@@ -27,13 +27,13 @@ import {
 import { DataTableBulkActions } from "./data-table-bulk-actions";
 import { displayColumns as columns } from "./display-columns";
 import { cn } from "@/lib/utils";
-import { type ExternalProduct } from "./data/schema";
+import type { DisplayExternalProduct } from "@/types/external-product.type";
 import type { Pagination } from "@/types/response.type";
 
 type DataTableProps = {
-  data: ExternalProduct[];
-  onEdit?: (item: ExternalProduct) => void;
-  onDelete?: (item: ExternalProduct) => void;
+  data: DisplayExternalProduct[];
+  onEdit?: (item: DisplayExternalProduct) => void;
+  onDelete?: (item: DisplayExternalProduct) => void;
   meta?: Pagination;
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;

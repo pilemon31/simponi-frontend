@@ -28,10 +28,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  createProductSchema,
-  type CreateProductFormValues,
-  type Inventory,
-} from "./data/schema";
+  internalInventoryMutateSchema,
+  type InternalInventoryMutateValues,
+} from "@/schemas/product.schema";
+import type { InternalInventory } from "@/types/product.type";
 import { resolveImageUrl } from "@/lib/media";
 
 type CategoryOption = {
@@ -40,14 +40,14 @@ type CategoryOption = {
 };
 
 type InventoryMutateDrawerProps = {
-  currentRow?: Inventory;
+  currentRow?: InternalInventory;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isPending?: boolean;
   categories?: CategoryOption[];
   onSubmitForm?: (
-    values: CreateProductFormValues & { imageFile?: File | null },
-    currentRow?: Inventory,
+    values: InternalInventoryMutateValues & { imageFile?: File | null },
+    currentRow?: InternalInventory,
   ) => boolean | void | Promise<boolean | void>;
 };
 
@@ -79,8 +79,8 @@ export function InventoryMutateDrawer({
   const existingImagePreview = resolveImageUrl(currentRow?.imageUrl);
   const previewImageSrc = selectedImagePreview || existingImagePreview;
 
-  const form = useForm<CreateProductFormValues>({
-    resolver: zodResolver(createProductSchema),
+  const form = useForm<InternalInventoryMutateValues>({
+    resolver: zodResolver(internalInventoryMutateSchema),
     defaultValues: isEdit
       ? {
           name: currentRow.name,
@@ -103,7 +103,7 @@ export function InventoryMutateDrawer({
     setImageFile(null);
   };
 
-  const onSubmit = async (values: CreateProductFormValues) => {
+  const onSubmit = async (values: InternalInventoryMutateValues) => {
     const shouldClose = await onSubmitForm?.(
       { ...values, imageFile },
       currentRow,

@@ -9,10 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { ExternalProduct } from "./data/schema";
+import type { DisplayExternalProduct } from "@/types/external-product.type";
 import { resolveImageUrl } from "@/lib/media";
 
-export const displayColumns: ColumnDef<ExternalProduct>[] = [
+export const displayColumns: ColumnDef<DisplayExternalProduct>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -119,8 +119,8 @@ export const displayColumns: ColumnDef<ExternalProduct>[] = [
       const rowData = row.original;
       const meta = table.options.meta as
         | {
-            onEdit?: (item: ExternalProduct) => void;
-            onDelete?: (item: ExternalProduct) => void;
+            onEdit?: (item: DisplayExternalProduct) => void;
+            onDelete?: (item: DisplayExternalProduct) => void;
           }
         | undefined;
 
