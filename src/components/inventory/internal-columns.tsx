@@ -1,7 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
-import { type Inventory } from "./data/schema";
+import type { InternalInventory } from "@/types/product.type";
 import {
   MoreVertical,
   Music,
@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export const inventoryColumns: ColumnDef<Inventory>[] = [
+export const inventoryColumns: ColumnDef<InternalInventory>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -194,8 +194,8 @@ export const inventoryColumns: ColumnDef<Inventory>[] = [
       const rowData = row.original;
       const meta = table.options.meta as
         | {
-            onEdit?: (item: Inventory) => void;
-            onDelete?: (item: Inventory) => void;
+            onEdit?: (item: InternalInventory) => void;
+            onDelete?: (item: InternalInventory) => void;
           }
         | undefined;
 

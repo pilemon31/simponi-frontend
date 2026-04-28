@@ -29,6 +29,38 @@ export type ProductStatus =
   | "Out of Stock"
   | "Out of stock";
 
+export type InternalInventoryStatusState =
+  | "Mapped"
+  | "Low Stock"
+  | "Unmapped"
+  | "Out of Stock";
+
+export type InternalInventoryExternalProduct = {
+  id: string;
+  image: string | null;
+  product_name: string;
+  platform: "shopee" | "tiktok";
+  store_platform_name: string;
+  price: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type InternalInventory = {
+  id: string;
+  name: string;
+  description: string;
+  sku: string;
+  stock: number;
+  category: Pick<ProductCategoryData, "id" | "name"> | null;
+  imageUrl: string | null;
+  externalProducts: InternalInventoryExternalProduct[];
+  status: {
+    state: InternalInventoryStatusState;
+    lastUpdated: string;
+  };
+};
+
 export type ProductData = {
   id: string;
   name: string;

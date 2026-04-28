@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { type Inventory } from './data/schema';
-import useDialogState from '@/hooks/use-dialog-state';
+import React, { useState } from "react";
+import type { InternalInventory } from "@/types/product.type";
+import useDialogState from "@/hooks/use-dialog-state";
 
-type InventoryDialogType = 'add' | 'edit' | 'delete';
+type InventoryDialogType = "add" | "edit" | "delete";
 
 type InventoryContextType = {
   open: InventoryDialogType | null;
   setOpen: (str: InventoryDialogType | null) => void;
-  currentRow: Inventory | null;
-  setCurrentRow: React.Dispatch<React.SetStateAction<Inventory | null>>;
+  currentRow: InternalInventory | null;
+  setCurrentRow: React.Dispatch<React.SetStateAction<InternalInventory | null>>;
 };
 
 const InventoryContext = React.createContext<InventoryContextType | null>(null);
 
 export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useDialogState<InventoryDialogType>(null);
-  const [currentRow, setCurrentRow] = useState<Inventory | null>(null);
+  const [currentRow, setCurrentRow] = useState<InternalInventory | null>(null);
 
   return (
     <InventoryContext value={{ open, setOpen, currentRow, setCurrentRow }}>
@@ -30,7 +30,7 @@ export const useInventoryDialogs = () => {
 
   if (!inventoryContext) {
     throw new Error(
-      'useInventoryDialogs has to be used within <InventoryProvider>',
+      "useInventoryDialogs has to be used within <InventoryProvider>",
     );
   }
 

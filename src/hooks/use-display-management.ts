@@ -1,20 +1,33 @@
-import { adaptExternalProductToInventory } from "@/components/inventory/display/data/adapter";
-import type { ExternalProduct } from "@/components/inventory/display/data/schema";
+import type { DisplayMutateValues } from "@/schemas/external-product.schema";
 import {
   createExternalProduct,
   deleteExternalProduct,
   getExternalProductByID,
   updateExternalProduct,
 } from "@/services/external-product.service";
+import type {
+  DisplayExternalProduct,
+  ExternalProductItem,
+} from "@/types/external-product.type";
 import type { ErrorResponse } from "@/types/response.type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-type DisplayMutateValues = {
-  productId: string;
-  storePlatformId: string;
-  price: number;
-};
+const normalizePlatform = (platform: string): "shopee" | "tiktok" =>
+  platform.toLowerCase().includes("tiktok") ? "tiktok" : "shopee";
+
+const adaptExternalProductToDisplay = (
+  externalProduct: ExternalProductItem,
+): DisplayExternalProduct => ({
+  id: externalProduct.id,
+  image: externalProduct.image ?? null,
+  product_name: externalProduct.product_name,
+  platform: normalizePlatform(externalProduct.platform),
+  store_platform_name: externalProduct.store_platform_name ?? "",
+  price: externalProduct.price,
+  created_at: externalProduct.created_at,
+  updated_at: externalProduct.updated_at,
+});
 
 export const STORE_PLATFORM_OPTIONS = [
   { id: "c1b2c3d4-0008-4000-8000-000000000001", label: "Shopee" },
@@ -103,7 +116,7 @@ export function useDisplayManagement() {
   };
 
   const updateDisplayProduct = async (
-    row: ExternalProduct,
+    row: DisplayExternalProduct,
     values: DisplayMutateValues,
   ) => {
     await updateMutation.mutateAsync({
@@ -114,20 +127,20 @@ export function useDisplayManagement() {
     return true;
   };
 
-  const deleteDisplayProduct = async (row: ExternalProduct) => {
+  const deleteDisplayProduct = async (row: DisplayExternalProduct) => {
     await deleteMutation.mutateAsync(row.id);
   };
 
   const getDisplayForEdit = async (
-    item: ExternalProduct,
-  ): Promise<ExternalProduct> => {
+    item: DisplayExternalProduct,
+  ): Promise<DisplayExternalProduct> => {
     const detailResponse = await getExternalProductByID(item.id);
 
     if (detailResponse.status !== true) {
       return item;
     }
 
-    return adaptExternalProductToInventory(detailResponse.data);
+    return adaptExternalProductToDisplay(detailResponse.data);
   };
 
   return {

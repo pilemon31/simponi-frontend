@@ -1,64 +1,68 @@
-import { InventoryDeleteDialog } from "@/components/inventory/internal/internal-delete-dialog";
-import { InventoryMutateDrawer } from "./internal-mutate-drawer";
-import { useInventoryDialogs } from "./internal-provider";
-import { type Inventory } from "./data/schema";
+import type { DisplayExternalProduct } from "@/types/external-product.type";
+import { DisplayDeleteDialog } from "./display-delete-dialog";
+import { DisplayMutateDrawer } from "./display-mutate-drawer";
+import { useDisplayDialogs } from "./display-provider";
 
-type InternalDialogsProps = {
-  categories?: Array<{
-    id: string;
-    name: string;
-  }>;
+type ProductOption = {
+  id: string;
+  name: string;
+};
+
+type StorePlatformOption = {
+  id: string;
+  label: string;
+};
+
+type DisplayDialogsProps = {
+  productOptions?: ProductOption[];
+  storePlatformOptions?: StorePlatformOption[];
   isMutating?: boolean;
   isDeleting?: boolean;
   onCreate?: (values: {
-    name: string;
-    sku: string;
-    stock: number;
-    imageFile?: File | null;
-    categoryId?: string;
-    description?: string;
+    productId: string;
+    storePlatformId: string;
+    price: number;
   }) => boolean | void | Promise<boolean | void>;
   onEdit?: (
-    currentRow: Inventory,
+    currentRow: DisplayExternalProduct,
     values: {
-      name: string;
-      sku: string;
-      stock: number;
-      imageFile?: File | null;
-      categoryId?: string;
-      description?: string;
+      productId: string;
+      storePlatformId: string;
+      price: number;
     },
   ) => boolean | void | Promise<boolean | void>;
-  onDelete?: (currentRow: Inventory) => void | Promise<void>;
+  onDelete?: (currentRow: DisplayExternalProduct) => void | Promise<void>;
 };
 
-export function InternalDialogs({
-  categories,
+export function DisplayDialogs({
+  productOptions,
+  storePlatformOptions,
   isMutating,
   isDeleting,
   onCreate,
   onEdit,
   onDelete,
-}: InternalDialogsProps) {
-  const { open, setOpen, currentRow, setCurrentRow } = useInventoryDialogs();
+}: DisplayDialogsProps) {
+  const { open, setOpen, currentRow, setCurrentRow } = useDisplayDialogs();
 
   return (
     <>
-      <InventoryMutateDrawer
-        key="internal-add"
+      <DisplayMutateDrawer
+        key="display-add"
         open={open === "add"}
         onOpenChange={(nextOpen: boolean) => setOpen(nextOpen ? "add" : null)}
         isPending={isMutating}
-        categories={categories}
+        productOptions={productOptions}
+        storePlatformOptions={storePlatformOptions}
         onSubmitForm={async (values) => {
-          await onCreate?.(values);
+          return onCreate?.(values);
         }}
       />
 
       {currentRow && (
         <>
-          <InventoryMutateDrawer
-            key={`internal-edit-${currentRow.id}`}
+          <DisplayMutateDrawer
+            key={`display-edit-${currentRow.id}`}
             open={open === "edit"}
             onOpenChange={(nextOpen: boolean) => {
               setOpen(nextOpen ? "edit" : null);
@@ -70,18 +74,19 @@ export function InternalDialogs({
             }}
             currentRow={currentRow}
             isPending={isMutating}
-            categories={categories}
+            productOptions={productOptions}
+            storePlatformOptions={storePlatformOptions}
             onSubmitForm={async (values, row) => {
               if (!row) {
                 return;
               }
 
-              await onEdit?.(row, values);
+              return onEdit?.(row, values);
             }}
           />
 
-          <InventoryDeleteDialog
-            key={`internal-delete-${currentRow.id}`}
+          <DisplayDeleteDialog
+            key={`display-delete-${currentRow.id}`}
             open={open === "delete"}
             onOpenChange={(nextOpen: boolean) => {
               setOpen(nextOpen ? "delete" : null);

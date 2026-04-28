@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DataTableBulkActions as BulkActionsToolbar } from "@/components/shared/data-table";
-import type { ExternalProduct } from "./data/schema";
+import type { InternalInventory } from "@/types/product.type";
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;
@@ -23,7 +23,7 @@ export function DataTableBulkActions<TData>({
 
   const handleBulkExport = () => {
     const selectedActivities = selectedRows.map(
-      (row) => row.original as ExternalProduct,
+      (row) => row.original as InternalInventory,
     );
     toast.promise(sleep(2000), {
       loading: "Exporting activities...",

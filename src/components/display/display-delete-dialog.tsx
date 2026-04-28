@@ -4,38 +4,34 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { type Inventory } from "./data/schema";
+import type { DisplayExternalProduct } from "@/types/external-product.type";
 
-type InventoryDeleteDialogProps = {
+type DisplayDeleteDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentRow: Inventory;
-  onConfirmDelete?: (productId: string) => void;
+  currentRow: DisplayExternalProduct;
+  onConfirmDelete?: (id: string) => void | Promise<void>;
   isLoading?: boolean;
 };
 
-export function InventoryDeleteDialog({
+export function DisplayDeleteDialog({
   open,
   onOpenChange,
   currentRow,
   onConfirmDelete,
   isLoading,
-}: InventoryDeleteDialogProps) {
+}: DisplayDeleteDialogProps) {
   const [value, setValue] = useState("");
 
-  const isConfirmed = value.trim() === currentRow.name;
+  const isConfirmed = value.trim() === currentRow.product_name;
 
   const handleDelete = async () => {
     if (!isConfirmed) {
       return;
     }
 
-    try {
-      await onConfirmDelete?.(currentRow.id);
-      onOpenChange(false);
-    } catch {
-      // Errors are surfaced by caller mutation handlers.
-    }
+    await onConfirmDelete?.(currentRow.id);
+    onOpenChange(false);
   };
 
   return (
@@ -51,16 +47,16 @@ export function InventoryDeleteDialog({
             className="me-1 inline-block stroke-destructive"
             size={18}
           />{" "}
-          Delete Product
+          Delete External Listing
         </span>
       }
       desc={
         <div className="space-y-4">
           <p className="mb-2">
-            Are you sure you want to delete{" "}
-            <span className="font-bold">{currentRow.name}</span>?
+            Are you sure you want to delete listing for{" "}
+            <span className="font-bold">{currentRow.product_name}</span>?
             <br />
-            This action will permanently remove this product and cannot be
+            This action will permanently remove this listing and cannot be
             undone.
           </p>
 
@@ -68,7 +64,7 @@ export function InventoryDeleteDialog({
             Product Name:
             <Input
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(event) => setValue(event.target.value)}
               placeholder="Type product name to confirm deletion."
             />
           </Label>
