@@ -2,6 +2,14 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/shared/data-table';
 import type { OrderItem } from '@/types/order.type';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Eye, MoreVertical } from 'lucide-react';
 
 export const orderColumns: ColumnDef<OrderItem>[] = [
   {
@@ -238,10 +246,40 @@ export const orderColumns: ColumnDef<OrderItem>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  // {
-  //   id: 'actions',
-  //   cell: <div></>,
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
+  {
+    id: 'actions',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Actions' />
+    ),
+    cell: ({ row, table }) => {
+      const rowData = row.original;
+      const meta = table.options.meta as
+        | {
+            onViewDetail?: (item: OrderItem) => void;
+          }
+        | undefined;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-8 w-8 text-muted-foreground'>
+              <MoreVertical className='size-4' />
+              <span className='sr-only'>Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end'>
+            <DropdownMenuItem onClick={() => meta?.onViewDetail?.(rowData)}>
+              <Eye className='size-4' />
+              View detail
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
 ];
