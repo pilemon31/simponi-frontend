@@ -29,6 +29,7 @@ export const sidebarData = {
           title: 'Order',
           url: '/orders',
           icon: BadgeDollarSign,
+          permission_id: 'abcdef01-0ea2-426c-89e7-e25e71c0b88f',
         },
         {
           title: 'Vendor',
