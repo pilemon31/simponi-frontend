@@ -76,6 +76,7 @@ export const sidebarData = {
             {
               title: 'Inventory Log',
               url: '/inventory-log',
+              permission_id: '0ea2426c-89e7-426c-b88f-222222222222',
             },
           ],
           permission_id: '55555555-0ea2-426c-89e7-e25e71c0b88f',
