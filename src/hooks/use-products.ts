@@ -55,6 +55,7 @@ type CreateProductPayload = ProductMutateValues & {
 
 type UpdateProductPayload = ProductMutateValues & {
   id: string;
+  imageFile?: File;
 };
 
 export const useProducts = (search = "", page = 1, perPage = 10) => {
@@ -102,22 +103,31 @@ export const useCreateProduct = () => {
         throw uploadRes;
       }
 
-      const imageId = uploadRes.data;
+      const imageIds = Array.isArray(uploadRes.data)
+        ? uploadRes.data
+            .map((item) => (isObject(item) ? item.image_id : null))
+            .filter((id): id is string => typeof id === "string")
+        : [];
 
-      if (!imageId) {
+      if (imageIds.length === 0) {
+        const fallbackId = findImageId(uploadRes.data);
+        if (fallbackId) {
+          imageIds.push(fallbackId);
+        }
+      }
+
+      if (imageIds.length === 0) {
         throw {
           status: false,
           error: "Upload succeeded but image ID is missing",
         } as ErrorResponse;
       }
 
-      const images = [imageId];
-
       const response = await ProductApi.create({
         name: payload.name,
         sku: payload.sku,
         stock: payload.stock,
-        images,
+        images: imageIds,
         category_id: payload.category_id || null,
         description: payload.description,
       });
@@ -145,8 +155,44 @@ export const useUpdateProduct = () => {
 
   return useMutation<ProductResponse, ErrorResponse, UpdateProductPayload>({
     mutationFn: async (payload: UpdateProductPayload) => {
-      const { id, ...data } = payload;
-      const response = await ProductApi.update(id, data);
+      let imageIds: string[] | undefined;
+
+      if (payload.imageFile) {
+        const uploadRes = await uploadProductImages([payload.imageFile]);
+
+        if (!uploadRes.status) {
+          throw uploadRes;
+        }
+
+        imageIds = Array.isArray(uploadRes.data)
+          ? uploadRes.data
+              .map((item) => (isObject(item) ? item.image_id : null))
+              .filter((id): id is string => typeof id === "string")
+          : [];
+
+        if (imageIds.length === 0) {
+          const fallbackId = findImageId(uploadRes.data);
+          if (fallbackId) {
+            imageIds.push(fallbackId);
+          }
+        }
+
+        if (imageIds.length === 0) {
+          throw {
+            status: false,
+            error: "Upload succeeded but image ID is missing",
+          } as ErrorResponse;
+        }
+      }
+
+      const response = await ProductApi.update(payload.id, {
+        name: payload.name,
+        sku: payload.sku,
+        stock: payload.stock,
+        images: imageIds,
+        category_id: payload.category_id || null,
+        description: payload.description,
+      });
 
       if (!response.status) {
         throw response;

@@ -76,6 +76,7 @@ export interface UpdateProductPayload {
   sku?: string;
   stock?: number;
   category_id?: string | null;
+  images?: string[];
 }
 
 export interface UpdateStockPayload {
