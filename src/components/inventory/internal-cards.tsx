@@ -1,9 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useProductStats } from "@/hooks/use-inventory";
+import { useProductStats } from "@/hooks/use-products";
 
 const InventoryStatsCard = () => {
-  const { stats, isLoading } = useProductStats();
+  const defaultValue = {
+    total_products: 0,
+    total_skus: 0,
+    stock_units: 0,
+    low_stock: 0,
+    out_of_stock: 0,
+    unsynced: 0,
+  };
+
+  const { data: stats = defaultValue, isLoading } = useProductStats();
 
   const items = [
     { label: "Total Products", value: stats.total_products, color: "" },

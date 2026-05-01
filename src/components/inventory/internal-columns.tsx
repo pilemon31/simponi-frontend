@@ -1,25 +1,17 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
-import type { InternalInventory } from "@/types/product.type";
 import {
-  MoreVertical,
   Music,
   ShoppingCart,
   AlertTriangle,
   Image as ImageIcon,
-  Pencil,
-  Trash2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import type { ProductListItem } from "@/types/product.type";
+import { resolveImageUrl } from "@/lib/media";
+import { DataTableRowActions } from "./data-table-row-actions";
 
-export const inventoryColumns: ColumnDef<InternalInventory>[] = [
+export const productColumns: ColumnDef<ProductListItem>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -49,15 +41,22 @@ export const inventoryColumns: ColumnDef<InternalInventory>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Product" />
     ),
+    meta: {
+      className: "ps-1 max-w-0 w-2/3",
+      tdClassName: "ps-4",
+    },
     cell: ({ row }) => {
       const data = row.original;
+      const imageUrl = data.images?.[0]?.image_url
+        ? resolveImageUrl(data.images[0].image_url)
+        : null;
 
       return (
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground">
-            {data.imageUrl ? (
+            {imageUrl ? (
               <img
-                src={data.imageUrl}
+                src={imageUrl}
                 alt={data.name}
                 className="size-full object-cover"
               />
@@ -66,7 +65,12 @@ export const inventoryColumns: ColumnDef<InternalInventory>[] = [
             )}
           </div>
           <div className="flex flex-col">
-            <span className="font-medium text-foreground">{data.name}</span>
+            <span className="truncate font-medium text-foreground">
+              {String(data.name)
+                .split(" ")
+                .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                .join(" ")}
+            </span>
             <span className="text-xs text-muted-foreground">
               {data.category?.name || "Uncategorized"}
             </span>
@@ -80,6 +84,10 @@ export const inventoryColumns: ColumnDef<InternalInventory>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Internal SKU" />
     ),
+    meta: {
+      className: "ps-1",
+      tdClassName: "ps-4",
+    },
     cell: ({ row }) => (
       <span className="font-mono text-sm text-muted-foreground">
         {row.getValue("sku")}
@@ -91,8 +99,12 @@ export const inventoryColumns: ColumnDef<InternalInventory>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Platform Mappings" />
     ),
+    meta: {
+      className: "ps-1",
+      tdClassName: "ps-4",
+    },
     cell: ({ row }) => {
-      const externals = row.original.externalProducts;
+      const externals = row.original.external_products || [];
       const tiktok = externals.find((e) => e.platform === "tiktok");
       const shopee = externals.find((e) => e.platform === "shopee");
 
@@ -128,6 +140,10 @@ export const inventoryColumns: ColumnDef<InternalInventory>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Central Stock" />
     ),
+    meta: {
+      className: "ps-1",
+      tdClassName: "ps-4",
+    },
     cell: ({ row }) => {
       const stock = row.getValue("stock") as number;
       const isCritical = stock < 10;
@@ -149,6 +165,10 @@ export const inventoryColumns: ColumnDef<InternalInventory>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
+    meta: {
+      className: "ps-1",
+      tdClassName: "ps-4",
+    },
     cell: ({ row }) => {
       const status = row.original.status;
 
@@ -168,62 +188,17 @@ export const inventoryColumns: ColumnDef<InternalInventory>[] = [
       return (
         <div className="flex items-center gap-2">
           <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getBadgeStyles(status.state)}`}>
-            {status.state}
-          </span>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
-            {status.lastUpdated}
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getBadgeStyles(status)}`}>
+            {status}
           </span>
         </div>
       );
     },
-    filterFn: (row, _columnId, filterValue: string[]) => {
-      if (!Array.isArray(filterValue) || filterValue.length === 0) {
-        return true;
-      }
-
-      return filterValue.includes(row.original.status.state);
-    },
   },
   {
     id: "actions",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Actions" />
-    ),
-    cell: ({ row, table }) => {
-      const rowData = row.original;
-      const meta = table.options.meta as
-        | {
-            onEdit?: (item: InternalInventory) => void;
-            onDelete?: (item: InternalInventory) => void;
-          }
-        | undefined;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground">
-              <MoreVertical className="size-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => meta?.onEdit?.(rowData)}>
-              <Pencil className="size-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => meta?.onDelete?.(rowData)}>
-              <Trash2 className="size-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: DataTableRowActions,
+    enableSorting: false,
+    enableHiding: false,
   },
 ];

@@ -1,101 +1,41 @@
-import { InventoryDeleteDialog } from "@/components/inventory/internal-delete-dialog";
-import { InventoryMutateDrawer } from "./internal-mutate-drawer";
-import { useInventoryDialogs } from "./internal-provider";
-import type { InternalInventory } from "@/types/product.type";
+import { ProductDeleteDialog } from "./internal-delete-dialog";
+import { ProductMutateDrawer } from "./internal-mutate-drawer";
+import { useProductDialogs } from "./internal-provider";
 
-type InternalDialogsProps = {
-  categories?: Array<{
-    id: string;
-    name: string;
-  }>;
-  isMutating?: boolean;
-  isDeleting?: boolean;
-  onCreate?: (values: {
-    name: string;
-    sku: string;
-    stock: number;
-    imageFile?: File | null;
-    categoryId?: string;
-    description?: string;
-  }) => boolean | void | Promise<boolean | void>;
-  onEdit?: (
-    currentRow: InternalInventory,
-    values: {
-      name: string;
-      sku: string;
-      stock: number;
-      imageFile?: File | null;
-      categoryId?: string;
-      description?: string;
-    },
-  ) => boolean | void | Promise<boolean | void>;
-  onDelete?: (currentRow: InternalInventory) => void | Promise<void>;
-};
-
-export function InternalDialogs({
-  categories,
-  isMutating,
-  isDeleting,
-  onCreate,
-  onEdit,
-  onDelete,
-}: InternalDialogsProps) {
-  const { open, setOpen, currentRow, setCurrentRow } = useInventoryDialogs();
-
+export function ProductDialogs() {
+  const { open, setOpen, currentRow, setCurrentRow } = useProductDialogs();
   return (
     <>
-      <InventoryMutateDrawer
-        key="internal-add"
+      <ProductMutateDrawer
+        key="products-add"
         open={open === "add"}
-        onOpenChange={(nextOpen: boolean) => setOpen(nextOpen ? "add" : null)}
-        isPending={isMutating}
-        categories={categories}
-        onSubmitForm={async (values) => {
-          await onCreate?.(values);
-        }}
+        onOpenChange={() => setOpen("add")}
       />
 
       {currentRow && (
         <>
-          <InventoryMutateDrawer
-            key={`internal-edit-${currentRow.id}`}
+          <ProductMutateDrawer
+            key={`products-edit-${currentRow.id}`}
             open={open === "edit"}
-            onOpenChange={(nextOpen: boolean) => {
-              setOpen(nextOpen ? "edit" : null);
-              if (!nextOpen) {
-                setTimeout(() => {
-                  setCurrentRow(null);
-                }, 300);
-              }
+            onOpenChange={() => {
+              setOpen("edit");
+              setTimeout(() => {
+                setCurrentRow(null);
+              }, 500);
             }}
             currentRow={currentRow}
-            isPending={isMutating}
-            categories={categories}
-            onSubmitForm={async (values, row) => {
-              if (!row) {
-                return;
-              }
-
-              await onEdit?.(row, values);
-            }}
           />
 
-          <InventoryDeleteDialog
-            key={`internal-delete-${currentRow.id}`}
+          <ProductDeleteDialog
+            key={`products-delete-${currentRow.id}`}
             open={open === "delete"}
-            onOpenChange={(nextOpen: boolean) => {
-              setOpen(nextOpen ? "delete" : null);
-              if (!nextOpen) {
-                setTimeout(() => {
-                  setCurrentRow(null);
-                }, 300);
-              }
+            onOpenChange={() => {
+              setOpen("delete");
+              setTimeout(() => {
+                setCurrentRow(null);
+              }, 500);
             }}
             currentRow={currentRow}
-            isLoading={isDeleting}
-            onConfirmDelete={async () => {
-              await onDelete?.(currentRow);
-            }}
           />
         </>
       )}

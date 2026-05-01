@@ -1,38 +1,38 @@
 import React, { useState } from "react";
-import type { InternalInventory } from "@/types/product.type";
+import { type ProductListItem } from "@/types/product.type";
 import useDialogState from "@/hooks/use-dialog-state";
 
-type InventoryDialogType = "add" | "edit" | "delete";
+type ProductDialogType = "add" | "edit" | "delete";
 
-type InventoryContextType = {
-  open: InventoryDialogType | null;
-  setOpen: (str: InventoryDialogType | null) => void;
-  currentRow: InternalInventory | null;
-  setCurrentRow: React.Dispatch<React.SetStateAction<InternalInventory | null>>;
+type ProductContextType = {
+  open: ProductDialogType | null;
+  setOpen: (str: ProductDialogType | null) => void;
+  currentRow: ProductListItem | null;
+  setCurrentRow: React.Dispatch<React.SetStateAction<ProductListItem | null>>;
 };
 
-const InventoryContext = React.createContext<InventoryContextType | null>(null);
+const ProductContext = React.createContext<ProductContextType | null>(null);
 
-export function InventoryProvider({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useDialogState<InventoryDialogType>(null);
-  const [currentRow, setCurrentRow] = useState<InternalInventory | null>(null);
+export function ProductProvider({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useDialogState<ProductDialogType>(null);
+  const [currentRow, setCurrentRow] = useState<ProductListItem | null>(null);
 
   return (
-    <InventoryContext value={{ open, setOpen, currentRow, setCurrentRow }}>
+    <ProductContext value={{ open, setOpen, currentRow, setCurrentRow }}>
       {children}
-    </InventoryContext>
+    </ProductContext>
   );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useInventoryDialogs = () => {
-  const inventoryContext = React.useContext(InventoryContext);
+export const useProductDialogs = () => {
+  const productContext = React.useContext(ProductContext);
 
-  if (!inventoryContext) {
+  if (!productContext) {
     throw new Error(
-      "useInventoryDialogs has to be used within <InventoryProvider>",
+      "useProductDialogs has to be used within <ProductProvider>",
     );
   }
 
-  return inventoryContext;
+  return productContext;
 };

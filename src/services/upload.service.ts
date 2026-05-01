@@ -13,11 +13,7 @@ export const uploadProductImages = async (
       formData.append("files", file);
     });
 
-    const response = await axiosConfig.post("/uploads", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axiosConfig.post("/uploads/", formData);
 
     return response.data as UploadImageResponse;
   } catch (error: unknown) {

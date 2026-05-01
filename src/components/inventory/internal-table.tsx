@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   type ColumnFiltersState,
   type SortingState,
@@ -24,26 +24,26 @@ import {
   DataTablePagination,
   DataTableToolbar,
 } from "@/components/shared/data-table";
-import type { InternalInventory } from "@/types/product.type";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { inventoryColumns as columns } from "./internal-columns";
+import { productColumns as columns } from "./internal-columns";
 import { cn } from "@/lib/utils";
-import type { Pagination } from "@/types/response.type";
+import { type Pagination } from "@/types/response.type";
+import { type ProductListItem } from "@/types/product.type";
 
 type DataTableProps = {
-  data: InternalInventory[];
-  onEdit?: (item: InternalInventory) => void;
-  onDelete?: (item: InternalInventory) => void;
+  data: ProductListItem[];
+  onEdit?: (item: ProductListItem) => void;
+  onDelete?: (item: ProductListItem) => void;
   meta?: Pagination;
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPageChange?: (page: number) => void;
-  onPerPageChange?: (perPage: number) => void;
+  onPerPageChange: (perPage: number) => void;
   onSetQueryParam?: (key: string, value: string) => void;
   onClearFilters?: () => void;
 };
 
-export function InventoriesTable({
+export function ProductsTable({
   data,
   onEdit,
   onDelete,
