@@ -4,6 +4,7 @@ export const AUTH_ERROR_MESSAGES = {
   'incorrect password': 'Email atau password salah!',
   'failed to generate access token': 'Gagal masuk, ada kesalahan pada sistem!',
   'failed to generate refresh token': 'Gagal masuk, ada kesalahan pada sistem!',
+  'failed sign in': 'Gagal masuk, ada kesalahan pada sistem!',
 } as const;
 
 export const ROLE_ERROR_MESSAGES = {
