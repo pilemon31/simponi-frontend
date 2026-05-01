@@ -33,7 +33,6 @@ import {
 } from "@/schemas/product.schema";
 import { resolveImageUrl } from "@/lib/media";
 import type { ProductListItem } from "@/types/product.type";
-import { toast } from "sonner";
 import {
   useCreateProduct,
   useProductCategories,
@@ -79,6 +78,15 @@ export function ProductMutateDrawer({
   );
   const previewImageSrc = selectedImagePreview || existingImagePreview;
 
+  const resetImageState = () => {
+    setImageFile(null);
+    form.setValue("files", undefined);
+    form.clearErrors("files");
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
+  };
+
   const form = useForm<ProductMutateValues>({
     resolver: zodResolver(productMutateSchema),
     defaultValues: isEdit
@@ -99,20 +107,25 @@ export function ProductMutateDrawer({
   });
 
   const onSubmit = (values: ProductMutateValues) => {
-    onOpenChange(false);
-
     if (isEdit) {
       updateProduct.mutate({ id: currentRow.id, ...values });
-    } else {
-      if (!imageFile) {
-        toast.error("Product image is required");
-        return;
-      }
-
-      createProduct.mutate({ ...values, imageFile });
+      onOpenChange(false);
+      form.reset();
+      resetImageState();
+      return;
     }
 
+    if (!values.files) {
+      form.setError("files", {
+        message: "Product image is required",
+      });
+      return;
+    }
+
+    createProduct.mutate({ ...values, imageFile: values.files });
+    onOpenChange(false);
     form.reset();
+    resetImageState();
   };
   return (
     <Sheet
@@ -120,7 +133,7 @@ export function ProductMutateDrawer({
       onOpenChange={(v) => {
         onOpenChange(v);
         form.reset();
-        setImageFile(null);
+        resetImageState();
       }}>
       <SheetContent className="flex flex-col py-3 sm:max-w-sm">
         <SheetHeader className="text-start">
@@ -166,21 +179,36 @@ export function ProductMutateDrawer({
             />
 
             {!isEdit && (
-              <FormItem>
-                <FormLabel>Product Image</FormLabel>
-                <FormControl>
-                  <Input
-                    ref={imageInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => {
-                      const selectedFile = event.target.files?.[0] ?? null;
-                      setImageFile(selectedFile);
-                      event.target.value = "";
-                    }}
-                  />
-                </FormControl>
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="files"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Image</FormLabel>
+                    <FormControl>
+                      <Input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        onChange={(event) => {
+                          const selectedFile = event.target.files?.[0] ?? null;
+
+                          if (!selectedFile) {
+                            resetImageState();
+                            event.target.value = "";
+                            return;
+                          }
+
+                          setImageFile(selectedFile);
+                          field.onChange(selectedFile);
+                          event.target.value = "";
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
 
             {(previewImageSrc || !isEdit) && (
@@ -210,7 +238,7 @@ export function ProductMutateDrawer({
                     <Button
                       type="button"
                       variant="ghost"
-                      onClick={() => setImageFile(null)}
+                      onClick={resetImageState}
                       disabled={!imageFile}>
                       Delete Preview
                     </Button>

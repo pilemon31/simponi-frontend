@@ -14,7 +14,7 @@ export const createProductSchema = z.object({
     .number({ error: () => "Masukkan jumlah stok" })
     .int("Stok harus berupa bilangan bulat")
     .min(0, "Stok tidak boleh negatif"),
-  image_id: z.string().uuid("Image ID tidak valid"),
+  image_id: z.uuid("Image ID tidak valid"),
   category_id: z.string().uuid("Category ID tidak valid").optional().nullable(),
 });
 
@@ -34,7 +34,7 @@ export const updateProductSchema = z.object({
     .min(0, "Stok tidak boleh negatif")
     .optional(),
 
-  category_id: z.string().uuid("Category ID tidak valid").optional().nullable(),
+  category_id: z.uuid("Category ID tidak valid").optional().nullable(),
 });
 
 export const updateStockSchema = z.object({
@@ -54,8 +54,17 @@ export const productMutateSchema = z.object({
   name: z.string().trim().min(1, "Product name is required"),
   sku: z.string().trim().min(1, "SKU is required"),
   stock: z.number().min(0, "Stock cannot be negative"),
-  category_id: z.string().uuid().optional().nullable(),
+  category_id: z.uuid().optional().nullable(),
   description: z.string().optional(),
+  files: z
+    .instanceof(File)
+    .refine((file) => file.size < 100 * 1024, {
+      message: "File size must be less than 100KB",
+    })
+    .refine((file) => ["image/jpeg", "image/png"].includes(file.type), {
+      message: "Only JPG and PNG files are allowed",
+    })
+    .optional(),
 });
 
 export const createProductPayload = createProductSchema;

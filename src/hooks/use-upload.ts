@@ -1,11 +1,11 @@
 import { uploadProductImages } from "@/services/upload.service";
-import type { UploadImageData } from "@/types/product.type";
+import { type UploadImage } from "@/types/product.type";
 import { useMutation } from "@tanstack/react-query";
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
-const isUploadImageData = (value: unknown): value is UploadImageData => {
+const isUploadImageData = (value: unknown): value is UploadImage => {
   return (
     isObject(value) &&
     typeof value.image_id === "string" &&
@@ -13,7 +13,7 @@ const isUploadImageData = (value: unknown): value is UploadImageData => {
   );
 };
 
-const normalizeUploadPayload = (payload: unknown): UploadImageData[] => {
+const normalizeUploadPayload = (payload: unknown): UploadImage[] => {
   if (Array.isArray(payload)) {
     return payload.filter(isUploadImageData);
   }
@@ -55,7 +55,9 @@ export function useUpload() {
         throw new Error("No files selected");
       }
 
-      const response = await uploadProductImages(files);
+      const response = await uploadProductImages({
+        files: files,
+      });
       if (response.status !== true) {
         throw new Error(response.message || "Failed to upload image");
       }
