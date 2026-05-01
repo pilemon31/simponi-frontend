@@ -26,7 +26,6 @@ import InternalProductPage from "./pages/inventory";
 import OrderPage from "./pages/orders";
 import VendorPage from "./pages/vendor";
 
-
 const router = createBrowserRouter([
   {
     element: <RootLayout />,
@@ -50,7 +49,7 @@ const router = createBrowserRouter([
                 path: "/",
                 element: <Dashboard />,
               },
-               {
+              {
                 path: "/orders",
                 element: <OrderPage />,
               },
@@ -58,10 +57,10 @@ const router = createBrowserRouter([
                 path: "/inventory/internal",
                 element: <InternalProductPage />,
               },
-              {
-                path: "/inventory/display",
-                element: <DisplayProductPage />,
-              },
+              // {
+              //   path: "/inventory/display",
+              //   element: <DisplayProductPage />,
+              // },
               {
                 path: "/activity",
                 element: <ActivityPage />,

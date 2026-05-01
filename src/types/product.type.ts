@@ -1,17 +1,17 @@
-import type { Pagination, SuccessResponse } from "./response.type";
+import type { SuccessResponse, Pagination } from "./response.type";
 
-export type ProductCategoryData = {
+export interface ProductCategory {
   id: string;
   name: string;
   created_at: string;
-};
+}
 
-export type ProductImageData = {
+export interface ProductImage {
   id: string;
   image_url: string;
-};
+}
 
-export type ExternalProductData = {
+export interface ExternalProduct {
   id: string;
   image_url: string;
   product_name: string;
@@ -20,118 +20,81 @@ export type ExternalProductData = {
   price: number;
   created_at: string;
   updated_at: string;
-};
+}
 
-export type ProductStatus =
-  | "Mapped"
-  | "Unmapped"
-  | "Low Stock"
-  | "Out of Stock"
-  | "Out of stock";
-
-export type InternalInventoryStatusState =
-  | "Mapped"
-  | "Low Stock"
-  | "Unmapped"
-  | "Out of Stock";
-
-export type InternalInventoryExternalProduct = {
-  id: string;
-  image: string | null;
-  product_name: string;
-  platform: "shopee" | "tiktok";
-  store_platform_name: string;
-  price: number;
-  created_at: string;
-  updated_at: string;
-};
-
-export type InternalInventory = {
-  id: string;
-  name: string;
-  description: string;
-  sku: string;
-  stock: number;
-  category: Pick<ProductCategoryData, "id" | "name"> | null;
-  imageUrl: string | null;
-  externalProducts: InternalInventoryExternalProduct[];
-  status: {
-    state: InternalInventoryStatusState;
-    lastUpdated: string;
-  };
-};
-
-export type ProductData = {
+export interface Product {
   id: string;
   name: string;
   description: string | null;
   sku: string;
   stock: number;
-  category: ProductCategoryData | null;
-  images: ProductImageData[];
-  external_products: ExternalProductData[];
+  category: ProductCategory | null;
+  images: ProductImage[];
+  external_products: ExternalProduct[];
   created_at: string;
   updated_at: string;
-};
+}
 
-export type ProductListItem = {
+export interface ProductListItem {
   id: string;
   name: string;
   sku: string;
   stock: number;
-  category: ProductCategoryData | null;
-  images?: ProductImageData[];
-  external_products?: ExternalProductData[];
-  status: ProductStatus;
+  category: ProductCategory | null;
+  images?: ProductImage[];
+  external_products?: ExternalProduct[];
+  status: "Mapped" | "Unmapped" | "Low Stock" | "Out of Stock";
   created_at: string;
-};
+}
 
-export type ProductListResponse =
-  | SuccessResponse<{
-      data: ProductListItem[];
-      pagination: Pagination;
-    }>
-  | SuccessResponse<ProductListItem[]>;
-
-export type ProductDetailResponse = SuccessResponse<ProductData>;
-
-export type ProductStatsData = {
+export interface ProductStats {
   total_products: number;
   total_skus: number;
   stock_units: number;
   low_stock: number;
   out_of_stock: number;
   unsynced: number;
-};
+}
 
-export type ProductStatsResponse = SuccessResponse<ProductStatsData>;
-
-export type UploadImageData = {
+export interface UploadImage {
   image_id: string;
   image_url: string;
-};
+}
 
-export type UploadImageResponse = SuccessResponse<UploadImageData[]>;
-
-export type CreateProductRequest = {
+export interface CreateProductPayload {
   name: string;
   description?: string;
   sku: string;
   stock: number;
-  image_id: string;
+  images: string[];
   category_id?: string | null;
-};
+}
 
-export type UpdateProductRequest = {
+export interface UpdateProductPayload {
   name?: string;
   description?: string;
   sku?: string;
   stock?: number;
   category_id?: string | null;
-};
+}
 
-export type UpdateStockRequest = {
+export interface UpdateStockPayload {
   change: number;
   source: "shopee" | "tiktok" | "manual";
   note?: string;
-};
+}
+
+export type ProductResponse = SuccessResponse<Product>;
+
+export type GetAllProductResponse = SuccessResponse<ProductListItem[]>;
+
+export type GetAllProductWithPaginationResponse = SuccessResponse<{
+  data: ProductListItem[];
+  pagination: Pagination;
+}>;
+
+export type ProductCategoryResponse = SuccessResponse<ProductCategory[]>;
+
+export type ProductStatsResponse = SuccessResponse<ProductStats>;
+
+export type UploadImageResponse = SuccessResponse<UploadImage[]>;

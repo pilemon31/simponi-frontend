@@ -28,38 +28,36 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  internalInventoryMutateSchema,
-  type InternalInventoryMutateValues,
+  productMutateSchema,
+  type ProductMutateValues,
 } from "@/schemas/product.schema";
-import type { InternalInventory } from "@/types/product.type";
 import { resolveImageUrl } from "@/lib/media";
+import type { ProductListItem } from "@/types/product.type";
+import { toast } from "sonner";
+import {
+  useCreateProduct,
+  useProductCategories,
+  useUpdateProduct,
+} from "@/hooks/use-products";
 
-type CategoryOption = {
-  id: string;
-  name: string;
-};
-
-type InventoryMutateDrawerProps = {
-  currentRow?: InternalInventory;
+type ProductMutateDrawerProps = {
+  currentRow?: ProductListItem;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isPending?: boolean;
-  categories?: CategoryOption[];
-  onSubmitForm?: (
-    values: InternalInventoryMutateValues & { imageFile?: File | null },
-    currentRow?: InternalInventory,
-  ) => boolean | void | Promise<boolean | void>;
 };
 
-export function InventoryMutateDrawer({
+export function ProductMutateDrawer({
   open,
   onOpenChange,
   currentRow,
   isPending,
-  categories = [],
-  onSubmitForm,
-}: InventoryMutateDrawerProps) {
+}: ProductMutateDrawerProps) {
+  const { data: categoryData } = useProductCategories();
   const isEdit = !!currentRow;
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -76,53 +74,53 @@ export function InventoryMutateDrawer({
     };
   }, [selectedImagePreview]);
 
-  const existingImagePreview = resolveImageUrl(currentRow?.imageUrl);
+  const existingImagePreview = resolveImageUrl(
+    currentRow?.images?.[0].image_url,
+  );
   const previewImageSrc = selectedImagePreview || existingImagePreview;
 
-  const form = useForm<InternalInventoryMutateValues>({
-    resolver: zodResolver(internalInventoryMutateSchema),
+  const form = useForm<ProductMutateValues>({
+    resolver: zodResolver(productMutateSchema),
     defaultValues: isEdit
       ? {
           name: currentRow.name,
           sku: currentRow.sku,
           stock: currentRow.stock,
-          categoryId: currentRow.category?.id,
-          description: currentRow.description ?? "",
+          category_id: currentRow.category?.id ?? null,
+          description: (currentRow as any).description ?? "",
         }
       : {
           name: "",
           sku: "",
           stock: 0,
-          categoryId: "",
+          category_id: null,
           description: "",
         },
   });
 
-  const resetDrawerState = () => {
-    form.reset();
-    setImageFile(null);
-  };
+  const onSubmit = (values: ProductMutateValues) => {
+    onOpenChange(false);
 
-  const onSubmit = async (values: InternalInventoryMutateValues) => {
-    const shouldClose = await onSubmitForm?.(
-      { ...values, imageFile },
-      currentRow,
-    );
+    if (isEdit) {
+      updateProduct.mutate({ id: currentRow.id, ...values });
+    } else {
+      if (!imageFile) {
+        toast.error("Product image is required");
+        return;
+      }
 
-    if (shouldClose === false) {
-      return;
+      createProduct.mutate({ ...values, imageFile });
     }
 
-    onOpenChange(false);
-    resetDrawerState();
+    form.reset();
   };
-
   return (
     <Sheet
       open={open}
-      onOpenChange={(value) => {
-        onOpenChange(value);
-        resetDrawerState();
+      onOpenChange={(v) => {
+        onOpenChange(v);
+        form.reset();
+        setImageFile(null);
       }}>
       <SheetContent className="flex flex-col py-3 sm:max-w-sm">
         <SheetHeader className="text-start">
@@ -223,26 +221,26 @@ export function InventoryMutateDrawer({
 
             <FormField
               control={form.control}
-              name="categoryId"
+              name="category_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category (optional)</FormLabel>
+                  <FormLabel>Category</FormLabel>
                   <FormControl>
                     <Select
-                      value={field.value || "__none"}
+                      value={field.value ?? "__none"}
                       onValueChange={(value) =>
-                        field.onChange(value === "__none" ? "" : value)
+                        field.onChange(value === "__none" ? null : value)
                       }>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__none">No Category</SelectItem>
-                        {categories.map((category) => (
+                        {categoryData?.data?.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
                             {category.name}
                           </SelectItem>
-                        ))}
+                        )) || []}
                       </SelectContent>
                     </Select>
                   </FormControl>
