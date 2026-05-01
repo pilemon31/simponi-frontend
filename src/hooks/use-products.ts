@@ -97,37 +97,23 @@ export const useCreateProduct = () => {
         } as ErrorResponse;
       }
 
-      const uploadRes = await uploadProductImages([payload.imageFile]);
+      const uploadRes = await uploadProductImages({
+        files: [payload.imageFile],
+      });
 
       if (!uploadRes.status) {
         throw uploadRes;
       }
 
-      const imageIds = Array.isArray(uploadRes.data)
-        ? uploadRes.data
-            .map((item) => (isObject(item) ? item.image_id : null))
-            .filter((id): id is string => typeof id === "string")
-        : [];
-
-      if (imageIds.length === 0) {
-        const fallbackId = findImageId(uploadRes.data);
-        if (fallbackId) {
-          imageIds.push(fallbackId);
-        }
-      }
-
-      if (imageIds.length === 0) {
-        throw {
-          status: false,
-          error: "Upload succeeded but image ID is missing",
-        } as ErrorResponse;
-      }
+      const images = uploadRes.data.map((res) => {
+        return String(res.image_url);
+      });
 
       const response = await ProductApi.create({
         name: payload.name,
         sku: payload.sku,
         stock: payload.stock,
-        images: imageIds,
+        images: images,
         category_id: payload.category_id || null,
         description: payload.description,
       });
@@ -158,7 +144,9 @@ export const useUpdateProduct = () => {
       let imageIds: string[] | undefined;
 
       if (payload.imageFile) {
-        const uploadRes = await uploadProductImages([payload.imageFile]);
+        const uploadRes = await uploadProductImages({
+          files: [payload.imageFile],
+        });
 
         if (!uploadRes.status) {
           throw uploadRes;
@@ -241,7 +229,7 @@ export const useUploadProductImage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (files: File[]) => uploadProductImages(files),
+    mutationFn: (files: File[]) => uploadProductImages({ files: files }),
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });

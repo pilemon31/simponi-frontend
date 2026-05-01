@@ -1,15 +1,16 @@
 import axiosConfig from "@/lib/axios";
+import type { UploadImageFormValues } from "@/schemas/upload.schema";
 import type { UploadImageResponse } from "@/types/product.type";
 import type { ErrorResponse } from "@/types/response.type";
 import axios, { AxiosError } from "axios";
 
 export const uploadProductImages = async (
-  files: File[],
+  files: UploadImageFormValues,
 ): Promise<UploadImageResponse | ErrorResponse> => {
   try {
     const formData = new FormData();
 
-    files.forEach((file) => {
+    files.files.forEach((file) => {
       formData.append("files", file);
     });
 
