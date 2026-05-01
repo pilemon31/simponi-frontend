@@ -4,6 +4,7 @@ import { DataTableColumnHeader } from '@/components/shared/data-table';
 import { Roles } from './data/data';
 import type { ProfileResponseData } from '@/types/user.type';
 import { UserActions } from './user-action';
+import { UserRowActions } from './user-row-actions';
 
 export const usersColumns: ColumnDef<ProfileResponseData>[] = [
   {
@@ -116,11 +117,25 @@ export const usersColumns: ColumnDef<ProfileResponseData>[] = [
     },
   },
   {
-    id: 'actions',
+    accessorKey: 'status',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Actions" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <UserActions userId={row.original.id} />,
+    cell: ({ row }) => (
+      <div className="w-16 truncate">{row.getValue('status')}</div>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    id: 'actions',
+    header: () => <div className="text-right">Actions</div>,
+    cell: ({ row }) => (
+      <div className="flex w-full items-center justify-end gap-1">
+        <UserActions userId={row.original.id} />
+        <UserRowActions row={row} />
+      </div>
+    ),
     enableSorting: false,
     enableHiding: false,
   },

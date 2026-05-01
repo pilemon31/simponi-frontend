@@ -2,7 +2,11 @@ import axiosConfig from '@/lib/axios';
 import axios, { type AxiosError } from 'axios';
 import { mapErrorResponse } from '@/lib/error-mapper';
 import { type ErrorResponse } from '@/types/response.type';
-import type { CreateUserRequest, UsersResponse } from '@/types/user.type';
+import type {
+  CreateUserRequest,
+  UpdateUserStatusRequest,
+  UsersResponse,
+} from '@/types/user.type';
 
 export const UsersApi = {
   getAll: async (search = '', page = 1, perPage = 10) => {
@@ -47,9 +51,9 @@ export const UsersApi = {
       } as ErrorResponse;
     }
   },
-  updateStatus: async (id: string, data: CreateUserRequest) => {
+  updateStatus: async (id: string, data: UpdateUserStatusRequest) => {
     try {
-      const response = await axiosConfig.put(`/users/${id}`, data);
+      const response = await axiosConfig.patch(`/users/${id}/status`, data);
       return response.data as UsersResponse;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
