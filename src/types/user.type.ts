@@ -19,5 +19,13 @@ export type ProfileResponseData = {
   };
 };
 
+export type CreateUserRequest = {
+  name: string;
+  email: string;
+  password: string;
+  image_url?: string;
+  role_id: string;
+};
+
 export type ProfileResponse = SuccessResponse<ProfileResponseData>;
 export type UsersResponse = SuccessResponse<ProfileResponseData[]>;

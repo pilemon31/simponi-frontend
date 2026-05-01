@@ -1,4 +1,4 @@
-import { User, UserStar, UserKey } from 'lucide-react';
+import { User, UserKey, KeyRound } from 'lucide-react';
 
 // export const Status = [
 //   {
@@ -26,7 +26,7 @@ export const Roles = [
   },
   {
     label: 'Super Admin',
-    value: 'super_admin' as const,
-    icon: UserStar,
+    value: 'superadmin' as const,
+    icon: KeyRound,
   },
 ];
