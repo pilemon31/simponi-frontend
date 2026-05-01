@@ -80,13 +80,21 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
           id: toastId,
         });
       } else {
-        toast.error(result.error || result.message || 'Sign In failed', {
-          id: toastId,
-        });
+        toast.error(
+          result.error ||
+            result.message ||
+            'Gagal masuk, ada kesalahan pada sistem!',
+          {
+            id: toastId,
+          },
+        );
       }
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Sign in failed';
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Gagal masuk, ada kesalahan pada sistem!';
       toast.error(message);
     },
   });
@@ -104,12 +112,12 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
       >
         <FormField
           control={form.control}
-          name="email"
+          name='email'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Alamat Email</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} />
+                <Input placeholder='name@example.com' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -117,17 +125,17 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
         />
         <FormField
           control={form.control}
-          name="password"
+          name='password'
           render={({ field }) => (
-            <FormItem className="relative">
+            <FormItem className='relative'>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <PasswordInput placeholder="********" {...field} />
+                <PasswordInput placeholder='********' {...field} />
               </FormControl>
               <FormMessage />
               <Link
-                to="/forgot-password"
-                className="absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75"
+                to='/forgot-password'
+                className='absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75'
               >
                 Lupa password?
               </Link>
@@ -135,11 +143,11 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
           )}
         />
         <Button
-          className="cursor-pointer"
+          className='cursor-pointer'
           disabled={signInMutation.isPending || getProfileMutation.isPending}
         >
           {signInMutation.isPending || getProfileMutation.isPending ? (
-            <Loader2 className="animate-spin" />
+            <Loader2 className='animate-spin' />
           ) : (
             <LogIn />
           )}

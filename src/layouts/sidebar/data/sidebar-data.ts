@@ -6,16 +6,33 @@ import {
   ShelvingUnit,
   Settings,
   UserCog,
-  Wrench,
   Palette,
-  Bell,
-  Monitor,
   HelpCircle,
   UserRoundKey,
   UsersRound,
+  Command,
+  GalleryVerticalEnd,
+  AudioWaveform,
 } from 'lucide-react';
 
 export const sidebarData = {
+  shops: [
+    {
+      name: 'Toko Aqeel',
+      logo: Command,
+      role: 'Client',
+    },
+    {
+      name: 'Toko Rizky',
+      logo: GalleryVerticalEnd,
+      role: 'Client',
+    },
+    {
+      name: 'Toko Barimbing',
+      logo: AudioWaveform,
+      role: 'Admin',
+    },
+  ],
   navGroups: [
     {
       title: 'General',
@@ -92,29 +109,14 @@ export const sidebarData = {
           icon: Settings,
           items: [
             {
-              title: 'Profile',
+              title: 'Account',
               url: '/settings',
               icon: UserCog,
-            },
-            {
-              title: 'Account',
-              url: '/settings/account',
-              icon: Wrench,
             },
             {
               title: 'Appearance',
               url: '/settings/appearance',
               icon: Palette,
-            },
-            {
-              title: 'Notifications',
-              url: '/settings/notifications',
-              icon: Bell,
-            },
-            {
-              title: 'Display',
-              url: '/settings/display',
-              icon: Monitor,
             },
           ],
         },
