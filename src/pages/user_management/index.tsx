@@ -4,26 +4,35 @@ import { Search } from '@/components/shared/search';
 import { ThemeSwitch } from '@/components/shared/theme-switcher';
 import { Header } from '@/layouts/header';
 import { Main } from '@/layouts/main';
-import { getUsers } from '@/services/users.service';
 import { useAuthStore } from '@/stores/auth-store';
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { UsersTable } from '@/components/users/users-table';
+import type { ProfileResponseData, UsersResponse } from '@/types/user.type';
+import type { ErrorResponse } from '@/types/response.type';
+import {
+  UsersProvider,
+  useUsers as useUsersDialogs,
+} from '@/components/users/user-provider';
+import { useSearchParams } from 'react-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useUsers as useUsersQuery } from '@/hooks/use-users';
+import { UserAddButton } from '@/components/users/user-add-button';
+import { UserDialogs } from '@/components/users/user-dialog';
 
-const UserManagementPage = () => {
+const isGetUsersSuccess = (
+  response: UsersResponse | ErrorResponse | undefined,
+): response is UsersResponse => response?.status === true;
+
+const UserPage = () => {
+  return (
+    <UsersProvider>
+      <UserPageContent />
+    </UsersProvider>
+  );
+};
+
+const UserPageContent = () => {
   const user = useAuthStore((state) => state.auth.user);
-  const [currentPage, setCurrentPage] = useState(1);
-  const perPage = 10;
-
-  const {
-    data: usersData,
-    isLoading,
-    isFetching,
-    isError,
-  } = useQuery({
-    queryKey: ['users', currentPage, perPage],
-    queryFn: () => getUsers(currentPage, perPage),
-  });
+  const { setCurrentRow, setOpen } = useUsersDialogs();
 
   const userData = {
     name: user?.name ?? 'john',
@@ -31,8 +40,91 @@ const UserManagementPage = () => {
     avatar: '/avatars/shadcn.jpg',
   };
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const search = searchParams.get('search') ?? '';
+  const page = Number(searchParams.get('page')) || 1;
+  const perPage = Number(searchParams.get('per_page')) || 10;
+  const [searchInput, setSearchInput] = useState(search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  const HandleQueryParam = useCallback(
+    (key: string, value: string) => {
+      setSearchParams(
+        (prev) => {
+          const params = new URLSearchParams(prev);
+          if (!value || value === 'all') {
+            params.delete(key);
+          } else {
+            params.set(key, value);
+          }
+          if (key !== 'page') {
+            params.set('page', '1');
+          }
+          return params;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const HandleFilters = () => {
+    setSearchInput('');
+    setSearchParams(
+      () => {
+        const params = new URLSearchParams();
+        params.set('page', '1');
+        params.set('per_page', String(perPage));
+        return params;
+      },
+      { replace: true },
+    );
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(
+      () => HandleQueryParam('search', value),
+      500,
+    );
+  };
+
+  const handlePageChange = (newPage: number) => {
+    HandleQueryParam('page', String(newPage));
+  };
+
+  const handlePerPageChange = (newLimit: number) => {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('per_page', String(newLimit));
+        params.set('page', '1');
+        return params;
+      },
+      { replace: true },
+    );
+  };
+
+  const { data: usersData } = useUsersQuery(searchInput, page, perPage);
+  const data = isGetUsersSuccess(usersData) ? usersData.data : [];
+  const meta = isGetUsersSuccess(usersData) ? usersData.meta : undefined;
+
+  const handleViewDetail = (item: ProfileResponseData) => {
+    setCurrentRow(item);
+    setOpen('detail');
+  };
+
   return (
     <>
+      <UserDialogs />
+
       <Header>
         <Search />
         <div className="ms-auto flex items-center space-x-4">
@@ -52,20 +144,24 @@ const UserManagementPage = () => {
               Manage your system users and their permissions here.
             </p>
           </div>
+
+          <UserAddButton />
         </div>
 
-        {isLoading || isFetching ? (
-          <UsersTable data={[]} />
-        ) : isError || !usersData?.status ? (
-          <p className="text-center text-sm text-gray-700">
-            Failed to load users. Please try again later.
-          </p>
-        ) : (
-          <UsersTable data={usersData.data} />
-        )}
+        <UsersTable
+          data={data}
+          meta={meta}
+          onViewDetail={handleViewDetail}
+          searchValue={searchInput}
+          onSearchChange={handleSearchChange}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSetQueryParam={HandleQueryParam}
+          onClearFilters={HandleFilters}
+        />
       </Main>
     </>
   );
 };
 
-export default UserManagementPage;
+export default UserPage;

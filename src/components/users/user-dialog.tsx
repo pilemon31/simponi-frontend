@@ -22,41 +22,45 @@ import { AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
-import { useVendorContext } from './vendor-provider';
-import type { VendorData } from './data/schema';
-import {
-  useCreateVendor,
-  useUpdateVendor,
-  useDeleteVendor,
-} from '@/hooks/use-vendor';
 import { useState, useEffect } from 'react';
-import type { CreateVendorRequest } from '@/types/vendor.type';
+import type { CreateUserRequest, ProfileResponseData } from '@/types/user.type';
+import { useCreateUser, useDeleteUser, useUpdateUser } from '@/hooks/use-users';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import { useUsers } from './user-provider';
 
-// ─── Mutate Drawer (Add / Edit) ───────────────────────────────────────────────
-
-type VendorMutateDrawerProps = {
+type UserMutateDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentRow?: VendorData;
+  currentRow?: ProfileResponseData;
 };
 
-export function VendorMutateDrawer({
+type UserMutateFormValues = CreateUserRequest & {
+  status: 'active' | 'inactive';
+};
+
+export function UserMutateDrawer({
   open,
   onOpenChange,
   currentRow,
-}: VendorMutateDrawerProps) {
+}: UserMutateDrawerProps) {
   const isEdit = !!currentRow;
-  const createVendor = useCreateVendor();
-  const updateVendor = useUpdateVendor();
+  const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
 
-  const form = useForm<CreateVendorRequest>({
+  const form = useForm<UserMutateFormValues>({
     defaultValues: {
       name: '',
       email: '',
-      phone_number: '',
-      address: '',
+      password: '',
       image_url: '',
-      description: '',
+      role_id: '',
+      status: 'active',
     },
   });
 
@@ -67,34 +71,41 @@ export function VendorMutateDrawer({
           ? {
               name: currentRow.name,
               email: currentRow.email,
-              phone_number: currentRow.phone,
-              address: currentRow.address,
+              password: '',
               image_url: currentRow.image_url,
-              description: currentRow.description,
+              role_id: currentRow.role.id,
+              status: currentRow.status ?? 'active',
             }
           : {
               name: '',
               email: '',
-              phone_number: '',
-              address: '',
+              password: '',
               image_url: '',
-              description: '',
+              role_id: '',
+              status: 'active',
             },
       );
     }
   }, [open, currentRow, isEdit, form]);
 
-  const onSubmit = (values: CreateVendorRequest) => {
+  const onSubmit = (values: UserMutateFormValues) => {
     if (isEdit) {
-      updateVendor.mutate({ id: currentRow.id, data: values });
+      updateUser.mutate({ id: currentRow.id, data: { status: values.status } });
     } else {
-      createVendor.mutate(values);
+      const createPayload: CreateUserRequest = {
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        image_url: values.image_url,
+        role_id: values.role_id,
+      };
+      createUser.mutate(createPayload);
     }
     onOpenChange(false);
     form.reset();
   };
 
-  const isPending = createVendor.isPending || updateVendor.isPending;
+  const isPending = createUser.isPending || updateUser.isPending;
 
   return (
     <Sheet
@@ -106,17 +117,17 @@ export function VendorMutateDrawer({
     >
       <SheetContent className="flex flex-col py-3 sm:max-w-sm">
         <SheetHeader className="text-start">
-          <SheetTitle>{isEdit ? 'Edit' : 'Add'} Vendor</SheetTitle>
+          <SheetTitle>{isEdit ? 'Edit' : 'Add'} User</SheetTitle>
           <SheetDescription>
             {isEdit
-              ? 'Edit vendor information.'
-              : 'Add a new vendor to the system.'}{' '}
+              ? 'Update user status only.'
+              : 'Add a new user to the system.'}{' '}
             Click save when you&apos;re done.
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
           <form
-            id="vendor-form"
+            id="user-form"
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex-1 space-y-4 overflow-y-auto px-4"
           >
@@ -127,7 +138,11 @@ export function VendorMutateDrawer({
                 <FormItem>
                   <FormLabel>Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Vendor name" {...field} />
+                    <Input
+                      placeholder="User name"
+                      {...field}
+                      disabled={isEdit}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -142,8 +157,9 @@ export function VendorMutateDrawer({
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="vendor@example.com"
+                      placeholder="user@example.com"
                       {...field}
+                      disabled={isEdit}
                     />
                   </FormControl>
                   <FormMessage />
@@ -152,25 +168,17 @@ export function VendorMutateDrawer({
             />
             <FormField
               control={form.control}
-              name="phone_number"
+              name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone *</FormLabel>
+                  <FormLabel>Password *</FormLabel>
                   <FormControl>
-                    <Input placeholder="+62 812 3456 7890" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Jl. Contoh No.1, Surabaya" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      {...field}
+                      disabled={isEdit}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -186,6 +194,7 @@ export function VendorMutateDrawer({
                     <Input
                       placeholder="https://example.com/image.jpg"
                       {...field}
+                      disabled={isEdit}
                     />
                   </FormControl>
                   <FormMessage />
@@ -194,24 +203,68 @@ export function VendorMutateDrawer({
             />
             <FormField
               control={form.control}
-              name="description"
+              name="role_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Vendor description..." {...field} />
-                  </FormControl>
+                  <FormLabel>Role</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={isEdit}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="58001c95-eab6-4f7a-b3ce-f627499d3ebe">
+                        Super Admin
+                      </SelectItem>
+                      <SelectItem value="791cb0fa-dc65-4510-b51d-38d52c1d73c3">
+                        Client
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {isEdit && (
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value: 'active' | 'inactive') =>
+                        field.onChange(value)
+                      }
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </form>
         </Form>
         <SheetFooter className="gap-2">
           <SheetClose asChild>
             <Button variant="outline">Close</Button>
           </SheetClose>
-          <Button form="vendor-form" type="submit" disabled={isPending}>
+          <Button form="user-form" type="submit" disabled={isPending}>
             {isPending ? 'Saving...' : 'Save changes'}
           </Button>
         </SheetFooter>
@@ -220,25 +273,23 @@ export function VendorMutateDrawer({
   );
 }
 
-// ─── Delete Dialog ────────────────────────────────────────────────────────────
-
-type VendorDeleteDialogProps = {
+type UserDeleteDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentRow: VendorData;
+  currentRow: ProfileResponseData;
 };
 
-export function VendorDeleteDialog({
+export function UserDeleteDialog({
   open,
   onOpenChange,
   currentRow,
-}: VendorDeleteDialogProps) {
+}: UserDeleteDialogProps) {
   const [value, setValue] = useState('');
-  const deleteVendor = useDeleteVendor();
+  const deleteUser = useDeleteUser();
 
   const handleDelete = () => {
     if (value.trim() !== currentRow.name) return;
-    deleteVendor.mutate(currentRow.id);
+    deleteUser.mutate(currentRow.id);
     onOpenChange(false);
   };
 
@@ -254,7 +305,7 @@ export function VendorDeleteDialog({
             className="me-1 inline-block stroke-destructive"
             size={18}
           />
-          Delete Vendor
+          Delete User
         </span>
       }
       desc={
@@ -265,11 +316,11 @@ export function VendorDeleteDialog({
             cannot be undone.
           </p>
           <Label className="my-2">
-            Vendor name:
+            User name:
             <Input
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Enter vendor name to confirm deletion."
+              placeholder="Enter user name to confirm deletion."
             />
           </Label>
           <Alert variant="destructive">
@@ -286,16 +337,13 @@ export function VendorDeleteDialog({
   );
 }
 
-// ─── Combined Dialogs ─────────────────────────────────────────────────────────
-
-export function VendorDialogs() {
-  const { open, setOpen, currentRow, setCurrentRow } = useVendorContext();
+export function UserDialogs() {
+  const { open, setOpen, currentRow, setCurrentRow } = useUsers();
 
   return (
     <>
-      {/* ✅ FIX: onOpenChange set null untuk menutup dialog */}
-      <VendorMutateDrawer
-        key="vendor-add"
+      <UserMutateDrawer
+        key="user-add"
         open={open === 'add'}
         onOpenChange={(v) => {
           if (!v) setOpen(null);
@@ -303,8 +351,8 @@ export function VendorDialogs() {
       />
       {currentRow && (
         <>
-          <VendorMutateDrawer
-            key={`vendor-edit-${currentRow.id}`}
+          <UserMutateDrawer
+            key={`user-edit-${currentRow.id}`}
             open={open === 'edit'}
             onOpenChange={(v) => {
               if (!v) {
@@ -314,8 +362,8 @@ export function VendorDialogs() {
             }}
             currentRow={currentRow}
           />
-          <VendorDeleteDialog
-            key={`vendor-delete-${currentRow.id}`}
+          <UserDeleteDialog
+            key={`user-delete-${currentRow.id}`}
             open={open === 'delete'}
             onOpenChange={(v) => {
               if (!v) {

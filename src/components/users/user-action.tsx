@@ -78,7 +78,7 @@ export function UserActions({ userId }: Props) {
       disabled={impersonateMutation.isPending || getProfileMutation.isPending}
     >
       {impersonateMutation.isPending || getProfileMutation.isPending
-        ? 'Loading...'
+        ? 'Loading'
         : 'Login'}
     </Button>
   );
