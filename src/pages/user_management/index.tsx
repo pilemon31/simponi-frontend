@@ -122,7 +122,7 @@ const UserPageContent = () => {
   };
 
   return (
-    <UsersProvider>
+    <>
       <UserDialogs />
 
       <Header>
@@ -160,7 +160,7 @@ const UserPageContent = () => {
           onClearFilters={HandleFilters}
         />
       </Main>
-    </UsersProvider>
+    </>
   );
 };
 

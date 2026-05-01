@@ -40,6 +40,10 @@ type UserMutateDrawerProps = {
   currentRow?: ProfileResponseData;
 };
 
+type UserMutateFormValues = CreateUserRequest & {
+  status: 'active' | 'inactive';
+};
+
 export function UserMutateDrawer({
   open,
   onOpenChange,
@@ -49,13 +53,14 @@ export function UserMutateDrawer({
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
 
-  const form = useForm<CreateUserRequest>({
+  const form = useForm<UserMutateFormValues>({
     defaultValues: {
       name: '',
       email: '',
       password: '',
       image_url: '',
       role_id: '',
+      status: 'active',
     },
   });
 
@@ -69,6 +74,7 @@ export function UserMutateDrawer({
               password: '',
               image_url: currentRow.image_url,
               role_id: currentRow.role.id,
+              status: currentRow.status ?? 'active',
             }
           : {
               name: '',
@@ -76,16 +82,24 @@ export function UserMutateDrawer({
               password: '',
               image_url: '',
               role_id: '',
+              status: 'active',
             },
       );
     }
   }, [open, currentRow, isEdit, form]);
 
-  const onSubmit = (values: CreateUserRequest) => {
+  const onSubmit = (values: UserMutateFormValues) => {
     if (isEdit) {
-      updateUser.mutate({ id: currentRow.id, data: values });
+      updateUser.mutate({ id: currentRow.id, data: { status: values.status } });
     } else {
-      createUser.mutate(values);
+      const createPayload: CreateUserRequest = {
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        image_url: values.image_url,
+        role_id: values.role_id,
+      };
+      createUser.mutate(createPayload);
     }
     onOpenChange(false);
     form.reset();
@@ -106,7 +120,7 @@ export function UserMutateDrawer({
           <SheetTitle>{isEdit ? 'Edit' : 'Add'} User</SheetTitle>
           <SheetDescription>
             {isEdit
-              ? 'Edit user information.'
+              ? 'Update user status only.'
               : 'Add a new user to the system.'}{' '}
             Click save when you&apos;re done.
           </SheetDescription>
@@ -124,7 +138,11 @@ export function UserMutateDrawer({
                 <FormItem>
                   <FormLabel>Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="User name" {...field} />
+                    <Input
+                      placeholder="User name"
+                      {...field}
+                      disabled={isEdit}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -141,6 +159,7 @@ export function UserMutateDrawer({
                       type="email"
                       placeholder="user@example.com"
                       {...field}
+                      disabled={isEdit}
                     />
                   </FormControl>
                   <FormMessage />
@@ -154,7 +173,12 @@ export function UserMutateDrawer({
                 <FormItem>
                   <FormLabel>Password *</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      {...field}
+                      disabled={isEdit}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,6 +194,7 @@ export function UserMutateDrawer({
                     <Input
                       placeholder="https://example.com/image.jpg"
                       {...field}
+                      disabled={isEdit}
                     />
                   </FormControl>
                   <FormMessage />
@@ -183,8 +208,9 @@ export function UserMutateDrawer({
                 <FormItem>
                   <FormLabel>Role</FormLabel>
                   <Select
+                    value={field.value}
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    disabled={isEdit}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -204,6 +230,34 @@ export function UserMutateDrawer({
                 </FormItem>
               )}
             />
+            {isEdit && (
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value: 'active' | 'inactive') =>
+                        field.onChange(value)
+                      }
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </form>
         </Form>
         <SheetFooter className="gap-2">
