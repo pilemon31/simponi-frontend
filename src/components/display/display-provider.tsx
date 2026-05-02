@@ -1,42 +1,48 @@
 import React, { useState } from "react";
-import type { DisplayExternalProduct } from "@/types/external-product.type";
+import type { ExternalProductItem } from "@/types/external-product.type";
 import useDialogState from "@/hooks/use-dialog-state";
 
-type DisplayDialogType = "add" | "edit" | "delete";
+type ExternalProductDialogType = "add" | "edit" | "delete";
 
-type DisplayContextType = {
-  open: DisplayDialogType | null;
-  setOpen: (str: DisplayDialogType | null) => void;
-  currentRow: DisplayExternalProduct | null;
+type ExternalProductContextType = {
+  open: ExternalProductDialogType | null;
+  setOpen: (str: ExternalProductDialogType | null) => void;
+  currentRow: ExternalProductItem | null;
   setCurrentRow: React.Dispatch<
-    React.SetStateAction<DisplayExternalProduct | null>
+    React.SetStateAction<ExternalProductItem | null>
   >;
 };
 
-const DisplayContext = React.createContext<DisplayContextType | null>(null);
+const ExternalProductContext =
+  React.createContext<ExternalProductContextType | null>(null);
 
-export function DisplayProvider({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useDialogState<DisplayDialogType>(null);
-  const [currentRow, setCurrentRow] = useState<DisplayExternalProduct | null>(
+export function ExternalProductProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useDialogState<ExternalProductDialogType>(null);
+  const [currentRow, setCurrentRow] = useState<ExternalProductItem | null>(
     null,
   );
 
   return (
-    <DisplayContext value={{ open, setOpen, currentRow, setCurrentRow }}>
+    <ExternalProductContext
+      value={{ open, setOpen, currentRow, setCurrentRow }}>
       {children}
-    </DisplayContext>
+    </ExternalProductContext>
   );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useDisplayDialogs = () => {
-  const displayContext = React.useContext(DisplayContext);
+export const useExternalProductDialogs = () => {
+  const externalProductContext = React.useContext(ExternalProductContext);
 
-  if (!displayContext) {
+  if (!externalProductContext) {
     throw new Error(
-      "useDisplayDialogs has to be used within <DisplayProvider>",
+      "useExternalProductDialogs has to be used within <ExternalProductProvider>",
     );
   }
 
-  return displayContext;
+  return externalProductContext;
 };

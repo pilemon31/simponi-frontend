@@ -1,34 +1,51 @@
 "use client";
 
 import { useState } from "react";
+import { type Table } from "@tanstack/react-table";
 import { AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "../shared/confirm-dialog";
 import { useDeleteExternalProduct } from "@/hooks/use-external-product";
-import type { ExternalProductItem } from "@/types/external-product.type";
 
-type ExternalProductDeleteDialogProps = {
+type ExternalProductMultiDeleteDialogProps<TData> = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentRow: ExternalProductItem;
+  table: Table<TData>;
 };
 
-export function ExternalProductDeleteDialog({
+const CONFIRM_WORD = "DELETE";
+
+export function ExternalProductMultiDeleteDialog<TData extends { id: string }>({
   open,
   onOpenChange,
-  currentRow,
-}: ExternalProductDeleteDialogProps) {
+  table,
+}: ExternalProductMultiDeleteDialogProps<TData>) {
   const [value, setValue] = useState("");
   const deleteExternalProduct = useDeleteExternalProduct();
 
-  const handleDelete = () => {
-    if (value.trim() !== currentRow.product_name) return;
+  const selectedRows = table.getFilteredSelectedRowModel().rows;
 
-    deleteExternalProduct.mutate(currentRow.id);
+  const handleDelete = async () => {
+    if (value.trim() !== CONFIRM_WORD) {
+      toast.error(`Please type "${CONFIRM_WORD}" to confirm.`);
+      return;
+    }
 
-    onOpenChange(false);
+    try {
+      for (const row of selectedRows) {
+        await deleteExternalProduct.mutateAsync(row.original.id);
+      }
+
+      setValue("");
+      table.resetRowSelection();
+      onOpenChange(false);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error: unknown) {
+      toast.error("Failed delete product");
+    }
   };
 
   return (
@@ -36,35 +53,31 @@ export function ExternalProductDeleteDialog({
       open={open}
       onOpenChange={onOpenChange}
       handleConfirm={handleDelete}
-      disabled={value.trim() !== currentRow.product_name}
+      disabled={value.trim() !== CONFIRM_WORD}
       title={
         <span className="text-destructive">
           <AlertTriangle
             className="me-1 inline-block stroke-destructive"
             size={18}
           />{" "}
-          Delete External Product
+          Delete {selectedRows.length}{" "}
+          {selectedRows.length > 1 ? "products" : "product"}
         </span>
       }
       desc={
         <div className="space-y-4">
           <p className="mb-2">
-            Are you sure you want to delete{" "}
-            <span className="font-bold">{currentRow.product_name}</span>?
+            Are you sure you want to delete the selected external products?{" "}
             <br />
-            This action will permanently remove the external product{" "}
-            <span className="font-bold">
-              {currentRow.product_name.toUpperCase()}
-            </span>{" "}
-            from the system. This cannot be undone.
+            This action cannot be undone.
           </p>
 
-          <Label className="my-2">
-            Product:
+          <Label className="my-4 flex flex-col items-start gap-1.5">
+            <span className="">Confirm by typing "{CONFIRM_WORD}":</span>
             <Input
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Enter product name to confirm deletion."
+              placeholder={`Type "${CONFIRM_WORD}" to confirm.`}
             />
           </Label>
 

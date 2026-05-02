@@ -1,5 +1,8 @@
 import axiosConfig from "@/lib/axios";
+import { buildStorePath } from "@/lib/shop";
+import axios, { type AxiosError } from "axios";
 import { mapErrorResponse } from "@/lib/error-mapper";
+
 import type {
   CreateExternalProductRequest,
   ExternalProductDetailResponse,
@@ -8,131 +11,147 @@ import type {
   UpdateExternalProductRequest,
 } from "@/types/external-product.type";
 import type { ErrorResponse } from "@/types/response.type";
-import axios, { AxiosError } from "axios";
 
-const fallbackError = (
-  message = "An unexpected error occurred",
-): ErrorResponse => ({
-  status: false,
-  message,
-  timestamp: new Date().toISOString(),
-  error: "Unknown error",
-});
+export const ExternalProductApi = {
+  getAll: async (search = "", page = 1, perPage = 10) => {
+    try {
+      const response = await axiosConfig.get<ExternalProductListResponse>(
+        buildStorePath("/external-products/"),
+        {
+          params: {
+            search: search || undefined,
+            page: String(page),
+            per_page: String(perPage),
+          },
+        },
+      );
 
-export const getExternalProducts = async (
-  search = "",
-  page: number = 1,
-  perPage: number = 10,
-): Promise<ExternalProductListResponse | ErrorResponse> => {
-  try {
-    const response = await axiosConfig.get("/external-products", {
-      params: {
-        search: search || undefined,
-        page,
-        per_page: perPage,
-      },
-    });
-    return response.data as ExternalProductListResponse;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const response = (error as AxiosError).response?.data;
-      return mapErrorResponse(response as ErrorResponse);
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        const res = (error as AxiosError).response?.data;
+        return mapErrorResponse(res as ErrorResponse);
+      }
+
+      return {
+        status: false,
+        message: "An unexpected error occurred",
+        timestamp: new Date().toISOString(),
+        error: "Unknown error",
+      } as ErrorResponse;
     }
-    return fallbackError();
-  }
-};
+  },
 
-export const getExternalProductByID = async (
-  id: string,
-): Promise<ExternalProductDetailResponse | ErrorResponse> => {
-  try {
-    const response = await axiosConfig.get(`/external-products/${id}`);
-    return response.data as ExternalProductDetailResponse;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const response = (error as AxiosError).response?.data;
-      return mapErrorResponse(response as ErrorResponse);
-    }
-    return fallbackError();
-  }
-};
+  getById: async (id: string) => {
+    try {
+      const response = await axiosConfig.get<ExternalProductDetailResponse>(
+        buildStorePath(`/external-products/${id}`),
+      );
 
-export const getExternalProductsByProductID = async (
-  productID: string,
-): Promise<ExternalProductItem[] | ErrorResponse> => {
-  try {
-    const response = await axiosConfig.get(
-      `/external-products/product/${productID}`,
-    );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const response = (error as AxiosError).response?.data;
-      return mapErrorResponse(response as ErrorResponse);
-    }
-    return fallbackError();
-  }
-};
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        const res = (error as AxiosError).response?.data;
+        return mapErrorResponse(res as ErrorResponse);
+      }
 
-export const getExternalProductsByStorePlatformID = async (
-  storePlatformID: string,
-): Promise<ExternalProductItem[] | ErrorResponse> => {
-  try {
-    const response = await axiosConfig.get(
-      `/external-products/store-platform/${storePlatformID}`,
-    );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const response = (error as AxiosError).response?.data;
-      return mapErrorResponse(response as ErrorResponse);
+      return {
+        status: false,
+        message: "An unexpected error occurred",
+        timestamp: new Date().toISOString(),
+        error: "Unknown error",
+      } as ErrorResponse;
     }
-    return fallbackError();
-  }
-};
+  },
 
-export const createExternalProduct = async (
-  data: CreateExternalProductRequest,
-): Promise<ExternalProductDetailResponse | ErrorResponse> => {
-  try {
-    const response = await axiosConfig.post("/external-products", data);
-    return response.data as ExternalProductDetailResponse;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const response = (error as AxiosError).response?.data;
-      return mapErrorResponse(response as ErrorResponse);
-    }
-    return fallbackError();
-  }
-};
+  getByStorePlatformId: async (storePlatformId: string) => {
+    try {
+      const response = await axiosConfig.get<ExternalProductItem[]>(
+        buildStorePath(`/external-products/store-platform/${storePlatformId}`),
+      );
 
-export const updateExternalProduct = async (
-  id: string,
-  data: UpdateExternalProductRequest,
-): Promise<ExternalProductDetailResponse | ErrorResponse> => {
-  try {
-    const response = await axiosConfig.put(`/external-products/${id}`, data);
-    return response.data as ExternalProductDetailResponse;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const response = (error as AxiosError).response?.data;
-      return mapErrorResponse(response as ErrorResponse);
-    }
-    return fallbackError();
-  }
-};
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        const res = (error as AxiosError).response?.data;
+        return mapErrorResponse(res as ErrorResponse);
+      }
 
-export const deleteExternalProduct = async (
-  id: string,
-): Promise<ErrorResponse | { status: true; message: string }> => {
-  try {
-    const response = await axiosConfig.delete(`/external-products/${id}`);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const response = (error as AxiosError).response?.data;
-      return mapErrorResponse(response as ErrorResponse);
+      return {
+        status: false,
+        message: "An unexpected error occurred",
+        timestamp: new Date().toISOString(),
+        error: "Unknown error",
+      } as ErrorResponse;
     }
-    return fallbackError();
-  }
+  },
+
+  create: async (payload: CreateExternalProductRequest) => {
+    try {
+      const response = await axiosConfig.post<ExternalProductDetailResponse>(
+        buildStorePath("/external-products/"),
+        payload,
+      );
+
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        const res = (error as AxiosError).response?.data;
+        return mapErrorResponse(res as ErrorResponse);
+      }
+
+      return {
+        status: false,
+        message: "An unexpected error occurred",
+        timestamp: new Date().toISOString(),
+        error: "Unknown error",
+      } as ErrorResponse;
+    }
+  },
+
+  update: async (id: string, payload: UpdateExternalProductRequest) => {
+    try {
+      const response = await axiosConfig.put<ExternalProductDetailResponse>(
+        buildStorePath(`/external-products/${id}`),
+        payload,
+      );
+
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        const res = (error as AxiosError).response?.data;
+        return mapErrorResponse(res as ErrorResponse);
+      }
+
+      return {
+        status: false,
+        message: "An unexpected error occurred",
+        timestamp: new Date().toISOString(),
+        error: "Unknown error",
+      } as ErrorResponse;
+    }
+  },
+
+  delete: async (id: string) => {
+    try {
+      const response = await axiosConfig.delete<{
+        status: true;
+        message: string;
+      }>(buildStorePath(`/external-products/${id}`));
+
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        const res = (error as AxiosError).response?.data;
+        return mapErrorResponse(res as ErrorResponse);
+      }
+
+      return {
+        status: false,
+        message: "An unexpected error occurred",
+        timestamp: new Date().toISOString(),
+        error: "Unknown error",
+      } as ErrorResponse;
+    }
+  },
 };

@@ -1,5 +1,5 @@
-import type { ProductCategoryData } from './product.type';
-import type { SuccessResponse } from './response.type';
+import type { ProductCategory } from "./product.type";
+import type { SuccessResponse } from "./response.type";
 
 interface InventoryLogListResponse {
   id: string;
@@ -9,7 +9,7 @@ interface InventoryLogListResponse {
     description: string;
     sku: string;
     stock: number;
-    category: ProductCategoryData;
+    category: ProductCategory;
     created_at: string;
     updated_at: string;
   };

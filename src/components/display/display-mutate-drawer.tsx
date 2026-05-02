@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -27,82 +28,99 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  displayMutateSchema,
-  type DisplayMutateValues,
+  createExternalProductFormSchema,
+  type CreateExternalProductFormValues,
 } from "@/schemas/external-product.schema";
-import type { DisplayExternalProduct } from "@/types/external-product.type";
+import type { ExternalProductItem } from "@/types/external-product.type";
+import {
+  useCreateExternalProduct,
+  useUpdateExternalProduct,
+} from "@/hooks/use-external-product";
 
 type ProductOption = {
   id: string;
   name: string;
 };
 
-type StorePlatformOption = {
+type PlatformOption = {
   id: string;
   label: string;
 };
 
-type DisplayMutateDrawerProps = {
-  currentRow?: DisplayExternalProduct;
+type ExternalProductMutateDrawerProps = {
+  currentRow?: ExternalProductItem;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  isPending?: boolean;
   productOptions?: ProductOption[];
-  storePlatformOptions?: StorePlatformOption[];
-  onSubmitForm?: (
-    values: DisplayMutateValues,
-    currentRow?: DisplayExternalProduct,
-  ) => boolean | void | Promise<boolean | void>;
+  platformOptions?: PlatformOption[];
 };
 
-export function DisplayMutateDrawer({
+export function ExternalProductMutateDrawer({
   open,
   onOpenChange,
   currentRow,
-  isPending,
   productOptions = [],
-  storePlatformOptions = [],
-  onSubmitForm,
-}: DisplayMutateDrawerProps) {
+  platformOptions = [],
+}: ExternalProductMutateDrawerProps) {
   const isEdit = !!currentRow;
+  const createMutation = useCreateExternalProduct();
+  const updateMutation = useUpdateExternalProduct();
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
-  const form = useForm<DisplayMutateValues>({
-    resolver: zodResolver(displayMutateSchema),
-    defaultValues: isEdit
-      ? {
-          productId: currentRow.id,
-          storePlatformId:
-            currentRow.store_platform_name || currentRow.platform,
-          price: currentRow.price,
-        }
-      : {
-          productId: "",
-          storePlatformId: "",
-          price: 0,
-        },
+  const form = useForm<CreateExternalProductFormValues>({
+    resolver: zodResolver(createExternalProductFormSchema),
+    defaultValues: {
+      product_id: isEdit ? currentRow.id : "",
+      platform_id: isEdit ? currentRow.id : "",
+      price: isEdit ? currentRow.price : 0,
+    },
   });
 
-  const resetDrawerState = () => {
-    form.reset();
-  };
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        product_id: isEdit ? currentRow.id : "",
+        platform_id: isEdit ? currentRow.id : "",
+        price: isEdit ? currentRow.price : 0,
+      });
+    }
+  }, [open, currentRow, isEdit, form]);
 
-  const onSubmit = async (values: DisplayMutateValues) => {
-    const shouldClose = await onSubmitForm?.(values, currentRow);
-
-    if (shouldClose === false) {
+  const onSubmit = (values: CreateExternalProductFormValues) => {
+    if (isEdit) {
+      updateMutation.mutate(
+        { id: currentRow.id, payload: { price: values.price } },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            form.reset();
+          },
+        },
+      );
       return;
     }
 
-    onOpenChange(false);
-    resetDrawerState();
+    createMutation.mutate(
+      {
+        product_id: values.product_id,
+        platform_id: values.platform_id,
+        price: values.price,
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          form.reset();
+        },
+      },
+    );
   };
 
   return (
     <Sheet
       open={open}
-      onOpenChange={(value) => {
-        onOpenChange(value);
-        resetDrawerState();
+      onOpenChange={(v) => {
+        onOpenChange(v);
+        if (!v) form.reset();
       }}>
       <SheetContent className="flex flex-col py-3 sm:max-w-sm">
         <SheetHeader className="text-start">
@@ -111,13 +129,14 @@ export function DisplayMutateDrawer({
             {isEdit
               ? "Update external listing information."
               : "Create a new external product listing."}
+            <br />
             Click save when you&apos;re done.
           </SheetDescription>
         </SheetHeader>
 
         <Form {...form}>
           <form
-            id="display-product-form"
+            id="external-product-form"
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex-1 space-y-6 overflow-y-auto px-4">
             {isEdit ? (
@@ -146,7 +165,7 @@ export function DisplayMutateDrawer({
               <>
                 <FormField
                   control={form.control}
-                  name="productId"
+                  name="product_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Internal Product</FormLabel>
@@ -178,7 +197,7 @@ export function DisplayMutateDrawer({
 
                 <FormField
                   control={form.control}
-                  name="storePlatformId"
+                  name="platform_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Store Platform</FormLabel>
@@ -189,13 +208,13 @@ export function DisplayMutateDrawer({
                             field.onChange(value === "__none" ? "" : value)
                           }>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select store platform" />
+                            <SelectValue placeholder="Select platform" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="__none">
                               Select platform
                             </SelectItem>
-                            {storePlatformOptions.map((platform) => (
+                            {platformOptions.map((platform) => (
                               <SelectItem key={platform.id} value={platform.id}>
                                 {platform.label}
                               </SelectItem>
@@ -241,7 +260,7 @@ export function DisplayMutateDrawer({
             </Button>
           </SheetClose>
           <Button
-            form="display-product-form"
+            form="external-product-form"
             type="submit"
             disabled={isPending}>
             {isPending ? "Saving..." : "Save changes"}

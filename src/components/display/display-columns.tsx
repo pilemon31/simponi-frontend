@@ -1,18 +1,12 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
-import { MoreVertical, Image as ImageIcon, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { DisplayExternalProduct } from "@/types/external-product.type";
+import { Music, ShoppingCart, Image as ImageIcon } from "lucide-react";
+import type { ExternalProductItem } from "@/types/external-product.type";
 import { resolveImageUrl } from "@/lib/media";
+import { DataTableRowActions } from "./data-table-row-actions";
 
-export const displayColumns: ColumnDef<DisplayExternalProduct>[] = [
+export const externalProductColumns: ColumnDef<ExternalProductItem>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -42,40 +36,70 @@ export const displayColumns: ColumnDef<DisplayExternalProduct>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Product" />
     ),
-    cell: ({ row }) => (
-      <span>{row.getValue<string>("product_name") || "-"}</span>
-    ),
+    meta: {
+      className: "ps-1 max-w-0 w-2/5",
+      tdClassName: "ps-4",
+    },
+    cell: ({ row }) => {
+      const data = row.original;
+      const imageUrl = data.image ? resolveImageUrl(data.image) : null;
+
+      return (
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={data.product_name}
+                className="size-full object-cover"
+              />
+            ) : (
+              <ImageIcon className="size-5" />
+            )}
+          </div>
+          <div className="flex flex-col truncate">
+            <span className="truncate font-medium text-foreground">
+              {data.product_name || "-"}
+            </span>
+            <span className="truncate text-xs text-muted-foreground">
+              {data.store_platform_name || "Unknown Store"}
+            </span>
+          </div>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "platform",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Platform" />
     ),
-    cell: ({ row }) => <span>{row.getValue<string>("platform") || "-"}</span>,
-  },
-  {
-    accessorKey: "image",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Image" />
-    ),
+    meta: {
+      className: "ps-1",
+      tdClassName: "ps-4",
+    },
     cell: ({ row }) => {
-      const imageUrl = row.getValue<string>("image");
+      const platform = row.getValue<string>("platform")?.toLowerCase();
 
-      if (!imageUrl) {
+      if (platform === "tiktok") {
         return (
-          <div className="flex size-9 items-center justify-center rounded-md bg-muted text-muted-foreground">
-            <ImageIcon className="size-4" />
+          <div className="flex items-center gap-1.5 text-blue-500">
+            <Music className="size-4" />
+            <span className="text-sm font-medium capitalize">TikTok</span>
           </div>
         );
       }
 
-      return (
-        <img
-          src={resolveImageUrl(imageUrl) ?? undefined}
-          alt={row.original.product_name}
-          className="size-9 rounded-md object-cover"
-        />
-      );
+      if (platform === "shopee") {
+        return (
+          <div className="flex items-center gap-1.5 text-orange-500">
+            <ShoppingCart className="size-4" />
+            <span className="text-sm font-medium capitalize">Shopee</span>
+          </div>
+        );
+      }
+
+      return <span className="text-sm capitalize">{platform || "-"}</span>;
     },
   },
   {
@@ -83,10 +107,14 @@ export const displayColumns: ColumnDef<DisplayExternalProduct>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Price" />
     ),
+    meta: {
+      className: "ps-1",
+      tdClassName: "ps-4",
+    },
     cell: ({ row }) => {
       const price = row.getValue<number>("price");
       return (
-        <span className="font-medium">
+        <span className="font-medium text-foreground">
           {price.toLocaleString("id-ID", {
             style: "currency",
             currency: "IDR",
@@ -101,6 +129,10 @@ export const displayColumns: ColumnDef<DisplayExternalProduct>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Created At" />
     ),
+    meta: {
+      className: "ps-1",
+      tdClassName: "ps-4",
+    },
     cell: ({ row }) => (
       <span className="text-xs text-muted-foreground">
         {new Date(row.getValue<string>("created_at")).toLocaleDateString(
@@ -112,43 +144,8 @@ export const displayColumns: ColumnDef<DisplayExternalProduct>[] = [
   },
   {
     id: "actions",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Actions" />
-    ),
-    cell: ({ row, table }) => {
-      const rowData = row.original;
-      const meta = table.options.meta as
-        | {
-            onEdit?: (item: DisplayExternalProduct) => void;
-            onDelete?: (item: DisplayExternalProduct) => void;
-          }
-        | undefined;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground">
-              <MoreVertical className="size-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => meta?.onEdit?.(rowData)}>
-              <Pencil className="size-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => meta?.onDelete?.(rowData)}>
-              <Trash2 className="size-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: DataTableRowActions,
+    enableSorting: false,
+    enableHiding: false,
   },
 ];
