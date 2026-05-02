@@ -1,10 +1,12 @@
 import axiosConfig from "@/lib/axios";
+import { buildStorePath } from "@/lib/shop";
 import axios, { type AxiosError } from "axios";
 import { mapErrorResponse } from "@/lib/error-mapper";
 
 import type {
   ProductResponse,
   GetAllProductResponse,
+  ProductStats,
   ProductStatsResponse,
   CreateProductPayload,
   UpdateProductPayload,
@@ -14,11 +16,27 @@ import type {
 
 import type { ErrorResponse } from "@/types/response.type";
 
+const normalizeProductListResponse = (
+  response: GetAllProductResponse,
+): GetAllProductResponse => ({
+  ...response,
+  data: Array.isArray(response.data) ? response.data : [],
+});
+
+const emptyProductStats = (): ProductStats => ({
+  total_products: 0,
+  total_skus: 0,
+  stock_units: 0,
+  low_stock: 0,
+  out_of_stock: 0,
+  unsynced: 0,
+});
+
 export const ProductApi = {
   getAll: async (search = "", page = 1, perPage = 10) => {
     try {
       const response = await axiosConfig.get<GetAllProductResponse>(
-        "/stores/fb03a935-3b35-4653-8ab9-8c97309012e8/products/",
+        buildStorePath("/products/"),
         {
           params: {
             search: search || undefined,
@@ -28,7 +46,7 @@ export const ProductApi = {
         },
       );
 
-      return response.data;
+      return normalizeProductListResponse(response.data);
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
         const res = (error as AxiosError).response?.data;
@@ -47,7 +65,7 @@ export const ProductApi = {
   getById: async (id: string) => {
     try {
       const response = await axiosConfig.get<ProductResponse>(
-        `/stores/fb03a935-3b35-4653-8ab9-8c97309012e8/products/${id}/`,
+        buildStorePath(`/products/${id}/`),
       );
 
       return response.data;
@@ -69,9 +87,11 @@ export const ProductApi = {
   getBySKU: async (sku: string) => {
     try {
       const response = await axiosConfig.get<ProductResponse>(
-        `/stores/fb03a935-3b35-4653-8ab9-8c97309012e8/products/sku/`,
+        buildStorePath("/products/sku/"),
         {
-          params: { sku },
+          params: {
+            sku,
+          },
         },
       );
 
@@ -109,10 +129,10 @@ export const ProductApi = {
   getStats: async () => {
     try {
       const response = await axiosConfig.get<ProductStatsResponse>(
-        "/stores/fb03a935-3b35-4653-8ab9-8c97309012e8/products/stats/",
+        buildStorePath("/products/stats/"),
       );
 
-      return response.data.data;
+      return response.data.data ?? emptyProductStats();
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
         throw error.response.data;
@@ -125,7 +145,7 @@ export const ProductApi = {
   create: async (payload: CreateProductPayload) => {
     try {
       const response = await axiosConfig.post<ProductResponse>(
-        "/stores/fb03a935-3b35-4653-8ab9-8c97309012e8/products/",
+        buildStorePath("/products/"),
         payload,
       );
 
@@ -148,7 +168,7 @@ export const ProductApi = {
   update: async (id: string, payload: UpdateProductPayload) => {
     try {
       const response = await axiosConfig.put<ProductResponse>(
-        `/stores/fb03a935-3b35-4653-8ab9-8c97309012e8/products/${id}/`,
+        buildStorePath(`/products/${id}/`),
         payload,
       );
 
@@ -171,7 +191,7 @@ export const ProductApi = {
   delete: async (id: string) => {
     try {
       const response = await axiosConfig.delete<ProductResponse>(
-        `/stores/fb03a935-3b35-4653-8ab9-8c97309012e8/products/${id}/`,
+        buildStorePath(`/products/${id}/`),
       );
 
       return response.data;
@@ -193,7 +213,7 @@ export const ProductApi = {
   updateStock: async (id: string, payload: UpdateStockPayload) => {
     try {
       const response = await axiosConfig.patch<ProductResponse>(
-        `/stores/fb03a935-3b35-4653-8ab9-8c97309012e8/products/${id}/stock/`,
+        buildStorePath(`/products/${id}/stock/`),
         payload,
       );
 

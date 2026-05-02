@@ -18,16 +18,19 @@ import {
 export const sidebarData = {
   shops: [
     {
+      id: 'e2b2c3d4-0007-4000-8000-000000000001',
       name: 'Toko Aqeel',
       logo: Command,
       role: 'Client',
     },
     {
+      id: 'e2b2c3d4-0007-4000-8000-000000000002',
       name: 'Toko Rizky',
       logo: GalleryVerticalEnd,
       role: 'Client',
     },
     {
+      id: 'a3b5c7d9-2222-4333-8444-555555555555',
       name: 'Toko Barimbing',
       logo: AudioWaveform,
       role: 'Admin',

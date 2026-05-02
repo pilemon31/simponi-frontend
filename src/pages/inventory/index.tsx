@@ -103,7 +103,11 @@ const ProductsPage = () => {
   };
 
   const { data: productData } = useProducts(searchInput, page, perPage);
-  const data = isGetAllProductSuccess(productData) ? productData.data : [];
+  const data = isGetAllProductSuccess(productData)
+    ? Array.isArray(productData.data)
+      ? productData.data
+      : []
+    : [];
   const meta = isGetAllProductSuccess(productData)
     ? productData.meta
     : undefined;
