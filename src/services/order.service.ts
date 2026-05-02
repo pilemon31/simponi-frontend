@@ -1,4 +1,5 @@
 import axiosConfig from '@/lib/axios';
+import { getActiveShopId } from '@/lib/shop';
 import axios, { type AxiosError } from 'axios';
 import { mapErrorResponse } from '@/lib/error-mapper';
 import { type ErrorResponse } from '@/types/response.type';
@@ -10,13 +11,18 @@ import type {
 export const OrdersApi = {
   getAll: async (search = '', page = 1, perPage = 10) => {
     try {
-      const response = await axiosConfig.get<GetAllOrdersResponse>('/orders', {
+      const activeShopId = getActiveShopId();
+      console.log(activeShopId)
+      const response = await axiosConfig.get<GetAllOrdersResponse>(`stores/${activeShopId}/orders`, {
         params: {
           search: search || undefined,
           page: String(page),
           per_page: String(perPage),
         },
       });
+
+      console.log(response.data)
+      console.log('test')
 
       return response.data as GetAllOrdersResponse;
     } catch (error: unknown) {
@@ -36,8 +42,9 @@ export const OrdersApi = {
 
   getDetail: async (id: string | number) => {
     try {
+      const activeShopId = getActiveShopId();
       const response = await axiosConfig.get<GetOrderDetailResponse>(
-        `/orders/${encodeURIComponent(String(id))}`,
+        `stores/${activeShopId}/orders/${encodeURIComponent(String(id))}`,
       );
 
       return response.data as GetOrderDetailResponse;

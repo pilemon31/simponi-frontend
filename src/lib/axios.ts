@@ -3,6 +3,7 @@ import axios, { AxiosError } from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/stores/auth-store';
 import { API_BASE_URL } from './env';
+import { getActiveShopId, SHOP_ID_HEADER } from './shop';
 
 const axiosConfig = axios.create({
   baseURL: `${API_BASE_URL}/v1`,
@@ -31,10 +32,18 @@ const processQueue = (error?: any, token?: string) => {
 axiosConfig.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().auth.accessToken;
+    const activeShopId = getActiveShopId();
+
+    config.headers = config.headers || {};
+
     if (token) {
-      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    if (activeShopId) {
+      config.headers[SHOP_ID_HEADER] = activeShopId;
+    }
+
     return config;
   },
   (error) => Promise.reject(error),

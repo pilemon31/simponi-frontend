@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useActiveShopId } from "@/lib/shop";
 import { ProductApi } from "@/services/product.service";
 import { uploadProductImages } from "@/services/upload.service";
 import type { ErrorResponse } from "@/types/response.type";
@@ -59,8 +60,10 @@ type UpdateProductPayload = ProductMutateValues & {
 };
 
 export const useProducts = (search = "", page = 1, perPage = 10) => {
+  const activeShopId = useActiveShopId();
+
   return useQuery({
-    queryKey: ["products", search, page, perPage],
+    queryKey: ["products", activeShopId, search, page, perPage],
     queryFn: () => ProductApi.getAll(search, page, perPage),
   });
 };
@@ -73,14 +76,19 @@ export const useProductCategories = () => {
 };
 
 export const useProductStats = () => {
+  const activeShopId = useActiveShopId();
+
   return useQuery({
-    queryKey: ["product-stats"],
+    queryKey: ["product-stats", activeShopId],
     queryFn: ProductApi.getStats,
   });
 };
 
 export const useProductDetail = () => {
+  const activeShopId = useActiveShopId();
+
   return useMutation({
+    mutationKey: ["product-detail", activeShopId],
     mutationFn: (id: string) => ProductApi.getById(id),
   });
 };

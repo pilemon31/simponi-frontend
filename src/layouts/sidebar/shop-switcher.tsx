@@ -14,9 +14,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { getActiveShopId, setActiveShopId } from '@/lib/shop';
 
 type ShopSwitcherProps = {
   shops: {
+    id: string;
     name: string;
     logo: React.ElementType;
     role: string;
@@ -25,7 +27,18 @@ type ShopSwitcherProps = {
 
 export function ShopSwitcher({ shops }: ShopSwitcherProps) {
   const { isMobile } = useSidebar();
-  const [activeShop, setActiveShop] = React.useState(shops[0]);
+  const [activeShop, setActiveShop] = React.useState(() => {
+    const fallbackShop = shops[0];
+    return shops.find((shop) => shop.id === getActiveShopId(fallbackShop.id)) ?? fallbackShop;
+  });
+
+  React.useEffect(() => {
+    if (activeShop) {
+      setActiveShopId(activeShop.id);
+    }
+  }, [activeShop]);
+
+  if (!activeShop) return null;
 
   return (
     <SidebarMenu>
@@ -59,7 +72,7 @@ export function ShopSwitcher({ shops }: ShopSwitcherProps) {
             </DropdownMenuLabel>
             {shops.map((team) => (
               <DropdownMenuItem
-                key={team.name}
+                key={team.id}
                 onClick={() => setActiveShop(team)}
                 className='gap-2 p-2'
               >
