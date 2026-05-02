@@ -16,6 +16,7 @@ import { ProductProvider } from "@/components/inventory/internal-provider";
 import { ProductsTable } from "@/components/inventory/internal-table";
 import { ProductPrimaryButtons } from "@/components/inventory/internal-primary-buttons";
 import { ProductDialogs } from "@/components/inventory/internal-dialog";
+import InventoryStatsCard from "@/components/inventory/internal-cards";
 
 const isGetAllProductSuccess = (
   response: GetAllProductResponse | ErrorResponse | undefined,
@@ -137,6 +138,7 @@ const ProductsPage = () => {
             </div>
             <ProductPrimaryButtons />
           </div>
+          <InventoryStatsCard />
           <ProductsTable
             data={data}
             meta={meta}

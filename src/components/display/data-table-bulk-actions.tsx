@@ -1,7 +1,5 @@
 import { type Table } from "@tanstack/react-table";
-import { Download } from "lucide-react";
-import { toast } from "sonner";
-import { sleep } from "@/lib/utils";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -10,53 +8,44 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DataTableBulkActions as BulkActionsToolbar } from "@/components/shared/data-table";
-import type { DisplayExternalProduct } from "@/types/external-product.type";
+import { useState } from "react";
+import { ExternalProductMultiDeleteDialog } from "./display-multi-delete-dialog";
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>;
 };
 
-export function DataTableBulkActions<TData>({
+export function DataTableBulkActions<TData extends { id: string }>({
   table,
 }: DataTableBulkActionsProps<TData>) {
-  const selectedRows = table.getFilteredSelectedRowModel().rows;
-
-  const handleBulkExport = () => {
-    const selectedActivities = selectedRows.map(
-      (row) => row.original as DisplayExternalProduct,
-    );
-    toast.promise(sleep(2000), {
-      loading: "Exporting activities...",
-      success: () => {
-        table.resetRowSelection();
-        return `Exported ${selectedActivities.length} activites${selectedActivities.length > 1 ? "s" : ""} to CSV.`;
-      },
-      error: "Error",
-    });
-    table.resetRowSelection();
-  };
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   return (
     <>
-      <BulkActionsToolbar table={table} entityName="task">
+      <BulkActionsToolbar table={table} entityName="external-product">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="outline"
               size="icon"
-              onClick={() => handleBulkExport()}
+              onClick={() => setShowDeleteConfirm(true)}
               className="size-8"
-              aria-label="Export activities"
-              title="Export activites">
-              <Download />
-              <span className="sr-only">Export activity</span>
+              aria-label="delete products"
+              title="delete products">
+              <Trash2 />
+              <span className="sr-only">Delete External Products</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Export activity</p>
+            <p>Delete External Products</p>
           </TooltipContent>
         </Tooltip>
       </BulkActionsToolbar>
+      <ExternalProductMultiDeleteDialog
+        table={table}
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+      />
     </>
   );
 }

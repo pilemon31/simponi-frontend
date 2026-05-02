@@ -59,10 +59,10 @@ const router = createBrowserRouter([
                 path: "/inventory/internal",
                 element: <InternalProductPage />,
               },
-              // {
-              //   path: '/inventory/display',
-              //   element: <DisplayProductPage />,
-              // },
+              {
+                path: "/inventory/display",
+                element: <DisplayProductPage />,
+              },
               {
                 path: "/activity",
                 element: <ActivityPage />,

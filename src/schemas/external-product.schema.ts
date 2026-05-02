@@ -1,50 +1,52 @@
 import { z } from "zod";
 
 export const externalProductSchema = z.object({
-  id: z.string(),
-  image_url: z.string().nullish(),
+  id: z.uuid(),
+  image: z.string(),
   product_name: z.string(),
-  platform: z.enum(["tiktok", "shopee"]),
+  platform: z.string(),
   store_platform_name: z.string(),
   price: z.number(),
   created_at: z.string(),
   updated_at: z.string(),
 });
 
-export const externalProductFormSchema = z.object({
-  product_id: z.string().min(1, "Product is required"),
-  store_platform_id: z.string().min(1, "Store platform is required"),
-  price: z.number().min(0, "Price cannot be negative"),
+export const createExternalProductFormSchema = z.object({
+  product_id: z
+    .uuid("Product ID tidak valid")
+    .min(1, "Pilih produk terlebih dahulu"),
+  platform_id: z
+    .uuid("Platform ID tidak valid")
+    .min(1, "Pilih platform terlebih dahulu"),
+  price: z
+    .number({ error: () => "Masukkan harga produk" })
+    .int("Harga harus berupa bilangan bulat")
+    .min(0, "Harga tidak boleh negatif"),
 });
 
-export const displayMutateSchema = z.object({
-  productId: z.string().trim().min(1, "Product is required"),
-  storePlatformId: z.string().trim().min(1, "Store platform is required"),
-  price: z.number().min(0, "Price cannot be negative"),
+export const updateExternalProductFormSchema = z.object({
+  price: z
+    .number({ error: () => "Masukkan harga produk" })
+    .int("Harga harus berupa bilangan bulat")
+    .min(0, "Harga tidak boleh negatif"),
 });
 
-export const createExternalProductPayload = z.object({
-  product_id: z.string(),
-  store_platform_id: z.string(),
-  price: z.number(),
-});
-
-export const updateExternalProductPayload = z.object({
-  price: z.number(),
-});
+export const createExternalProductPayload = createExternalProductFormSchema;
+export const updateExternalProductPayload = updateExternalProductFormSchema;
 
 export type ExternalProduct = z.infer<typeof externalProductSchema>;
 
-export type ExternalProductFormValues = z.infer<
-  typeof externalProductFormSchema
+export type CreateExternalProductFormValues = z.infer<
+  typeof createExternalProductFormSchema
 >;
 
-export type DisplayMutateValues = z.infer<typeof displayMutateSchema>;
+export type UpdateExternalProductFormValues = z.infer<
+  typeof updateExternalProductFormSchema
+>;
 
 export type CreateExternalProductPayloadValues = z.infer<
   typeof createExternalProductPayload
 >;
-
 export type UpdateExternalProductPayloadValues = z.infer<
   typeof updateExternalProductPayload
 >;

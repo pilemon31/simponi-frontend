@@ -1,147 +1,46 @@
-import { DisplayDialogs } from "@/components/display/display-dialog";
-import { DisplayPrimaryButtons } from "@/components/display/display-primary-buttons";
-import {
-  DisplayProvider,
-  useDisplayDialogs,
-} from "@/components/display/display-provider";
-import { DisplayTable } from "@/components/display/display-table";
-import type { DisplayExternalProduct } from "@/types/external-product.type";
-import { ConfigDrawer } from "@/components/shared/config-drawer";
-import { ProfileDropdown } from "@/components/shared/profile-dropdown";
+"use client";
+
+import { Header } from "@/layouts/header";
+import { useAuthStore } from "@/stores/auth-store";
 import { Search } from "@/components/shared/search";
 import { ThemeSwitch } from "@/components/shared/theme-switcher";
-import {
-  STORE_PLATFORM_OPTIONS,
-  useDisplayManagement,
-} from "@/hooks/use-display-management";
-import { useExternalProduct } from "@/hooks/use-external-product";
-import { useInventory } from "@/hooks/use-inventory";
-import { Header } from "@/layouts/header";
+import { ConfigDrawer } from "@/components/shared/config-drawer";
+import { ProfileDropdown } from "@/components/shared/profile-dropdown";
 import { Main } from "@/layouts/main";
-import { useAuthStore } from "@/stores/auth-store";
-import {
-  type ChangeEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { DollarSign, Link2, Music, ShoppingCart } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 
-type DisplayPageContentProps = {
-  onPrepareEdit: (
-    item: DisplayExternalProduct,
-  ) => Promise<DisplayExternalProduct>;
-};
+import { useExternalProducts } from "@/hooks/use-external-product";
+import { ExternalProductProvider } from "@/components/display/display-provider";
+import { ExternalProductsTable } from "@/components/display/display-table";
+import { ExternalProductPrimaryButtons } from "@/components/display/display-primary-buttons";
+import { ExternalProductDialogs } from "@/components/display/display-dialog";
+import type { ExternalProductItem } from "@/types/external-product.type";
 
-function DisplayPageContent({ onPrepareEdit }: DisplayPageContentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+import { DollarSign, Link2, Music, ShoppingCart } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-  const search = searchParams.get("search") ?? "";
-  const page = Number(searchParams.get("page")) || 1;
-  const perPage = Number(searchParams.get("per_page")) || 10;
-  const [searchInput, setSearchInput] = useState(search);
-
-  const {
-    data: externalProducts,
-    isLoading,
-    totalCount,
-    meta,
-  } = useExternalProduct(searchInput, page, perPage);
-  const { setCurrentRow, setOpen } = useDisplayDialogs();
-
-  const handleOpenEdit = useCallback(
-    async (item: DisplayExternalProduct) => {
-      const hydratedRow = await onPrepareEdit(item);
-      setCurrentRow(hydratedRow);
-      setOpen("edit");
-    },
-    [onPrepareEdit, setCurrentRow, setOpen],
-  );
-
-  useEffect(() => {
-    setSearchInput(search);
-  }, [search]);
-
-  const handleQueryParam = useCallback(
-    (key: string, value: string) => {
-      setSearchParams(
-        (prev) => {
-          const params = new URLSearchParams(prev);
-
-          if (!value || value === "all") {
-            params.delete(key);
-          } else {
-            params.set(key, value);
-          }
-
-          if (key !== "page") {
-            params.set("page", "1");
-          }
-
-          return params;
-        },
-        { replace: true },
-      );
-    },
-    [setSearchParams],
-  );
-
-  const handleClearFilters = () => {
-    setSearchInput("");
-    setSearchParams(
-      () => {
-        const params = new URLSearchParams();
-        params.set("page", "1");
-        params.set("per_page", String(perPage));
-        return params;
-      },
-      { replace: true },
-    );
-  };
-
-  const handleSearchChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      setSearchInput(value);
-
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-
-      debounceRef.current = setTimeout(() => {
-        handleQueryParam("search", value);
-      }, 500);
-    },
-    [handleQueryParam],
-  );
-
-  const handlePageChange = (nextPage: number) => {
-    handleQueryParam("page", String(nextPage));
-  };
-
-  const handlePerPageChange = (nextPerPage: number) => {
-    setSearchParams(
-      (prev) => {
-        const params = new URLSearchParams(prev);
-        params.set("per_page", String(nextPerPage));
-        params.set("page", "1");
-        return params;
-      },
-      { replace: true },
-    );
-  };
-
-  const shopeeCount = externalProducts.filter((ep) =>
+const DisplayStatsCard = ({
+  data,
+  isLoading,
+  totalCount,
+}: {
+  data: ExternalProductItem[];
+  isLoading: boolean;
+  totalCount: number;
+}) => {
+  const shopeeCount = data.filter((ep) =>
     ep.platform.toLowerCase().includes("shopee"),
   ).length;
 
-  const tiktokCount = externalProducts.filter((ep) =>
+  const tiktokCount = data.filter((ep) =>
     ep.platform.toLowerCase().includes("tiktok"),
   ).length;
+
+  const avgPrice =
+    data.length > 0
+      ? Math.round(data.reduce((acc, ep) => acc + ep.price, 0) / data.length)
+      : 0;
 
   const statsItems = [
     {
@@ -164,93 +63,41 @@ function DisplayPageContent({ onPrepareEdit }: DisplayPageContentProps) {
     },
     {
       label: "Avg. Price",
-      value:
-        externalProducts.length > 0
-          ? Math.round(
-              externalProducts.reduce((acc, ep) => acc + ep.price, 0) /
-                externalProducts.length,
-            ).toLocaleString("id-ID", {
-              style: "currency",
-              currency: "IDR",
-              minimumFractionDigits: 0,
-            })
-          : "Rp0",
+      value: avgPrice.toLocaleString("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+      }),
       icon: <DollarSign className="h-4 w-4 text-muted-foreground" />,
       color: "",
     },
   ];
 
   return (
-    <Main className="flex flex-1 flex-col gap-4 sm:gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Display Products
-          </h2>
-          <p className="text-muted-foreground">
-            Manage product listings across Shopee and TikTok platforms
-          </p>
-        </div>
-        <DisplayPrimaryButtons />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statsItems.map((item) => (
-          <Card key={item.label}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {item.label}
-              </CardTitle>
-              {item.icon}
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${item.color}`}>
-                {isLoading ? (
-                  <span className="text-muted-foreground text-base">...</span>
-                ) : (
-                  item.value
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <DisplayTable
-        data={externalProducts}
-        meta={meta}
-        onEdit={handleOpenEdit}
-        onDelete={(item) => {
-          setCurrentRow(item);
-          setOpen("delete");
-        }}
-        searchValue={searchInput}
-        onSearchChange={handleSearchChange}
-        onPageChange={handlePageChange}
-        onPerPageChange={handlePerPageChange}
-        onSetQueryParam={handleQueryParam}
-        onClearFilters={handleClearFilters}
-      />
-    </Main>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {statsItems.map((item) => (
+        <Card key={item.label}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
+            {item.icon}
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${item.color}`}>
+              {isLoading ? (
+                <span className="text-base text-muted-foreground">...</span>
+              ) : (
+                item.value
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
-}
+};
 
 const DisplayProductPage = () => {
   const user = useAuthStore((state) => state.auth.user);
-  const { data: inventoryData } = useInventory();
-  const {
-    isMutating,
-    isDeleting,
-    createDisplayProduct,
-    updateDisplayProduct,
-    deleteDisplayProduct,
-    getDisplayForEdit,
-  } = useDisplayManagement();
-
-  const productOptions = inventoryData.map((product) => ({
-    id: product.id,
-    name: product.name,
-  }));
 
   const userData = {
     name: user?.name ?? "john",
@@ -258,17 +105,87 @@ const DisplayProductPage = () => {
     avatar: "/avatars/shadcn.jpg",
   };
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const search = searchParams.get("search") ?? "";
+  const page = Number(searchParams.get("page")) || 1;
+  const perPage = Number(searchParams.get("per_page")) || 10;
+  const [searchInput, setSearchInput] = useState(search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  const HandleQueryParam = useCallback(
+    (key: string, value: string) => {
+      setSearchParams(
+        (prev) => {
+          const params = new URLSearchParams(prev);
+          if (!value || value === "all") {
+            params.delete(key);
+          } else {
+            params.set(key, value);
+          }
+          if (key !== "page") {
+            params.set("page", "1");
+          }
+          return params;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const HandleFilters = () => {
+    setSearchInput("");
+    setSearchParams(
+      () => {
+        const params = new URLSearchParams();
+        params.set("page", "1");
+        params.set("per_page", String(perPage));
+        return params;
+      },
+      { replace: true },
+    );
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(
+      () => HandleQueryParam("search", value),
+      500,
+    );
+  };
+
+  const handlePageChange = (newPage: number) => {
+    HandleQueryParam("page", String(newPage));
+  };
+
+  const handlePerPageChange = (newLimit: number) => {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        params.set("per_page", String(newLimit));
+        params.set("page", "1");
+        return params;
+      },
+      { replace: true },
+    );
+  };
+
+  const { data, meta, isLoading, totalCount } = useExternalProducts(
+    searchInput,
+    page,
+    perPage,
+  );
+
   return (
-    <DisplayProvider>
-      <DisplayDialogs
-        productOptions={productOptions}
-        storePlatformOptions={STORE_PLATFORM_OPTIONS}
-        isMutating={isMutating}
-        isDeleting={isDeleting}
-        onCreate={createDisplayProduct}
-        onEdit={updateDisplayProduct}
-        onDelete={deleteDisplayProduct}
-      />
+    <ExternalProductProvider>
+      <ExternalProductDialogs />
 
       <Header>
         <Search />
@@ -279,8 +196,37 @@ const DisplayProductPage = () => {
         </div>
       </Header>
 
-      <DisplayPageContent onPrepareEdit={getDisplayForEdit} />
-    </DisplayProvider>
+      <Main className="flex flex-1 flex-col gap-4 sm:gap-6">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Display Products
+            </h2>
+            <p className="text-muted-foreground">
+              Manage product listings across Shopee and TikTok platforms
+            </p>
+          </div>
+          <ExternalProductPrimaryButtons />
+        </div>
+
+        <DisplayStatsCard
+          data={data}
+          isLoading={isLoading}
+          totalCount={totalCount}
+        />
+
+        <ExternalProductsTable
+          data={data}
+          meta={meta}
+          searchValue={searchInput}
+          onSearchChange={handleSearchChange}
+          onPageChange={handlePageChange}
+          onPerPageChange={handlePerPageChange}
+          onSetQueryParam={HandleQueryParam}
+          onClearFilters={HandleFilters}
+        />
+      </Main>
+    </ExternalProductProvider>
   );
 };
 

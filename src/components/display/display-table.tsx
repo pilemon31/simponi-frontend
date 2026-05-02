@@ -25,25 +25,25 @@ import {
   DataTableToolbar,
 } from "@/components/shared/data-table";
 import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { displayColumns as columns } from "./display-columns";
+import { externalProductColumns as columns } from "./display-columns";
 import { cn } from "@/lib/utils";
-import type { DisplayExternalProduct } from "@/types/external-product.type";
-import type { Pagination } from "@/types/response.type";
+import { type Pagination } from "@/types/response.type";
+import type { ExternalProductItem } from "@/types/external-product.type";
 
 type DataTableProps = {
-  data: DisplayExternalProduct[];
-  onEdit?: (item: DisplayExternalProduct) => void;
-  onDelete?: (item: DisplayExternalProduct) => void;
+  data: ExternalProductItem[];
+  onEdit?: (item: ExternalProductItem) => void;
+  onDelete?: (item: ExternalProductItem) => void;
   meta?: Pagination;
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPageChange?: (page: number) => void;
-  onPerPageChange?: (perPage: number) => void;
+  onPerPageChange: (perPage: number) => void;
   onSetQueryParam?: (key: string, value: string) => void;
   onClearFilters?: () => void;
 };
 
-export function DisplayTable({
+export function ExternalProductsTable({
   data,
   onEdit,
   onDelete,
@@ -93,7 +93,7 @@ export function DisplayTable({
       )}>
       <DataTableToolbar
         table={table}
-        searchPlaceholder="Filter by platform"
+        searchPlaceholder="Filter by external product name or SKU..."
         searchValue={searchValue}
         onSearchChange={onSearchChange}
         onClearFilters={onClearFilters}
