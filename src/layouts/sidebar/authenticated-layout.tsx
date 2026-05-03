@@ -6,6 +6,7 @@ import { SearchProvider } from '@/context/search-provider';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from './app-sidebar';
 import { SkipToMain } from '@/components/shared/skip-to-main';
+import { PlatformAlert } from '@/components/shared/platform-alert';
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode;
@@ -32,7 +33,8 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
               // set the height to 100svh - spacing (total margins) to prevent overflow
               'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]',
             )}
-          >
+            >
+            <PlatformAlert />
             {children ?? <Outlet />}
           </SidebarInset>
         </SidebarProvider>
