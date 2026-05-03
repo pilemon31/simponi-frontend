@@ -13,6 +13,7 @@ import {
   Command,
   GalleryVerticalEnd,
   AudioWaveform,
+  PlugZap,
 } from 'lucide-react';
 
 export const sidebarData = {
@@ -120,6 +121,11 @@ export const sidebarData = {
               title: 'Appearance',
               url: '/settings/appearance',
               icon: Palette,
+            },
+            {
+              title: 'Platform Connection',
+              url: '/connect',
+              icon: PlugZap,
             },
           ],
         },

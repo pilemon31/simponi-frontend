@@ -27,6 +27,21 @@ import OrderPage from "./pages/orders";
 import VendorPage from "./pages/vendor";
 import { AccountPage } from "./pages/settings/account";
 import { AppearancePage } from "./pages/settings/appearance";
+import { PlatformGuard } from '@/layouts/middlewares/platform-guard';
+import ConnectPlatformPage from "@/pages/settings/connect-platform";
+
+const AVAILABLE_PLATFORMS = [
+  {
+    id: "shopee",
+    name: "Shopee",
+    platformDbId: "f1b2c3d4-0006-4000-8000-000000000001", 
+  },
+  {
+    id: "tokopedia",
+    name: "Tokopedia",
+    platformDbId: "f1b2c3d4-0006-4000-8000-000000000002", 
+  },
+];
 
 const router = createBrowserRouter([
   {
@@ -48,48 +63,64 @@ const router = createBrowserRouter([
             element: <AuthenticatedLayout />,
             children: [
               {
-                path: "/",
-                element: <Dashboard />,
-              },
-              {
-                path: "/orders",
-                element: <OrderPage />,
-              },
-              {
-                path: "/inventory/internal",
-                element: <InternalProductPage />,
-              },
-              {
-                path: "/inventory/display",
-                element: <DisplayProductPage />,
-              },
-              {
-                path: "/activity",
-                element: <ActivityPage />,
-              },
-              {
-                path: "/inventory-log",
-                element: <InventoryLogPage />,
-              },
-              {
-                path: "/users",
-                element: <UserManagementPage />,
-              },
-              {
-                path: "/roles",
-                element: <RolePage />,
-              },
-              {
-                path: "/vendors",
-                element: <VendorPage />,
-              },
-              {
                 path: "/settings",
                 element: <AccountPage />,
               },
               {
                 path: "/settings/appearance",
                 element: <AppearancePage />,
+              },
+              {
+                path: "/connect",
+                element: (
+                  <ConnectPlatformPage availablePlatforms={AVAILABLE_PLATFORMS} />
+                ),
+              },
+            ],
+          },
+          {
+            element: <PlatformGuard />,
+            children: [
+              {
+                element: <AuthenticatedLayout />,
+                children: [
+                  {
+                    path: "/",
+                    element: <Dashboard />,
+                  },
+                  {
+                    path: "/orders",
+                    element: <OrderPage />,
+                  },
+                  {
+                    path: "/inventory/internal",
+                    element: <InternalProductPage />,
+                  },
+                  {
+                    path: "/inventory/display",
+                    element: <DisplayProductPage />,
+                  },
+                  {
+                    path: "/activity",
+                    element: <ActivityPage />,
+                  },
+                  {
+                    path: "/inventory-log",
+                    element: <InventoryLogPage />,
+                  },
+                  {
+                    path: "/users",
+                    element: <UserManagementPage />,
+                  },
+                  {
+                    path: "/roles",
+                    element: <RolePage />,
+                  },
+                  {
+                    path: "/vendors",
+                    element: <VendorPage />,
+                  },
+                ],
               },
             ],
           },
