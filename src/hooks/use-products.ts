@@ -5,10 +5,11 @@ import { uploadProductImages } from "@/services/upload.service";
 import type { ErrorResponse } from "@/types/response.type";
 import { toast } from "sonner";
 import type {
+  CreateProductPayload,
   ProductCategoryResponse,
   ProductResponse,
+  UpdateProductPayload,
 } from "@/types/product.type";
-import type { ProductMutateValues } from "@/schemas/product.schema";
 
 type UploadImageLike = {
   image_id?: string;
@@ -50,15 +51,6 @@ const findImageId = (value: unknown): string | null => {
   return null;
 };
 
-type CreateProductPayload = ProductMutateValues & {
-  imageFile: File;
-};
-
-type UpdateProductPayload = ProductMutateValues & {
-  id: string;
-  imageFile?: File;
-};
-
 export const useProducts = (search = "", page = 1, perPage = 10) => {
   const activeShopId = useActiveShopId();
 
@@ -98,33 +90,7 @@ export const useCreateProduct = () => {
 
   return useMutation<ProductResponse, ErrorResponse, CreateProductPayload>({
     mutationFn: async (payload: CreateProductPayload) => {
-      if (!payload.imageFile) {
-        throw {
-          status: false,
-          error: "Product image is required",
-        } as ErrorResponse;
-      }
-
-      const uploadRes = await uploadProductImages({
-        files: [payload.imageFile],
-      });
-
-      if (!uploadRes.status) {
-        throw uploadRes;
-      }
-
-      const images = uploadRes.data.map((res) => {
-        return String(res.image_url);
-      });
-
-      const response = await ProductApi.create({
-        name: payload.name,
-        sku: payload.sku,
-        stock: payload.stock,
-        images: images,
-        category_id: payload.category_id || null,
-        description: payload.description,
-      });
+      const response = await ProductApi.create(payload);
 
       if (!response.status) {
         throw response;
@@ -147,48 +113,13 @@ export const useCreateProduct = () => {
 export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<ProductResponse, ErrorResponse, UpdateProductPayload>({
-    mutationFn: async (payload: UpdateProductPayload) => {
-      let imageIds: string[] | undefined;
-
-      if (payload.imageFile) {
-        const uploadRes = await uploadProductImages({
-          files: [payload.imageFile],
-        });
-
-        if (!uploadRes.status) {
-          throw uploadRes;
-        }
-
-        imageIds = Array.isArray(uploadRes.data)
-          ? uploadRes.data
-              .map((item) => (isObject(item) ? item.image_id : null))
-              .filter((id): id is string => typeof id === "string")
-          : [];
-
-        if (imageIds.length === 0) {
-          const fallbackId = findImageId(uploadRes.data);
-          if (fallbackId) {
-            imageIds.push(fallbackId);
-          }
-        }
-
-        if (imageIds.length === 0) {
-          throw {
-            status: false,
-            error: "Upload succeeded but image ID is missing",
-          } as ErrorResponse;
-        }
-      }
-
-      const response = await ProductApi.update(payload.id, {
-        name: payload.name,
-        sku: payload.sku,
-        stock: payload.stock,
-        images: imageIds,
-        category_id: payload.category_id || null,
-        description: payload.description,
-      });
+  return useMutation<
+    ProductResponse,
+    ErrorResponse,
+    UpdateProductPayload & { id: string }
+  >({
+    mutationFn: async ({ id, ...payload }) => {
+      const response = await ProductApi.update(id, payload);
 
       if (!response.status) {
         throw response;
