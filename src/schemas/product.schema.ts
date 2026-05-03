@@ -56,15 +56,6 @@ export const productMutateSchema = z.object({
   stock: z.number().min(0, "Stock cannot be negative"),
   category_id: z.uuid().optional().nullable(),
   description: z.string().optional(),
-  files: z
-    .instanceof(File)
-    .refine((file) => file.size < 100 * 1024, {
-      message: "File size must be less than 100KB",
-    })
-    .refine((file) => ["image/jpeg", "image/png"].includes(file.type), {
-      message: "Only JPG and PNG files are allowed",
-    })
-    .optional(),
 });
 
 export const createProductPayload = createProductSchema;
