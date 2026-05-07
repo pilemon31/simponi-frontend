@@ -18,11 +18,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Image as ImageIcon, X } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import type { CreateUserRequest, ProfileResponseData } from '@/types/user.type';
 import { useCreateUser, useDeleteUser, useUpdateUser } from '@/hooks/use-users';
 import {
@@ -33,6 +33,8 @@ import {
   SelectValue,
 } from '../ui/select';
 import { useUsers } from './user-provider';
+import { useUpload } from '@/hooks/use-upload';
+import { resolveImageUrl } from '@/lib/media';
 
 type UserMutateDrawerProps = {
   open: boolean;
@@ -44,6 +46,11 @@ type UserMutateFormValues = CreateUserRequest & {
   status: 'active' | 'inactive';
 };
 
+type ImagePreview = {
+  url: string;
+  file?: File;
+};
+
 export function UserMutateDrawer({
   open,
   onOpenChange,
@@ -52,6 +59,9 @@ export function UserMutateDrawer({
   const isEdit = !!currentRow;
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
+  const { uploadAsync, isPending: isUploadPending } = useUpload();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [images, setImages] = useState<ImagePreview[]>([]);
 
   const form = useForm<UserMutateFormValues>({
     defaultValues: {
@@ -85,27 +95,110 @@ export function UserMutateDrawer({
               status: 'active',
             },
       );
+
+      if (currentRow?.image_url) {
+        setImages([{ url: resolveImageUrl(currentRow.image_url) ?? '' }]);
+      } else {
+        setImages([]);
+      }
     }
   }, [open, currentRow, isEdit, form]);
 
-  const onSubmit = (values: UserMutateFormValues) => {
-    if (isEdit) {
-      updateUser.mutate({ id: currentRow.id, data: { status: values.status } });
-    } else {
-      const createPayload: CreateUserRequest = {
-        name: values.name,
-        email: values.email,
-        password: values.password,
-        image_url: values.image_url,
-        role_id: values.role_id,
-      };
-      createUser.mutate(createPayload);
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = Array.from(e.target.files || [])[0];
+    if (!selectedFile) return;
+
+    const isValidType = ['image/jpeg', 'image/png'].includes(selectedFile.type);
+    const isValidSize = selectedFile.size < 100 * 1024;
+
+    if (!isValidType) {
+      form.setError('image_url', {
+        type: 'manual',
+        message: 'Invalid file type. Only JPEG and PNG are allowed.',
+      });
+      return;
     }
-    onOpenChange(false);
-    form.reset();
+
+    if (!isValidSize) {
+      form.setError('image_url', {
+        type: 'manual',
+        message: 'File size exceeds 100KB limit.',
+      });
+      return;
+    }
+
+    form.clearErrors('image_url');
+    setImages((prev) => {
+      prev.forEach((img) => {
+        if (img.file) URL.revokeObjectURL(img.url);
+      });
+      const newPreviewUrl = URL.createObjectURL(selectedFile);
+      form.setValue('image_url', newPreviewUrl, { shouldDirty: true });
+      return [{ url: newPreviewUrl, file: selectedFile }];
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const isPending = createUser.isPending || updateUser.isPending;
+  const handleRemoveImage = () => {
+    setImages((prev) => {
+      prev.forEach((img) => {
+        if (img.file) URL.revokeObjectURL(img.url);
+      });
+      return [];
+    });
+    form.setValue('image_url', '', { shouldDirty: true });
+  };
+
+  const onSubmit = async (values: UserMutateFormValues) => {
+    if (isEdit) {
+      updateUser.mutate(
+        { id: currentRow.id, data: { status: values.status } },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            form.reset();
+          },
+        },
+      );
+    } else {
+      try {
+        let imageUrl = '';
+        const fileToUpload = images.find((img) => img.file)?.file;
+
+        if (fileToUpload) {
+          const uploaded = await uploadAsync([fileToUpload]);
+          imageUrl = uploaded[0]?.image_url ?? '';
+        } else if (values.image_url) {
+          imageUrl = values.image_url;
+        }
+
+        const createPayload: CreateUserRequest = {
+          name: values.name,
+          email: values.email,
+          password: values.password,
+          image_url: imageUrl || undefined,
+          role_id: values.role_id,
+        };
+        createUser.mutate(createPayload, {
+          onSuccess: () => {
+            onOpenChange(false);
+            form.reset();
+            handleRemoveImage();
+          },
+        });
+      } catch (error) {
+        form.setError('image_url', {
+          type: 'manual',
+          message:
+            error instanceof Error ? error.message : 'Failed to upload image.',
+        });
+      }
+    }
+  };
+
+  const isPending =
+    createUser.isPending || updateUser.isPending || isUploadPending;
 
   return (
     <Sheet
@@ -189,14 +282,54 @@ export function UserMutateDrawer({
               name="image_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image URL</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="https://example.com/image.jpg"
-                      {...field}
-                      disabled={isEdit}
-                    />
-                  </FormControl>
+                  <FormLabel>Profile Image</FormLabel>
+                  <Input type="hidden" {...field} />
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {images.map((img, idx) => (
+                        <div
+                          key={img.url}
+                          className="relative h-24 w-24 overflow-hidden rounded-md border bg-muted/30"
+                        >
+                          <img
+                            src={img.url}
+                            alt={`Preview ${idx + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                          {!isEdit && (
+                            <button
+                              type="button"
+                              onClick={handleRemoveImage}
+                              className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-destructive"
+                            >
+                              <X className="size-3" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+
+                      {!isEdit && images.length < 1 && (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex h-24 w-24 flex-col items-center justify-center rounded-md border-2 border-dashed text-muted-foreground transition-colors hover:bg-accent"
+                        >
+                          <ImageIcon className="mb-1 size-6" />
+                          <span className="text-[10px]">Add Image</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {!isEdit && (
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
