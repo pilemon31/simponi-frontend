@@ -5,6 +5,7 @@ import { Roles } from './data/data';
 import type { ProfileResponseData } from '@/types/user.type';
 import { UserActions } from './user-action';
 import { UserRowActions } from './user-row-actions';
+import { BASE_URL } from '@/lib/env';
 
 export const usersColumns: ColumnDef<ProfileResponseData>[] = [
   {
@@ -44,7 +45,7 @@ export const usersColumns: ColumnDef<ProfileResponseData>[] = [
         <div className="flex items-center">
           {imageUrl ? (
             <img
-              src={imageUrl}
+              src={`${BASE_URL}${imageUrl}`}
               alt={`${name}'s avatar`}
               className="size-8 rounded-full object-cover"
             />

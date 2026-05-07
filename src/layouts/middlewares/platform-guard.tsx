@@ -14,9 +14,9 @@ export function PlatformGuard() {
     );
   }
 
-  if (status === 'none') {
-    return <Navigate to="/connect" state={{ from: location }} replace />;
-  }
+  // if (status === 'none') {
+  //   return <Navigate to="/connect" state={{ from: location }} replace />;
+  // }
 
   return <Outlet />;
 }
