@@ -61,8 +61,10 @@ export const useProducts = (search = "", page = 1, perPage = 10) => {
 };
 
 export const useProductCategories = () => {
+  const activeShopId = useActiveShopId();
+
   return useQuery<ProductCategoryResponse>({
-    queryKey: ["product-categories"],
+    queryKey: ["product-categories", activeShopId],
     queryFn: ProductApi.getProductCategory,
   });
 };
