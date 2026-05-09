@@ -13,7 +13,7 @@ import { useSearchParams } from "react-router";
 import { useExternalProducts } from "@/hooks/use-external-product";
 import { ExternalProductProvider } from "@/components/display/display-provider";
 import { ExternalProductsTable } from "@/components/display/display-table";
-import { ExternalProductPrimaryButtons } from "@/components/display/display-primary-buttons";
+// import { ExternalProductPrimaryButtons } from "@/components/display/display-primary-buttons";
 import { ExternalProductDialogs } from "@/components/display/display-dialog";
 import type { ExternalProductItem } from "@/types/external-product.type";
 
@@ -206,7 +206,7 @@ const DisplayProductPage = () => {
               Manage product listings across Shopee and TikTok platforms
             </p>
           </div>
-          <ExternalProductPrimaryButtons />
+          {/* <ExternalProductPrimaryButtons /> */}
         </div>
 
         <DisplayStatsCard

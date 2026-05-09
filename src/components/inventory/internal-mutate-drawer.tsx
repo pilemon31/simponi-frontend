@@ -177,7 +177,10 @@ export function ProductMutateDrawer({
         finalImageUrls = existingUrls;
       }
 
-      const payload = { ...values, images: finalImageUrls };
+      const normalizedImages = finalImageUrls.map((url) =>
+        url.replace(/\\/g, "/"),
+      );
+      const payload = { ...values, images: normalizedImages };
 
       if (isEdit) {
         updateProduct.mutate(
