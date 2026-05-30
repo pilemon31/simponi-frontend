@@ -1,10 +1,8 @@
-// src/layouts/middlewares/platform-guard.tsx
-import { Navigate, Outlet, useLocation } from 'react-router';
-import { usePlatformStatus } from '@/hooks/use-platform-status';
+import { Outlet } from "react-router";
+import { usePlatformStatus } from "@/hooks/use-platform-status";
 
 export function PlatformGuard() {
-  const { status, isLoading } = usePlatformStatus();
-  const location = useLocation();
+  const { isLoading } = usePlatformStatus();
 
   if (isLoading) {
     return (
