@@ -11,7 +11,8 @@
     scrollbar-color: var(--border) transparent;
   }
   html {
-    @apply overflow-x-hidden font-plus-jakarta-sans;
+    @apply overflow-x-hidden font-plus-jakarta-sans scroll-smooth;
+    scroll-padding-top: 96px;
   }
   body {
     @apply min-h-svh w-full bg-background text-foreground has-[div[data-variant='inset']]:bg-sidebar;
@@ -83,5 +84,56 @@
   }
   to {
     height: 0;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(18px, -12px, 0) scale(1.03);
+  }
+}
+
+[data-animate] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms ease,
+    transform 700ms ease;
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: transform, opacity;
+}
+
+[data-animate='left'] {
+  transform: translateX(-24px);
+}
+
+[data-animate='right'] {
+  transform: translateX(24px);
+}
+
+[data-animate].is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
