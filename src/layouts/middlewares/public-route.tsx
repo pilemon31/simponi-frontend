@@ -5,7 +5,7 @@ const PublicRoute = () => {
   const { accessToken } = useAuthStore((state) => state.auth);
 
   if (accessToken) {
-    return <Navigate to='/' replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;
