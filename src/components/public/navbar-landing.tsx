@@ -57,7 +57,7 @@ const NavbarLanding = () => {
             <div className="mt-2 flex flex-col gap-2">
               <a
                 className="rounded-md border border-black px-4 py-2 text-center text-sm font-semibold text-black transition-colors hover:bg-black hover:text-white duration-700"
-                href="#"
+                href="/signin"
               >
                 Masuk
               </a>
