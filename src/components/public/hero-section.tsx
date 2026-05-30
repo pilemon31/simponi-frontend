@@ -48,14 +48,11 @@ const HeroSection = () => {
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
-              href="#"
+              href="/signin"
               className="inline-flex items-center gap-2 rounded-md bg-black px-6 py-3 text-base font-semibold text-white transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
             >
               Mulai Integrasi Sekarang <ArrowRight size={18} />
             </a>
-            <span className="text-sm text-muted-foreground">
-              Gratis 14 hari · Tanpa kartu kredit
-            </span>
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             {[
@@ -117,14 +114,6 @@ const HeroSection = () => {
               className="h-full w-full object-cover grayscale"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/20 bg-black/70 px-4 py-3 text-white backdrop-blur">
-              <p className="text-xs uppercase tracking-wider text-white/60">
-                Live order
-              </p>
-              <p className="mt-0.5 text-sm font-semibold">
-                +Rp 12.450.000 hari ini · 3 channel sinkron
-              </p>
-            </div>
           </div>
 
           {/* floating stat card */}

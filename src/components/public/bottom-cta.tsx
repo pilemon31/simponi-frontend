@@ -35,7 +35,7 @@ const BottomCtaSection = () => {
           mereka pada Simponi.
         </p>
         <a
-          href="#"
+          href="/signup"
           className="mt-8 inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 text-base font-semibold text-black transition-all hover:-translate-y-0.5 hover:opacity-90"
         >
           Daftar Sekarang
