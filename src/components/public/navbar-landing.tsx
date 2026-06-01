@@ -27,10 +27,16 @@ const NavbarLanding = () => {
         </nav>
         <div className="hidden items-center gap-3 md:flex">
           <a
-            href="#"
+            href="/signin"
             className="rounded-md border border-black px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-black hover:text-white"
           >
             Masuk
+          </a>
+          <a
+            className="rounded-md px-4 py-2 text-center text-sm font-semibold text-white bg-black transition-colors hover:bg-white hover:border hover:text-black hover:border-black duration-700"
+            href="/signup"
+          >
+            Daftar sebagai Client
           </a>
         </div>
         <button
@@ -54,12 +60,18 @@ const NavbarLanding = () => {
                 {l.label}
               </a>
             ))}
-            <div className="mt-2 flex flex-col gap-2">
+            <div className="mt-2 grid grid-cols-2 gap-2">
               <a
                 className="rounded-md border border-black px-4 py-2 text-center text-sm font-semibold text-black transition-colors hover:bg-black hover:text-white duration-700"
                 href="/signin"
               >
                 Masuk
+              </a>
+              <a
+                className="rounded-md px-4 py-2 text-center text-sm font-semibold text-white bg-black transition-colors hover:bg-white hover:border hover:text-black hover:border-black duration-700"
+                href="/signup"
+              >
+                Daftar sebagai Client
               </a>
             </div>
           </div>
