@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from './app-sidebar';
 import { SkipToMain } from '@/components/shared/skip-to-main';
 import { PlatformAlert } from '@/components/shared/platform-alert';
+import { ChatbotWidget } from '@/components/shared/chatbot-widget';
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode;
@@ -37,6 +38,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
             <PlatformAlert />
             {children ?? <Outlet />}
           </SidebarInset>
+          <ChatbotWidget />
         </SidebarProvider>
       </LayoutProvider>
     </SearchProvider>
