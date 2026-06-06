@@ -1,6 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ChatApi } from "@/services/chat.service";
 import { useAuthStore } from "@/stores/auth-store";
+import { useChatStore } from "@/stores/chat-store";
 import type { ChatMessage } from "@/types/chat.type";
 
 const ERROR_MESSAGE =
@@ -9,8 +10,17 @@ const ERROR_MESSAGE =
 export const useChat = () => {
   const userId = useAuthStore((state) => state.auth.user?.id ?? "anonymous");
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messages = useChatStore((state) => state.messages);
+  const addMessage = useChatStore((state) => state.addMessage);
+  const clearMessages = useChatStore((state) => state.clearMessages);
+  const ensureOwner = useChatStore((state) => state.ensureOwner);
+
   const [isLoading, setIsLoading] = useState(false);
+
+  // Reset history bila pemiliknya bukan user yang sedang login.
+  useEffect(() => {
+    ensureOwner(userId);
+  }, [userId, ensureOwner]);
 
   const sendMessage = useCallback(
     async (question: string) => {
@@ -20,9 +30,9 @@ export const useChat = () => {
       const userMessage: ChatMessage = { role: "user", content: trimmed };
 
       // History dikirim adalah percakapan SEBELUM pertanyaan terbaru.
-      const history = messages;
+      const history = useChatStore.getState().messages;
 
-      setMessages((prev) => [...prev, userMessage]);
+      addMessage(userMessage);
       setIsLoading(true);
 
       const response = await ChatApi.ask({
@@ -41,18 +51,11 @@ export const useChat = () => {
             ? ERROR_MESSAGE
             : response.message || ERROR_MESSAGE;
 
-      const assistantMessage: ChatMessage = {
-        role: "assistant",
-        content,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
+      addMessage({ role: "assistant", content });
       setIsLoading(false);
     },
-    [isLoading, messages, userId],
+    [isLoading, addMessage, userId],
   );
-
-  const clearMessages = useCallback(() => setMessages([]), []);
 
   return { messages, isLoading, sendMessage, clearMessages };
 };
