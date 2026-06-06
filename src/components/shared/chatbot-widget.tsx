@@ -3,6 +3,7 @@ import { Bot, Loader2, MessageCircle, Send, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChat } from "@/hooks/use-chat";
 import { Button } from "@/components/ui/button";
+import { MarkdownMessage } from "@/components/shared/markdown-message";
 
 export function ChatbotWidget() {
   const [open, setOpen] = useState(false);
@@ -115,13 +116,17 @@ export function ChatbotWidget() {
             >
               <div
                 className={cn(
-                  "max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm shadow-sm",
+                  "max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm",
                   message.role === "user"
-                    ? "rounded-br-sm bg-primary text-primary-foreground"
+                    ? "whitespace-pre-wrap rounded-br-sm bg-primary text-primary-foreground"
                     : "rounded-bl-sm bg-muted text-foreground",
                 )}
               >
-                {message.content}
+                {message.role === "assistant" ? (
+                  <MarkdownMessage content={message.content} />
+                ) : (
+                  message.content
+                )}
               </div>
             </div>
           ))}
