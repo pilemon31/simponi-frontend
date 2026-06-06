@@ -16,6 +16,7 @@ export type DashboardStoreResponse = {
   name: string;
 };
 
+
 export type DashboardSummaryResponse = {
   store: DashboardStoreResponse;
   metrics: DashboardSummaryMetricsResponse;
