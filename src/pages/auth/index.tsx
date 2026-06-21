@@ -32,7 +32,7 @@ const AuthPage = () => {
               untuk masuk ke sistem
             </p>
           </div>
-          <SignInForm redirectTo="/"></SignInForm>
+          <SignInForm redirectTo="/dashboard"></SignInForm>
           <p className="px-8 text-center text-sm text-muted-foreground">
             Dengan menekan masuk, anda setuju terhadap{" "}
             <a

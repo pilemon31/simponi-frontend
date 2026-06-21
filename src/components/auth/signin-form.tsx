@@ -1,12 +1,12 @@
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router';
-import { Loader2, LogIn } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuthStore } from '@/stores/auth-store';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Link, useNavigate } from "react-router";
+import { Loader2, LogIn } from "lucide-react";
+import { toast } from "sonner";
+import { useAuthStore } from "@/stores/auth-store";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,13 +14,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import PasswordInput from '../shared/password-input';
-import { signInSchema } from '@/schemas/auth.schema';
-import { useMutation } from '@tanstack/react-query';
-import { signIn } from '@/services/auth.service';
-import { getProfile } from '@/services/user.service';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import PasswordInput from "../shared/password-input";
+import { signInSchema } from "@/schemas/auth.schema";
+import { useMutation } from "@tanstack/react-query";
+import { signIn } from "@/services/auth.service";
+import { getProfile } from "@/services/user.service";
 
 interface SignInFormProps extends React.HTMLAttributes<HTMLFormElement> {
   redirectTo?: string;
@@ -33,8 +33,8 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
@@ -43,10 +43,10 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
   const signInMutation = useMutation({
     mutationFn: signIn,
     onSuccess: async (result) => {
-      const toastId = toast.loading('Masuk ke akun...');
-      let signedInUserName = 'user';
+      const toastId = toast.loading("Masuk ke akun...");
+      let signedInUserName = "user";
 
-      if ('status' in result && result.status) {
+      if ("status" in result && result.status) {
         const accessToken = result.data?.access_token;
         const refreshToken = result.data?.refresh_token;
 
@@ -57,12 +57,10 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
         auth.setAccessToken(accessToken);
         auth.setRefreshToken(refreshToken);
 
-        console.log('Auth after setting tokens:', auth);
-
         try {
           const profile = await getProfileMutation.mutateAsync();
-          console.log('Profile:', profile);
-          console.log('Auth:', auth);
+          console.log("Profile:", profile);
+          console.log("Auth:", auth);
 
           if (profile && profile.status) {
             auth.setUser(profile.data ?? null);
@@ -74,7 +72,7 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
           // Silently ignore profile fetch errors
         }
 
-        const targetPath = redirectTo || '/';
+        const targetPath = redirectTo || "/dashboard";
         navigate(targetPath, { replace: true });
         toast.success(`Selamat datang kembali, ${signedInUserName}!`, {
           id: toastId,
@@ -83,7 +81,7 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
         toast.error(
           result.error ||
             result.message ||
-            'Gagal masuk, ada kesalahan pada sistem!',
+            "Gagal masuk, ada kesalahan pada sistem!",
           {
             id: toastId,
           },
@@ -94,7 +92,7 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
       const message =
         err instanceof Error
           ? err.message
-          : 'Gagal masuk, ada kesalahan pada sistem!';
+          : "Gagal masuk, ada kesalahan pada sistem!";
       toast.error(message);
     },
   });
@@ -107,17 +105,16 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('w-full flex flex-col justify-start gap-5', className)}
-        {...props}
-      >
+        className={cn("w-full flex flex-col justify-start gap-5", className)}
+        {...props}>
         <FormField
           control={form.control}
-          name='email'
+          name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Alamat Email</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input placeholder="name@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,29 +122,27 @@ const SignInForm = ({ className, redirectTo, ...props }: SignInFormProps) => {
         />
         <FormField
           control={form.control}
-          name='password'
+          name="password"
           render={({ field }) => (
-            <FormItem className='relative'>
+            <FormItem className="relative">
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <PasswordInput placeholder='********' {...field} />
+                <PasswordInput placeholder="********" {...field} />
               </FormControl>
               <FormMessage />
               <Link
-                to='/forgot-password'
-                className='absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75'
-              >
+                to="/forgot-password"
+                className="absolute inset-e-0 -top-0.5 text-sm font-medium text-muted-foreground hover:opacity-75">
                 Lupa password?
               </Link>
             </FormItem>
           )}
         />
         <Button
-          className='cursor-pointer'
-          disabled={signInMutation.isPending || getProfileMutation.isPending}
-        >
+          className="cursor-pointer"
+          disabled={signInMutation.isPending || getProfileMutation.isPending}>
           {signInMutation.isPending || getProfileMutation.isPending ? (
-            <Loader2 className='animate-spin' />
+            <Loader2 className="animate-spin" />
           ) : (
             <LogIn />
           )}
