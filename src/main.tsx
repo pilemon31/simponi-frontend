@@ -31,6 +31,7 @@ import { PlatformGuard } from "@/layouts/middlewares/platform-guard";
 import ConnectPlatformPage from "@/pages/settings/connect-platform";
 import LandingPage from "./pages/landing";
 import SignUpPage from "./pages/signup";
+import StoreEmployeesPage from "@/pages/stores/employees";
 
 const AVAILABLE_PLATFORMS = [
   {
@@ -87,6 +88,10 @@ const router = createBrowserRouter([
                     availablePlatforms={AVAILABLE_PLATFORMS}
                   />
                 ),
+              },
+              {
+                path: "/stores/:storeId/employees",
+                element: <StoreEmployeesPage />,
               },
             ],
           },

@@ -87,6 +87,13 @@ export const sidebarData = {
           permission_id: "090331cb-5d7e-4ca2-84c7-d420bc8c2c0d",
         },
         {
+          title: "Employee Management",
+          url: "/employees",
+          icon: UsersRound,
+          permission_id: "fa192ecf-56dc-4999-a9c2-9c5e4d21d0be",
+          storeScoped: true,
+        },
+        {
           title: "Activity",
           icon: Cctv,
           items: [

@@ -33,10 +33,12 @@ import {
   type NavGroup as NavGroupProps,
 } from './types';
 import { useAuthStore } from '@/stores/auth-store';
+import { useActiveShopId } from '@/lib/shop';
 
 export function NavGroup({ title, items }: NavGroupProps) {
   const { state, isMobile } = useSidebar();
   const user = useAuthStore((state) => state.auth.user);
+  const activeShopId = useActiveShopId('');
   const location = useLocation();
   const href = location.pathname;
   return (
@@ -47,15 +49,30 @@ export function NavGroup({ title, items }: NavGroupProps) {
           const key = `${item.title}-${item.url || item.items?.[0]?.url}`;
 
           if (!item.items) {
+            if (item.storeScoped && !activeShopId) {
+              return null;
+            }
+
+            const resolvedItem = item.storeScoped
+              ? {
+                  ...item,
+                  url: `/stores/${encodeURIComponent(activeShopId)}${item.url}`,
+                }
+              : item;
+
             if (!item.permission_id) {
-              return <SidebarMenuLink key={key} item={item} href={href} />;
+              return (
+                <SidebarMenuLink key={key} item={resolvedItem} href={href} />
+              );
             }
 
             const authorized = user?.role.permissions.some(
               (p) => p.id === item.permission_id,
             );
             if (authorized) {
-              return <SidebarMenuLink key={key} item={item} href={href} />;
+              return (
+                <SidebarMenuLink key={key} item={resolvedItem} href={href} />
+              );
             }
             return null;
           }

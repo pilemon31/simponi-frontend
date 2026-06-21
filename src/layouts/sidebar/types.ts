@@ -20,6 +20,7 @@ type NavLink = BaseNavItem & {
   url: string;
   items?: never;
   permission_id?: string;
+  storeScoped?: boolean;
 };
 
 type NavCollapsible = BaseNavItem & {
