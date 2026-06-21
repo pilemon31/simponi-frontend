@@ -1,56 +1,72 @@
-// src/services/platform.service.ts
-import axios, { AxiosError } from 'axios';
+import axios, { type AxiosError } from 'axios';
+
 import axiosConfig from '@/lib/axios';
 import { mapErrorResponse } from '@/lib/error-mapper';
-import type { ConnectPlatformRequest, MyStoreResponse } from '@/types/platform.type';
 import type { ErrorResponse } from '@/types/response.type';
+import type {
+  ConnectPlatformResponseData,
+  PlatformApiError,
+  PlatformApiResult,
+  PlatformApiSuccess,
+  StorePlatformApiStore,
+} from '@/types/platform.type';
 
-type ApiSuccess<T> = { status: true; message: string; data: T };
-type ApiResult<T> = ApiSuccess<T> | ErrorResponse;
-
-const fallbackError = (message = 'Terjadi kesalahan'): ErrorResponse => ({
+const fallbackError = (message = 'Terjadi kesalahan'): PlatformApiError => ({
   status: false,
   message,
   timestamp: new Date().toISOString(),
   error: 'Unknown error',
 });
 
-export const getMyStore = async (): Promise<ApiResult<MyStoreResponse | null>> => {
+const mapPlatformError = (error: unknown): PlatformApiError => {
+  if (axios.isAxiosError(error) && error.response) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    return {
+      ...mapErrorResponse(axiosError.response?.data as ErrorResponse),
+      httpStatus: axiosError.response?.status,
+    };
+  }
+
+  return fallbackError();
+};
+
+export const getStorePlatformStatus = async (
+  storeId: string,
+): Promise<PlatformApiResult<StorePlatformApiStore>> => {
   try {
-    const res = await axiosConfig.get('/platforms/my-store');
-    return res.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return mapErrorResponse((error as AxiosError).response?.data as ErrorResponse);
-    }
-    return fallbackError();
+    const response = await axiosConfig.get<
+      PlatformApiSuccess<StorePlatformApiStore>
+    >(`/stores/${storeId}`);
+    return response.data;
+  } catch (error: unknown) {
+    return mapPlatformError(error);
   }
 };
 
 export const connectPlatform = async (
-  data: ConnectPlatformRequest,
-): Promise<ApiResult<MyStoreResponse>> => {
+  storeId: string,
+  platformId: string,
+): Promise<PlatformApiResult<ConnectPlatformResponseData>> => {
   try {
-    const res = await axiosConfig.post('/platforms/connect', data);
-    return res.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return mapErrorResponse((error as AxiosError).response?.data as ErrorResponse);
-    }
-    return fallbackError();
+    const response = await axiosConfig.post<
+      PlatformApiSuccess<ConnectPlatformResponseData>
+    >(`/store/${storeId}/platforms/${platformId}/connect`);
+    return response.data;
+  } catch (error: unknown) {
+    return mapPlatformError(error);
   }
 };
 
 export const disconnectPlatform = async (
-  storePlatformId: string,
-): Promise<ApiResult<null>> => {
+  storeId: string,
+  platformId: string,
+): Promise<PlatformApiResult<null>> => {
   try {
-    const res = await axiosConfig.delete(`/platforms/${storePlatformId}/disconnect`);
-    return res.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return mapErrorResponse((error as AxiosError).response?.data as ErrorResponse);
-    }
-    return fallbackError();
+    const response = await axiosConfig.delete<PlatformApiSuccess<null>>(
+      `/store/${storeId}/platforms/${platformId}`,
+    );
+    return response.data;
+  } catch (error: unknown) {
+    return mapPlatformError(error);
   }
 };

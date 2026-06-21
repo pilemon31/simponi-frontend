@@ -1,24 +1,70 @@
-// src/types/platform.type.ts
+import type { ErrorResponse } from './response.type';
 
-export interface ConnectedPlatformDetail {
-  store_platform_id: string;
-  platform_id: string;
-  platform_name: string;
-  external_name: string;    // nama toko di marketplace
-  external_shop_id: string; // shop_id
-  is_connected: boolean;
+export interface StorePlatformApiRelation {
+  id: string;
+  name: string;
 }
 
-export interface MyStoreResponse {
+export interface StorePlatformApiStore {
   id: string;
   name: string;
   description: string;
   image_url: string;
   is_active: boolean;
-  platforms: ConnectedPlatformDetail[];
+  platforms: StorePlatformApiRelation[];
 }
 
-// ── Request types ─────────────────────────────────────────────────────────────
+export interface StorePlatformRelation extends StorePlatformApiRelation {
+  platform_id: string;
+  platform_name: string;
+  // Store detail does not expose the store-platform relation ID.
+  store_platform_id: string;
+}
+
+export interface StorePlatformStore
+  extends Omit<StorePlatformApiStore, 'platforms'> {
+  platforms: StorePlatformRelation[];
+}
+
+export interface PlatformItem {
+  id: string;
+  name: string;
+  platformDbId: string;
+  connectSupported: boolean;
+}
+
+export interface ConnectPlatformResponseData {
+  auth_url?: string;
+}
+
+export type PlatformApiSuccess<T> = {
+  status: true;
+  message: string;
+  data?: T;
+};
+
+export type PlatformApiError = ErrorResponse & {
+  httpStatus?: number;
+};
+
+export type PlatformApiResult<T> = PlatformApiSuccess<T> | PlatformApiError;
+
+export type PlatformConfigurationStatus =
+  | 'no-store'
+  | 'none'
+  | 'partial'
+  | 'full';
+
+export interface PlatformStatus {
+  status: PlatformConfigurationStatus;
+  store: StorePlatformStore | null;
+  configuredPlatformIds: string[];
+  isShopeeConfigured: boolean;
+  isTikTokConfigured: boolean;
+}
+
+// Kept for the currently unused legacy form components. The verified connect
+// endpoint does not consume this payload.
 export interface ConnectFirstPlatformRequest {
   platform_id: string;
   external_name: string;
@@ -38,24 +84,3 @@ export interface ConnectSecondPlatformRequest {
 export type ConnectPlatformRequest =
   | ConnectFirstPlatformRequest
   | ConnectSecondPlatformRequest;
-
-// ── Derived state ─────────────────────────────────────────────────────────────
-export type PlatformConnectionStatus =
-  | 'none'      // belum ada store
-  | 'partial'   // 1 platform terkoneksi
-  | 'full';     // 2 platform terkoneksi
-
-export interface PlatformStatus {
-  status: PlatformConnectionStatus;
-  store: MyStoreResponse | null;
-  connectedPlatformIds: string[];
-  isShopeeConnected: boolean;
-  isTokopediaConnected: boolean;
-}
-
-// ── Platform master data (dari DB / seeds) ────────────────────────────────────
-export interface PlatformItem {
-  id: string;         
-  name: string;
-  platformDbId: string; 
-}

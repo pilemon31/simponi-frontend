@@ -1,6 +1,7 @@
-// src/components/settings/connect-platform/platform-card.tsx
+import { CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
 
-import { CheckCircle2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -10,71 +11,80 @@ import {
 } from '@/components/ui/card';
 import type { PlatformItem } from '@/types/platform.type';
 
-// Styling config (biar scalable)
-const PLATFORM_STYLE: Record<
-  string,
-  { accent: string; bg: string; border: string; text: string }
-> = {
-  shopee: {
-    accent: 'bg-orange-500',
-    bg: 'bg-orange-50',
-    border: 'border-orange-200',
-    text: 'text-orange-600',
-  },
-  tokopedia: {
-    accent: 'bg-green-500',
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-    text: 'text-green-700',
-  },
-};
-
-const getStyle = (platformId: string) =>
-  PLATFORM_STYLE[platformId.toLowerCase()] ?? PLATFORM_STYLE['shopee'];
-
 interface PlatformCardProps {
   platform: PlatformItem;
-  isConnected: boolean;
-  connectedAs?: string;
-  onClick: () => void;
+  isConfigured: boolean;
+  canConnect: boolean;
+  canDisconnect: boolean;
+  isBusy: boolean;
+  onConnect: () => void;
+  onDisconnect: () => void;
 }
 
 export function PlatformCard({
   platform,
-  isConnected,
-  connectedAs,
-  onClick,
+  isConfigured,
+  canConnect,
+  canDisconnect,
+  isBusy,
+  onConnect,
+  onDisconnect,
 }: PlatformCardProps) {
-  const style = getStyle(platform.id);
-
   return (
-    <Card
-      className={`transition-all ${
-        isConnected
-          ? `${style.border} ${style.bg} cursor-default`
-          : 'cursor-pointer border-border hover:border-primary hover:shadow-sm'
-      }`}
-      onClick={() => !isConnected && onClick()}
-    >
-      <CardHeader className="pb-2 pt-4">
-        <div className="flex items-center justify-between">
-          <div className={`h-2 w-2 rounded-full ${style.accent}`} />
-          {isConnected && (
-            <CheckCircle2 className={`h-4 w-4 ${style.text}`} />
-          )}
+    <Card className={isConfigured ? 'border-emerald-300 bg-emerald-50/50' : ''}>
+      <CardHeader>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <CardTitle>{platform.name}</CardTitle>
+            <CardDescription className="mt-1">
+              {isConfigured
+                ? 'Platform tersedia untuk toko ini.'
+                : 'Belum terdaftar pada toko ini.'}
+            </CardDescription>
+          </div>
+          <Badge variant={isConfigured ? 'default' : 'outline'}>
+            {isConfigured ? (
+              <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+            ) : null}
+            {isConfigured ? 'Terdaftar' : 'Belum terdaftar'}
+          </Badge>
         </div>
-        <CardTitle className="text-base">{platform.name}</CardTitle>
       </CardHeader>
 
-      <CardContent className="pb-4">
-        {isConnected ? (
-          <CardDescription className={`text-xs font-medium ${style.text}`}>
-            ✓ {connectedAs ?? 'Terhubung'}
-          </CardDescription>
+      <CardContent className="space-y-4">
+        {isConfigured ? (
+          <div className="flex items-start gap-2 text-xs text-muted-foreground">
+            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              Status ini berasal dari relasi platform. Validitas OAuth dan
+              kredensial tidak dapat diverifikasi dari respons backend.
+            </span>
+          </div>
+        ) : null}
+
+        {isConfigured ? (
+          canDisconnect ? (
+            <Button
+              variant="destructive"
+              className="w-full"
+              disabled={isBusy}
+              onClick={onDisconnect}
+            >
+              {isBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Hapus Relasi Platform
+            </Button>
+          ) : null
+        ) : platform.connectSupported ? (
+          canConnect ? (
+            <Button className="w-full" disabled={isBusy} onClick={onConnect}>
+              {isBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Mulai Konfigurasi
+            </Button>
+          ) : null
         ) : (
-          <CardDescription className="text-xs">
-            Klik untuk menghubungkan
-          </CardDescription>
+          <Button className="w-full" variant="outline" disabled>
+            Belum didukung backend
+          </Button>
         )}
       </CardContent>
     </Card>

@@ -38,11 +38,13 @@ const AVAILABLE_PLATFORMS = [
     id: "shopee",
     name: "Shopee",
     platformDbId: "f1b2c3d4-0006-4000-8000-000000000001",
+    connectSupported: true,
   },
   {
-    id: "tokopedia",
-    name: "Tokopedia",
+    id: "tiktok",
+    name: "TikTok",
     platformDbId: "f1b2c3d4-0006-4000-8000-000000000002",
+    connectSupported: false,
   },
 ];
 
