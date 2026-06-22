@@ -12,7 +12,6 @@ import { NavGroup } from './nav-group';
 import { NavUser } from './nav-user';
 import { useAuthStore } from '@/stores/auth-store';
 import { ShopSwitcher } from './shop-switcher';
-import { LogoDisplay } from './logo-display';
 
 export function AppSidebar() {
   const user = useAuthStore((state) => state.auth.user);
@@ -33,11 +32,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible={collapsible} variant={variant} side={side}>
       <SidebarHeader>
-        {user?.role.id === '58001c95-eab6-4f7a-b3ce-f627499d3ebe' ? (
-          <LogoDisplay></LogoDisplay>
-        ) : (
-          <ShopSwitcher shops={sidebarData.shops}></ShopSwitcher>
-        )}
+        <ShopSwitcher />
       </SidebarHeader>
       <SidebarContent>
         {sidebarData.navGroups.map((props) => (

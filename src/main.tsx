@@ -32,6 +32,7 @@ import ConnectPlatformPage from "@/pages/settings/connect-platform";
 import LandingPage from "./pages/landing";
 import SignUpPage from "./pages/signup";
 import StoreEmployeesPage from "@/pages/stores/employees";
+import StoresPage from "@/pages/stores";
 
 const AVAILABLE_PLATFORMS = [
   {
@@ -94,6 +95,10 @@ const router = createBrowserRouter([
               {
                 path: "/stores/:storeId/employees",
                 element: <StoreEmployeesPage />,
+              },
+              {
+                path: "/stores",
+                element: <StoresPage />,
               },
             ],
           },

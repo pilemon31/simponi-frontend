@@ -10,33 +10,11 @@ import {
   HelpCircle,
   UserRoundKey,
   UsersRound,
-  Command,
-  GalleryVerticalEnd,
-  AudioWaveform,
   PlugZap,
+  Store,
 } from "lucide-react";
 
 export const sidebarData = {
-  shops: [
-    {
-      id: "e2b2c3d4-0007-4000-8000-000000000001",
-      name: "Toko Aqeel",
-      logo: Command,
-      role: "Client",
-    },
-    {
-      id: "e2b2c3d4-0007-4000-8000-000000000002",
-      name: "Toko Rizky",
-      logo: GalleryVerticalEnd,
-      role: "Client",
-    },
-    {
-      id: "a3b5c7d9-2222-4333-8444-555555555555",
-      name: "Toko Barimbing",
-      logo: AudioWaveform,
-      role: "Admin",
-    },
-  ],
   navGroups: [
     {
       title: "General",
@@ -85,6 +63,12 @@ export const sidebarData = {
           url: "/users",
           icon: UsersRound,
           permission_id: "090331cb-5d7e-4ca2-84c7-d420bc8c2c0d",
+        },
+        {
+          title: "Store Management",
+          url: "/stores",
+          icon: Store,
+          permission_id: "b2e3d4f5-8c23-4b7f-9d32-2f8b6c3d4e56",
         },
         {
           title: "Employee Management",

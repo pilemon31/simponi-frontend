@@ -8,12 +8,21 @@ import { AppSidebar } from './app-sidebar';
 import { SkipToMain } from '@/components/shared/skip-to-main';
 import { PlatformAlert } from '@/components/shared/platform-alert';
 import { ChatbotWidget } from '@/components/shared/chatbot-widget';
+import { StoreProvider } from '@/context/store-provider';
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode;
 };
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
+  return (
+    <StoreProvider>
+      <AuthenticatedLayoutContent>{children}</AuthenticatedLayoutContent>
+    </StoreProvider>
+  );
+}
+
+function AuthenticatedLayoutContent({ children }: AuthenticatedLayoutProps) {
   const defaultOpen = getCookie('sidebar_state') !== 'false';
   return (
     <SearchProvider>
