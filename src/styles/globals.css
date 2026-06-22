@@ -23,6 +23,19 @@
     overflow: unset !important;
   }
 
+  /* Radix UI (with React 19) can leave `pointer-events: none` stuck on the
+     <body> after a dropdown/dialog closes, which freezes the whole page —
+     e.g. table sort menus or row-action (⋯) buttons stop responding.
+     Keep the document interactive; modal dialogs still block the background
+     via their own overlay layer. */
+  body {
+    pointer-events: auto !important;
+  }
+  /* Allow Radix dialogs to temporarily disable interactions */
+body[data-scroll-locked] {
+  pointer-events: auto !important;
+}
+
   /* Cursor pointer for buttons */
   button:not(:disabled),
   [role='button']:not(:disabled) {
