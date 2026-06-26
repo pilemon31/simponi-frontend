@@ -44,17 +44,16 @@ export function ChatbotWidget() {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
       {/* Panel chat */}
-      <div
-        className={cn(
-          "flex h-[32rem] max-h-[calc(100svh-6rem)] w-[22rem] max-w-[calc(100vw-2rem)] origin-bottom-right flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-2xl transition-all duration-200",
-          open
-            ? "pointer-events-auto scale-100 opacity-100"
-            : "pointer-events-none scale-95 opacity-0",
-        )}
-        role="dialog"
-        aria-label="Chatbot Simponi"
-        aria-hidden={!open}
-      >
+      {open && (
+        <div
+          className={cn(
+            "flex h-[32rem] max-h-[calc(100svh-6rem)] w-[22rem] max-w-[calc(100vw-2rem)] origin-bottom-right flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-2xl transition-all duration-200",
+            "pointer-events-auto scale-100 opacity-100",
+          )}
+          role="dialog"
+          aria-label="Chatbot Simponi"
+          aria-hidden={!open}
+        >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border bg-primary px-4 py-3 text-primary-foreground">
           <div className="flex items-center gap-2">
@@ -164,7 +163,8 @@ export function ChatbotWidget() {
             </Button>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Tombol floating */}
       <Button

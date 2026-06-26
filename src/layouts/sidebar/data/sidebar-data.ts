@@ -12,6 +12,7 @@ import {
   UsersRound,
   PlugZap,
   Store,
+  MessagesSquare,
 } from "lucide-react";
 
 export const sidebarData = {
@@ -53,6 +54,11 @@ export const sidebarData = {
           ],
         },
         {
+          title: "Product Reviews",
+          url: "/product-reviews",
+          icon: MessagesSquare,
+        },
+        {
           title: "Roles & Permissions",
           url: "/roles",
           icon: UserRoundKey,
@@ -63,6 +69,12 @@ export const sidebarData = {
           url: "/users",
           icon: UsersRound,
           permission_id: "090331cb-5d7e-4ca2-84c7-d420bc8c2c0d",
+        },
+        {
+          title: "Store Management",
+          url: "/stores",
+          icon: Store,
+          permission_id: "b2e3d4f5-8c23-4b7f-9d32-2f8b6c3d4e56",
         },
         {
           title: "Employee Management",
