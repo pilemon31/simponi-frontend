@@ -65,12 +65,6 @@ export const sidebarData = {
           permission_id: "090331cb-5d7e-4ca2-84c7-d420bc8c2c0d",
         },
         {
-          title: "Store Management",
-          url: "/stores",
-          icon: Store,
-          permission_id: "b2e3d4f5-8c23-4b7f-9d32-2f8b6c3d4e56",
-        },
-        {
           title: "Employee Management",
           url: "/employees",
           icon: UsersRound,
@@ -112,6 +106,12 @@ export const sidebarData = {
               title: "Appearance",
               url: "/settings/appearance",
               icon: Palette,
+            },
+            {
+              title: "Store Management",
+              url: "/stores",
+              icon: Store,
+              permission_id: "b2e3d4f5-8c23-4b7f-9d32-2f8b6c3d4e56",
             },
             {
               title: "Platform Connection",

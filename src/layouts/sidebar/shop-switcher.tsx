@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { ChevronsUpDown, Plus, Store as StoreIcon } from 'lucide-react';
 
+import { StoreFormDialog } from '@/components/stores/store-form-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,11 +27,11 @@ export function ShopSwitcher() {
   const navigate = useNavigate();
   const location = useLocation();
   const { stores, activeStore, isError, selectStore } = useStoreContext();
-  const canCreate = useAuthStore((state) =>
-    state.auth.user?.role.permissions.some(
-      (permission) => permission.id === STORE_PERMISSIONS.CREATE,
-    ),
-  );
+  const [createOpen, setCreateOpen] = useState(false);
+  const user = useAuthStore((state) => state.auth.user);
+  const permissions = user?.role.permissions.map((permission) => permission.id) ?? [];
+  const canCreate = permissions.includes(STORE_PERMISSIONS.CREATE);
+  const canUpload = permissions.includes(STORE_PERMISSIONS.UPLOAD);
 
   const handleSelectStore = (storeId: string) => {
     selectStore(storeId);
@@ -46,104 +48,128 @@ export function ShopSwitcher() {
 
   if (isError) {
     return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton size="lg" onClick={() => navigate('/stores')}>
-            <StoreIcon className="size-4" />
-            <span>Store tidak dapat dimuat</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
+      <>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" onClick={() => navigate('/stores')}>
+              <StoreIcon className="size-4" />
+              <span>Store tidak dapat dimuat</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <StoreFormDialog
+          open={createOpen}
+          store={null}
+          canUpload={canUpload}
+          onOpenChange={setCreateOpen}
+        />
+      </>
     );
   }
 
   if (!activeStore) {
     return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            size="lg"
-            onClick={() => navigate(canCreate ? '/stores?create=1' : '/stores')}
-          >
-            {canCreate ? <Plus className="size-4" /> : <StoreIcon className="size-4" />}
-            <span>{canCreate ? 'Tambah Store' : 'Belum ada store'}</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
+      <>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              onClick={() => (canCreate ? setCreateOpen(true) : navigate('/stores'))}
+            >
+              {canCreate ? <Plus className="size-4" /> : <StoreIcon className="size-4" />}
+              <span>{canCreate ? 'Tambah Store' : 'Belum ada store'}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <StoreFormDialog
+          open={createOpen}
+          store={null}
+          canUpload={canUpload}
+          onOpenChange={setCreateOpen}
+        />
+      </>
     );
   }
 
   const imageUrl = resolveImageUrl(activeStore.image_url);
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <div className="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <StoreIcon className="size-4" />
-                )}
-              </div>
-              <div className="grid flex-1 text-start text-sm leading-tight">
-                <span className="truncate font-semibold">{activeStore.name}</span>
-                <span className="truncate text-xs">
-                  {activeStore.is_active ? 'Aktif' : 'Tidak aktif'}
-                </span>
-              </div>
-              <ChevronsUpDown className="ms-auto" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            align="start"
-            side={isMobile ? 'bottom' : 'right'}
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Stores
-            </DropdownMenuLabel>
-            {stores.map((store) => (
-              <DropdownMenuItem
-                key={store.id}
-                onClick={() => handleSelectStore(store.id)}
-                className="gap-2 p-2"
+    <>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
-                  <StoreIcon className="size-4 shrink-0" />
+                <div className="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <StoreIcon className="size-4" />
+                  )}
                 </div>
-                <span className="truncate">{store.name}</span>
-              </DropdownMenuItem>
-            ))}
-            {canCreate ? (
-              <>
-                <DropdownMenuSeparator />
+                <div className="grid flex-1 text-start text-sm leading-tight">
+                  <span className="truncate font-semibold">{activeStore.name}</span>
+                  <span className="truncate text-xs">
+                    {activeStore.is_active ? 'Aktif' : 'Tidak aktif'}
+                  </span>
+                </div>
+                <ChevronsUpDown className="ms-auto" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              align="start"
+              side={isMobile ? 'bottom' : 'right'}
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Stores
+              </DropdownMenuLabel>
+              {stores.map((store) => (
                 <DropdownMenuItem
+                  key={store.id}
+                  onClick={() => handleSelectStore(store.id)}
                   className="gap-2 p-2"
-                  onClick={() => navigate('/stores?create=1')}
                 >
-                  <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                    <Plus className="size-4" />
+                  <div className="flex size-6 items-center justify-center rounded-sm border">
+                    <StoreIcon className="size-4 shrink-0" />
                   </div>
-                  <div className="font-medium text-muted-foreground">
-                    Tambah Store
-                  </div>
+                  <span className="truncate">{store.name}</span>
                 </DropdownMenuItem>
-              </>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+              ))}
+              {canCreate ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="gap-2 p-2"
+                    onClick={() => setCreateOpen(true)}
+                  >
+                    <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                      <Plus className="size-4" />
+                    </div>
+                    <div className="font-medium text-muted-foreground">
+                      Tambah Store
+                    </div>
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+      <StoreFormDialog
+        open={createOpen}
+        store={null}
+        canUpload={canUpload}
+        onOpenChange={setCreateOpen}
+      />
+    </>
   );
 }
