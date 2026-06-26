@@ -3,9 +3,31 @@ import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/auth.provider';
 import { usePlatformStatus } from '@/hooks/use-platform-status';
+import { isSuperadminRole } from '@/lib/roles';
+import { useAuthStore } from '@/stores/auth-store';
 
 export function PlatformGuard() {
+  const { isHydrating } = useAuth();
+  const user = useAuthStore((state) => state.auth.user);
+
+  if (isHydrating || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isSuperadminRole(user.role.name)) {
+    return <Outlet />;
+  }
+
+  return <NonSuperadminPlatformGuard />;
+}
+
+function NonSuperadminPlatformGuard() {
   const location = useLocation();
   const {
     status,

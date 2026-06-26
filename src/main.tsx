@@ -46,7 +46,7 @@ const AVAILABLE_PLATFORMS = [
     id: "tiktok",
     name: "TikTok",
     platformDbId: "f1b2c3d4-0006-4000-8000-000000000002",
-    connectSupported: false,
+    connectSupported: true,
   },
 ];
 

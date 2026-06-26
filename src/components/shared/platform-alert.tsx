@@ -4,9 +4,23 @@ import { AlertCircle, X } from 'lucide-react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/auth.provider';
 import { usePlatformStatus } from '@/hooks/use-platform-status';
+import { isSuperadminRole } from '@/lib/roles';
+import { useAuthStore } from '@/stores/auth-store';
 
 export function PlatformAlert() {
+  const { isHydrating } = useAuth();
+  const user = useAuthStore((state) => state.auth.user);
+
+  if (isHydrating || isSuperadminRole(user?.role.name)) {
+    return null;
+  }
+
+  return <NonSuperadminPlatformAlert />;
+}
+
+function NonSuperadminPlatformAlert() {
   const {
     status,
     hasActiveStore,
