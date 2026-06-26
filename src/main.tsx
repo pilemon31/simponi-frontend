@@ -23,6 +23,7 @@ import UserManagementPage from "./pages/user_management";
 import RolePage from "./pages/roles";
 import InventoryLogPage from "./pages/inventory_log";
 import InternalProductPage from "./pages/inventory";
+import ProductReviewPage from "./pages/product-review";
 import OrderPage from "./pages/orders";
 import VendorPage from "./pages/vendor";
 import { AccountPage } from "./pages/settings/account";
@@ -127,6 +128,10 @@ const router = createBrowserRouter([
                       {
                         path: "/inventory/display",
                         element: <DisplayProductPage />,
+                      },
+                      {
+                        path: "/product-reviews",
+                        element: <ProductReviewPage />,
                       },
                       {
                         path: "/activity",
