@@ -11,7 +11,7 @@ export interface StorePlatformApiStore {
   description: string;
   image_url: string;
   is_active: boolean;
-  platforms: StorePlatformApiRelation[];
+  platforms: StorePlatformApiRelation[] | null;
 }
 
 export interface StorePlatformRelation extends StorePlatformApiRelation {

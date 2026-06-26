@@ -7,7 +7,15 @@ import { usePlatformStatus } from '@/hooks/use-platform-status';
 
 export function PlatformGuard() {
   const location = useLocation();
-  const { status, isLoading, isError, error, refetch } = usePlatformStatus();
+  const {
+    status,
+    isLoading,
+    isError,
+    error,
+    isStoreListError,
+    refetch,
+    refetchStoreList,
+  } = usePlatformStatus();
 
   if (isLoading) {
     return (
@@ -29,7 +37,13 @@ export function PlatformGuard() {
                 ? error.message
                 : 'Gagal mengambil relasi platform dari backend.'}
             </span>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                isStoreListError ? refetchStoreList() : refetch()
+              }
+            >
               <RefreshCw className="mr-2 h-4 w-4" />
               Coba Lagi
             </Button>
@@ -39,7 +53,11 @@ export function PlatformGuard() {
     );
   }
 
-  if (status === 'no-store' || status === 'none') {
+  if (status === 'no-store') {
+    return <Navigate to="/stores" state={{ from: location }} replace />;
+  }
+
+  if (status === 'none') {
     return <Navigate to="/connect" state={{ from: location }} replace />;
   }
 

@@ -68,8 +68,9 @@ export default function ConnectPlatformPage({
   const permissions = user?.role.permissions.map((permission) => permission.id) ?? [];
   const canConnect = permissions.includes(PLATFORM_PERMISSIONS.CONNECT);
   const canDisconnect = permissions.includes(PLATFORM_PERMISSIONS.DISCONNECT);
+  const storePlatforms = store?.platforms ?? [];
   const configuredIds = new Set(
-    store?.platforms.map((platform) => platform.id) ?? [],
+    storePlatforms.map((platform) => platform.id),
   );
   const configuredCount = availablePlatforms.filter((platform) =>
     configuredIds.has(platform.platformDbId),
@@ -102,7 +103,7 @@ export default function ConnectPlatformPage({
     try {
       await disconnectAsync(disconnectTarget.platformDbId);
       const refreshed = await refetch();
-      const relationStillExists = refreshed.data?.platforms.some(
+      const relationStillExists = (refreshed.data?.platforms ?? []).some(
         (platform) => platform.id === disconnectTarget.platformDbId,
       );
 

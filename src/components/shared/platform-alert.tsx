@@ -7,12 +7,20 @@ import { Button } from '@/components/ui/button';
 import { usePlatformStatus } from '@/hooks/use-platform-status';
 
 export function PlatformAlert() {
-  const { status, isShopeeConfigured, isTikTokConfigured } =
+  const {
+    status,
+    hasActiveStore,
+    isError,
+    isShopeeConfigured,
+    isTikTokConfigured,
+  } =
     usePlatformStatus();
   const navigate = useNavigate();
   const [dismissed, setDismissed] = useState(false);
 
-  if (status !== 'partial' || dismissed) return null;
+  if (!hasActiveStore || isError || status !== 'partial' || dismissed) {
+    return null;
+  }
 
   const missingPlatform = !isShopeeConfigured
     ? 'Shopee'

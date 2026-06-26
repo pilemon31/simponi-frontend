@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { useActiveShopId } from '@/lib/shop';
+import { useStoreContext } from '@/context/store-context';
 import {
   connectPlatform,
   disconnectPlatform,
@@ -76,8 +76,15 @@ const deriveStatus = (
 
 export const usePlatformStatus = () => {
   const queryClient = useQueryClient();
-  const activeStoreId = useActiveShopId('');
-  const hasActiveStore = UUID_PATTERN.test(activeStoreId);
+  const {
+    activeStore,
+    activeStoreId,
+    isError: isStoreListError,
+    error: storeListError,
+    refetch: refetchStoreList,
+  } = useStoreContext();
+  const hasActiveStore =
+    Boolean(activeStore) && UUID_PATTERN.test(activeStoreId);
   const queryKey = platformStatusQueryKey(activeStoreId);
 
   const storeQuery = useQuery({
@@ -87,9 +94,11 @@ export const usePlatformStatus = () => {
       if (!response.status) throw new PlatformRequestError(response);
       if (!response.data) return null;
 
+      const platforms = response.data.platforms ?? [];
+
       return {
         ...response.data,
-        platforms: response.data.platforms.map((platform) => ({
+        platforms: platforms.map((platform) => ({
           ...platform,
           platform_id: platform.id,
           platform_name: platform.name,
@@ -132,9 +141,11 @@ export const usePlatformStatus = () => {
     activeStoreId,
     hasActiveStore,
     isLoading: storeQuery.isPending && hasActiveStore,
-    isError: storeQuery.isError,
-    error: storeQuery.error,
+    isError: isStoreListError || storeQuery.isError,
+    error: storeListError ?? storeQuery.error,
+    isStoreListError,
     refetch: storeQuery.refetch,
+    refetchStoreList,
     connectAsync: connectMutation.mutateAsync,
     isConnecting: connectMutation.isPending,
     connectError: connectMutation.error,

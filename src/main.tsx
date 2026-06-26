@@ -33,6 +33,7 @@ import LandingPage from "./pages/landing";
 import SignUpPage from "./pages/signup";
 import StoreEmployeesPage from "@/pages/stores/employees";
 import StoresPage from "@/pages/stores";
+import { StoreScopeLayout } from "@/layouts/store-scope-layout";
 
 const AVAILABLE_PLATFORMS = [
   {
@@ -74,75 +75,80 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
-            element: <AuthenticatedLayout />,
-            children: [
-              {
-                path: "/settings",
-                element: <AccountPage />,
-              },
-              {
-                path: "/settings/appearance",
-                element: <AppearancePage />,
-              },
-              {
-                path: "/connect",
-                element: (
-                  <ConnectPlatformPage
-                    availablePlatforms={AVAILABLE_PLATFORMS}
-                  />
-                ),
-              },
-              {
-                path: "/stores/:storeId/employees",
-                element: <StoreEmployeesPage />,
-              },
-              {
-                path: "/stores",
-                element: <StoresPage />,
-              },
-            ],
-          },
-          {
-            element: <PlatformGuard />,
+            element: <StoreScopeLayout />,
             children: [
               {
                 element: <AuthenticatedLayout />,
                 children: [
                   {
-                    path: "/dashboard",
-                    element: <Dashboard />,
+                    path: "/settings",
+                    element: <AccountPage />,
                   },
                   {
-                    path: "/orders",
-                    element: <OrderPage />,
+                    path: "/settings/appearance",
+                    element: <AppearancePage />,
                   },
                   {
-                    path: "/inventory/internal",
-                    element: <InternalProductPage />,
+                    path: "/connect",
+                    element: (
+                      <ConnectPlatformPage
+                        availablePlatforms={AVAILABLE_PLATFORMS}
+                      />
+                    ),
                   },
                   {
-                    path: "/inventory/display",
-                    element: <DisplayProductPage />,
+                    path: "/stores/:storeId/employees",
+                    element: <StoreEmployeesPage />,
                   },
                   {
-                    path: "/activity",
-                    element: <ActivityPage />,
+                    path: "/stores",
+                    element: <StoresPage />,
                   },
+                ],
+              },
+              {
+                element: <PlatformGuard />,
+                children: [
                   {
-                    path: "/inventory-log",
-                    element: <InventoryLogPage />,
-                  },
-                  {
-                    path: "/users",
-                    element: <UserManagementPage />,
-                  },
-                  {
-                    path: "/roles",
-                    element: <RolePage />,
-                  },
-                  {
-                    path: "/vendors",
-                    element: <VendorPage />,
+                    element: <AuthenticatedLayout />,
+                    children: [
+                      {
+                        path: "/dashboard",
+                        element: <Dashboard />,
+                      },
+                      {
+                        path: "/orders",
+                        element: <OrderPage />,
+                      },
+                      {
+                        path: "/inventory/internal",
+                        element: <InternalProductPage />,
+                      },
+                      {
+                        path: "/inventory/display",
+                        element: <DisplayProductPage />,
+                      },
+                      {
+                        path: "/activity",
+                        element: <ActivityPage />,
+                      },
+                      {
+                        path: "/inventory-log",
+                        element: <InventoryLogPage />,
+                      },
+                      {
+                        path: "/users",
+                        element: <UserManagementPage />,
+                      },
+                      {
+                        path: "/roles",
+                        element: <RolePage />,
+                      },
+                      {
+                        path: "/vendors",
+                        element: <VendorPage />,
+                      },
+                    ],
                   },
                 ],
               },
